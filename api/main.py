@@ -4,11 +4,22 @@ from fastapi.responses import JSONResponse
 from src.routers import routers
 from src.schemas.api_response import ApiResponse
 from src.domain.exceptions import NotFound, Conflict, Unauthorized, InvalidData
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Minha API", version="1.0.0")
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 for router in routers:
     app.include_router(router)
+
 
 EXCEPTION_STATUS_MAP = {
     NotFound: 404,

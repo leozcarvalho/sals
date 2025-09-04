@@ -7,7 +7,7 @@ from src.core.db import get_session
 def get_user_service(session = Depends(get_session)):
     return UsersRepository(session)
 
-user_router = BaseRouter(
+router_user = BaseRouter(
     prefix="/users",
     tags=["Users"],
     get_service=get_user_service,

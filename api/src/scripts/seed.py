@@ -59,12 +59,12 @@ def create_profiles(db):
         {
             "name": "Engenharia",
             "permissions": [
-                "MANAGE_HARDWARE_KIND",
-                "MANAGE_HARDWARE_DEVICE",
-                "MANAGE_HARDWARE_POINT_TYPE",
-                "MANAGE_HARDWARE_CONNECTION_TEMPLATE",
-                "MANAGE_DEVICE_PIN",
-                "MANAGE_INSTALATION",
+                PermissionEnum.MANAGE_HARDWARE_KIND,
+                PermissionEnum.MANAGE_HARDWARE_DEVICE,
+                PermissionEnum.MANAGE_HARDWARE_POINT_TYPE,
+                PermissionEnum.MANAGE_HARDWARE_CONNECTION_TEMPLATE,
+                PermissionEnum.MANAGE_DEVICE_PIN,
+                PermissionEnum.MANAGE_INSTALATION,
             ],
         },
     ]

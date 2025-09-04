@@ -10,10 +10,10 @@ from typing import Optional, List
 
 class GlobalFields(BaseModel):
     id: int
-    created_by: Optional[int]
+    created_by: Optional[str]
     created_at: datetime = datetime.utcnow()
     created_at_l: Optional[str] = None
-    updated_by: Optional[int]
+    updated_by: Optional[str]
     updated_at: datetime = datetime.utcnow()
     updated_at_l: Optional[str] = None
 

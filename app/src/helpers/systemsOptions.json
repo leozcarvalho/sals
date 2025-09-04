@@ -1,0 +1,16 @@
+{
+    "systems": [
+        {
+            "name": "VisioAgro",
+            "logo": "/assets/logo-visioagro.png"
+        },
+        {
+            "name": "Sals",
+            "logo": "/assets/logo-sals.png"
+        },
+        {
+            "name": "Swinecensus",
+            "logo": "/assets/logo-swinecensus.png"
+        }
+    ]
+}

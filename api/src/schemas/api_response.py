@@ -1,15 +1,14 @@
 from pydantic import BaseModel
 from typing import Generic, TypeVar, Optional
-from pydantic.generics import GenericModel
 
 T = TypeVar("T")
 
-class ApiResponse(GenericModel, Generic[T]):
+class ApiResponse(BaseModel, Generic[T]):
     success: bool
     data: Optional[T]
     error: Optional[str]
 
-class ApiResponseList(GenericModel, Generic[T]):
+class ApiResponseList(BaseModel, Generic[T]):
     count: int
     items: list[T]
 
