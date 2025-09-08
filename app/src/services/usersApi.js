@@ -13,7 +13,7 @@ userApi.auth = async (email, password) => {
     return response.data;
   } catch (error) {
     console.log("response error", error)
-    return error.response.data;
+    return error;
   }
 };
 

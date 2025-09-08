@@ -8,10 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Minha API", version="1.0.0")
 
+origins = [
+    "http://localhost:5173"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,6 +29,7 @@ EXCEPTION_STATUS_MAP = {
     Conflict: 409,
     Unauthorized: 401,
     InvalidData: 422,
+    ConnectionError: 503,
 }
 
 @app.middleware("http")

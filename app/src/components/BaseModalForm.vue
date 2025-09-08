@@ -39,7 +39,11 @@ const ensureInitialState = () => {
     } else if (f.hasOwnProperty("default")) {
       form[key] = typeof f.default === "function" ? f.default() : f.default;
     } else {
-      form[key] = f.type === "checkbox" ? false : null;
+      if (f.multiple) {
+        form[key] = [];
+      } else {
+        form[key] = f.type === "checkbox" ? false : null;
+      }
     }
   });
 

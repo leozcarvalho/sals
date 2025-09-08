@@ -51,7 +51,6 @@ onMounted(async () => {
     v-model="kitchenSelected"
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-      { name: 'account_id', label: 'Conta', type: 'async-select', entity: 'accounts' },
       { name: 'shaker_pin_id', label: 'Agitador', type: 'select', rules: 'required', options: pinsOptions },
       { name: 'pump_pin_id', label: 'Bomba', type: 'select', rules: 'required', options: pinsOptions },
       { name: 'scale_pin_id', label: 'Balança', type: 'select', rules: 'required', options: pinsOptions },

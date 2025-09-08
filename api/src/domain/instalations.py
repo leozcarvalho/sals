@@ -2,6 +2,7 @@ from typing import Optional, List, Dict
 from sqlmodel import Field, Relationship
 from sqlalchemy import JSON
 from src.domain.base import Base
+from typing import ClassVar
 
 class Instalation(Base, table=True):
     __tablename__ = "instalations"
@@ -11,7 +12,7 @@ class Instalation(Base, table=True):
     last_seen: Optional[str] = Field(default=None)
     is_online: bool = Field(default=False, nullable=False)
     device_id: int = Field(foreign_key="devices.id", nullable=False)
-
+    
 
     device: Optional["Device"] = Relationship(back_populates="instalations")
     pins: List["DevicePin"] = Relationship(

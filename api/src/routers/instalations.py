@@ -11,8 +11,8 @@ from src.routers.base_router import BaseRouter
 def get_instalation_service(session=Depends(get_session)):
     return InstalationRepository(session)
 
-router_instalations = BaseRouter(
-    prefix="/instalations",
+router_installations = BaseRouter(
+    prefix="/installations",
     read_schema=Instalation,
     create_schema=InstalationCreate,
     update_schema=InstalationUpdate,
@@ -22,17 +22,17 @@ router_instalations = BaseRouter(
     tags=["Instalações"]
 )
 
-@router_instalations.router.post("/{instalation_id}/health-check")
-def health_check(instalation_id: int, service: InstalationRepository = Depends(get_instalation_service), current_user: UserBase = Depends(get_current_user)):
-    service.health_check(instalation_id, current_user)
+@router_installations.router.post("/{installation_id}/health-check")
+def health_check(installation_id: int, service: InstalationRepository = Depends(get_instalation_service), current_user: UserBase = Depends(get_current_user)):
+    service.health_check(installation_id, current_user)
     return ApiResponse(success=True)
 
-@router_instalations.router.post("/{instalation_id}/restart")
+@router_installations.router.post("/{installation_id}/restart")
 def restart_device(instalation_id: int, service: InstalationRepository = Depends(get_instalation_service), current_user: UserBase = Depends(get_current_user)):
     service.restart_device(instalation_id, current_user)
     return ApiResponse(success=True)
 
-@router_instalations.router.post("/{instalation_id}/toggle-pin/{pin_number}")
-def toggle_pin(instalation_id: int, pin_number: int, service: InstalationRepository = Depends(get_instalation_service), current_user: UserBase = Depends(get_current_user)):
-    service.toggle_pin(instalation_id, pin_number, current_user)
+@router_installations.router.post("/{installation_id}/toggle-pin/{pin_number}")
+def toggle_pin(installation_id: int, pin_number: int, service: InstalationRepository = Depends(get_instalation_service), current_user: UserBase = Depends(get_current_user)):
+    service.toggle_pin(installation_id, pin_number, current_user)
     return ApiResponse(success=True)

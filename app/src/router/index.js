@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { isLoggedIn, loggout } from "@/helpers/userSession";
+import { loadUserFromCookie } from "@/helpers/userSession";
+import { useUserStore } from "@/stores/userStore";
 
 import NProgress from "nprogress/nprogress.js";
 
@@ -8,9 +9,7 @@ import LayoutBackendBoxed from "@/layouts/variations/BackendBoxed.vue";
 
 const BackendDashboard = () => import("@/views/dashboard/DashboardView.vue");
 
-const UserList = () => import("@/pages/users/UsersList.vue");
-const UserForm = () => import("@/pages/users/UserForm.vue");
-const UserProfile = () => import("@/pages/users/UserProfile.vue");
+const Users = () => import("@/pages/users/Users.vue");
 
 // Auth
 const AuthSignIn = () => import("@/views/auth/SignInView.vue");
@@ -32,9 +31,11 @@ const HardwareConnectionTemplates = () => import("@/pages/hardware-connection-te
 const HardwareDevices = () => import("@/pages/hardware-device/HardwareDevice.vue");
 
 
-const Instalations = () => import("@/pages/instalations/Instalations.vue");
-const Instalation = () => import("@/pages/instalations/Instalation.vue");
-const InstalationPinsConfig = () => import("@/pages/instalations/InstalationPinsConfig.vue");
+const Installations = () => import("@/pages/installations/Installations.vue");
+const Installation = () => import("@/pages/installations/Installation.vue");
+const InstallationPinsConfig = () => import("@/pages/installations/InstallationPinsConfig.vue");
+
+const Profiles = () => import("@/pages/profiles/Profiles.vue");
 
 const Kitchens = () => import("@/pages/kitchens/Kitchens.vue");
 const Sheds = () => import("@/pages/sheds/ShedsList.vue");
@@ -72,6 +73,18 @@ const routes = [
         component: BackendDashboard,
       },
       {
+        path: "users",
+        name: "users",
+        meta: { requiresAuth: true },
+        component: Users,
+      },
+      {
+        path: "profiles",
+        name: "profiles",
+        meta: { requiresAuth: true },
+        component: Profiles,
+      },
+      {
         path: "kitchens",
         name: "kitchens",
         meta: { requiresAuth: true },
@@ -91,38 +104,6 @@ const routes = [
       }
     ],
   },
-  {
-    path: "/management",
-    component: LayoutBackendBoxed,
-    children: [
-      {
-        path: "user-management",
-        name: "user-management",
-        meta: { requiresAuth: true },
-        component: UserList,
-      },
-      {
-        path: "user-edit",
-        name: "user-form",
-        meta: { requiresAuth: true },
-        component: UserForm,
-      },
-      {
-        path: "user-profile",
-        name: "user-profile",
-        meta: { requiresAuth: true },
-
-        component: UserProfile,
-      },
-      {
-        path: "user-management",
-        name: "users-list",
-        meta: { requiresAuth: true },
-        component: UserList,
-      },
-    ],
-  },
-
 
   {
     path: "/hardware",
@@ -153,22 +134,22 @@ const routes = [
         component: HardwareKinds,
       },
       {
-        name: "instalations",
-        path: "/instalacoes",
+        name: "installations",
+        path: "/installations",
         meta: { requiresAuth: true },
-        component: Instalations,
+        component: Installations,
       },
       {
-        name: "instalation",
-        path: "/instalacao",
+        name: "installation",
+        path: "/installation",
         meta: { requiresAuth: true },
-        component: Instalation,
+        component: Installation,
       },
       {
-        name: "instalation-pin-config",
-        path: "/instalacao/pinos",
+        name: "installation-pin-config",
+        path: "/installation/pins",
         meta: { requiresAuth: true },
-        component: InstalationPinsConfig,
+        component: InstallationPinsConfig,
       }
     ]
   },
@@ -259,18 +240,24 @@ const router = createRouter({
 /*eslint-disable no-unused-vars*/
 NProgress.configure({ showSpinner: false });
 
-router.beforeResolve(async (to, from, next) => {
+router.beforeResolve((to, from, next) => {
   NProgress.start();
-  if (to.meta.requiresAuth && !isLoggedIn()) {
-    next({
-      path: "auth-signin",
-    });
-  } else if (from.meta.requiresAuth && to.name === 'auth-signin') {
-    loggout()
-    next();
+  const userStore = useUserStore();
+  if (!userStore.id) {
+    loadUserFromCookie();
+  }
+  if (to.meta.requiresAuth && !userStore.id) {
+    console.log("Usuário não autenticado");
+    return next({ path: "/auth-signin" });
+  }
+  if (from.meta.requiresAuth && to.name === "auth-signin") {
+    console.log("Usuário deslogado");
+    userStore.logout();
   }
   next();
 });
+
+
 
 router.afterEach((to, from) => {
   NProgress.done();

@@ -6,7 +6,7 @@ export const useTemplateStore = defineStore({
   state: () => ({
     // App vital details
     app: {
-      name: "VisioAgro",
+      name: "SALS",
       version: "0.0.1",
       copyright: new Date().getFullYear(),
     },

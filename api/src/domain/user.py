@@ -11,3 +11,5 @@ class User(Base, table=True):
     profile_id: int = Field(foreign_key="profile.id")
 
     exhibition_name: ClassVar[str] = "Usuário"
+
+    profile: "Profile" = Relationship(back_populates="users")

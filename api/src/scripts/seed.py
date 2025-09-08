@@ -64,7 +64,7 @@ def create_profiles(db):
                 PermissionEnum.MANAGE_HARDWARE_POINT_TYPE,
                 PermissionEnum.MANAGE_HARDWARE_CONNECTION_TEMPLATE,
                 PermissionEnum.MANAGE_DEVICE_PIN,
-                PermissionEnum.MANAGE_INSTALATION,
+                PermissionEnum.MANAGE_INSTALLATION,
             ],
         },
     ]
@@ -74,11 +74,21 @@ def create_profiles(db):
         
     print("[SEED] Perfis criados/atualizados com sucesso")
 
-def create_user(db):
+def create_users(db):
     repo = UsersRepository(db)
-    user_data = USER.model_dump()
+    user_data = USER.model_dump().copy()
+    user_data['name'] = "Usuário Admin"
+    user_data['email'] = "sals@admin.com"
     user = repo.save(user_data)
     print(f"[SEED] Usuário criado: {user.id}")
+
+    user_data = USER.model_dump().copy()
+    user_data['name'] = "Usuário Engenharia"
+    user_data['email'] = "sals@engenharia.com"
+    user_data['profile_id'] = 2
+    user = repo.save(user_data)
+    print(f"[SEED] Usuário criado: {user.id}")
+
     return user
 
 def create_hardware_kinds(db, user):
@@ -146,7 +156,7 @@ def seed():
     db = Session(bind=engine)
     try:
         profiles = create_profiles(db)
-        user = create_user(db)
+        user = create_users(db)
 
         hw_kind, balanca_kind = create_hardware_kinds(db, user)
         point_type = create_hardware_point_type(db, user)

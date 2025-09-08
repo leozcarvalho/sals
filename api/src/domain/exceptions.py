@@ -10,3 +10,5 @@ class Unauthorized(Exception):
 class InvalidData(Exception):
     pass
  
+class ConnectionError(Exception):
+    pass

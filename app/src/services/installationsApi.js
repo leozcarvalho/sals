@@ -1,8 +1,8 @@
 import { ApiClient } from './genericApi'
 
-class AccountDeviceClient extends ApiClient {
+class InstallationClient extends ApiClient {
   constructor() {
-    super("/account-devices"); // chama o construtor da classe pai
+    super("/installations"); // chama o construtor da classe pai
   }
 
   async healthCheck(id) {
@@ -33,4 +33,4 @@ class AccountDeviceClient extends ApiClient {
   }
 }
 
-export { AccountDeviceClient };
+export { InstallationClient };

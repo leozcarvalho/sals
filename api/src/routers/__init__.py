@@ -1,6 +1,6 @@
 from .auth import auth_router
 from .profile import router_profiles
-from .instalations import router_instalations
+from .instalations import router_installations
 from .users import router_user
 from .hardware_connection_template import router_hardware_connection_templates
 from .hardware_kind import router_hardware_kinds
@@ -16,7 +16,7 @@ from .stall_feeder import router_stall_feeders
 routers = [
     auth_router,
     router_profiles.router,
-    router_instalations.router,
+    router_installations.router,
     router_user.router,
     router_hardware_connection_templates.router,
     router_hardware_kinds.router,

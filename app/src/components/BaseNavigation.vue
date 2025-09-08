@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { can } from '@/helpers/permissions';
+import { can } from "../helpers/userSession";
 
 // Main store and Route
 const store = useTemplateStore();

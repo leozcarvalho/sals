@@ -131,8 +131,8 @@ class Repository:
 
     def save(self, values: dict, actor=None):
         if actor:
-            values['created_by'] = actor.id
-            values['updated_by'] = actor.id
+            values['created_by'] = str(actor.id)
+            values['updated_by'] = str(actor.id)
         obj = self.model(**values)
         self.db_session.add(obj)
         self.db_session.flush()
@@ -141,7 +141,7 @@ class Repository:
     def update(self, id: int, values: dict, actor=None):
         obj = self.check_exists(id)
         if actor:
-            values['updated_by'] = actor.id
+            values['updated_by'] = str(actor.id)
         if obj:
             for key, value in values.items():
                 setattr(obj, key, value)

@@ -1,6 +1,8 @@
 alembic==1.16.5
 annotated-types==0.7.0
 anyio==4.10.0
+argon2-cffi==25.1.0
+argon2-cffi-bindings==25.1.0
 bcrypt==4.3.0
 certifi==2025.8.3
 cffi==1.17.1
@@ -30,6 +32,7 @@ Pygments==2.19.2
 pytest==8.4.1
 python-dotenv==1.1.1
 python-jose==3.5.0
+python-multipart==0.0.20
 PyYAML==6.0.2
 requests==2.32.5
 rsa==4.9.1

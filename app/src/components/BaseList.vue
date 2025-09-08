@@ -118,7 +118,7 @@ onMounted(() => {
       </div>
 
       <!-- Tabela -->
-      <Dataset v-slot="{ ds }" :ds-data="items" :ds-sortby="props.filter.sort_by || ''">
+      <Dataset v-slot="{ ds }" :ds-data="items" :ds-sortby="props.filter.sort_by ? [props.filter.sort_by] : []">
         <div class="table-responsive">
           <table class="table table-striped">
             <thead>

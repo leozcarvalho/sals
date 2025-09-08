@@ -1,28 +1,30 @@
 from pydantic.networks import EmailStr
 from pydantic import BaseModel, Json
-from src.schemas.global_schemas import GlobalFields, BaseFilter, Message
-from typing import Optional, List
+from src.schemas.global_schemas import GlobalFields, BaseFilter
+from typing import Optional
 
 
 class UserBase(BaseModel):
     email: str
     name: str
-    password: str
     is_active: Optional[bool] = True
     profile_id: int
 
 
-class UserCreate(UserBase):
+class UserBaseData(UserBase):
+    password: str
+
+class UserCreate(UserBaseData):
     pass
 
-class UserUpdate(BaseModel):
+class UserUpdate(UserBaseData):
     pass
 
 class UserRead(GlobalFields, UserBase):
     pass
 
 class UserFilter(BaseFilter):
-    email: Optional[EmailStr]
-    name: Optional[str]
-    is_active: Optional[bool]
-    profile_id: Optional[int]
+    email: Optional[str] = None
+    name: Optional[str] = None
+    is_active: Optional[bool] = None
+    profile_id: Optional[int] = None

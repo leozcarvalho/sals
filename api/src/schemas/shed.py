@@ -4,7 +4,7 @@ from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class ShedBase(BaseModel):
     name: str
-    entrance_pin_id: int
+    entrance_pin_id: Optional[int] = None
 
 class ShedCreate(ShedBase):
     pass

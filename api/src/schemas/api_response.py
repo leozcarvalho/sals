@@ -5,12 +5,9 @@ T = TypeVar("T")
 
 class ApiResponse(BaseModel, Generic[T]):
     success: bool
-    data: Optional[T]
+    data: Optional[T] = None
     error: Optional[str]
 
 class ApiResponseList(BaseModel, Generic[T]):
     count: int
     items: list[T]
-
-class AuthResponse(ApiResponse):
-    access_token: str

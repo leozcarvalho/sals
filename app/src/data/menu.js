@@ -7,29 +7,27 @@ export const baseMenu = [
   },
   {
     name: "Instalações",
-    to: "account-devices",
+    to: "installations",
     icon: "home-variant",
-    action: "view-cams",
   },
   {
     name: "Cadastros",
-    to: "users-list",
     icon: "format-list-checkbox",
-    action: "manage-cruds",
     sub: [
-      { name: "Usuários", to: "users-list", icon: "account-group", action: "manage-cruds" },
-      { name: "Cozinhas", to: "kitchens", icon: "chef-hat", action: "manage-cruds" },
-      { name: "Galpões", to: "sheds", icon: "pig-variant", action: "manage-cruds" },
+      { name: "Usuários", to: "users", icon: "account-group", action: "manage_user" },
+      { name: "Perfis", to: "profiles", icon: "account", action: "manage_profile" },
+      { name: "Cozinhas", to: "kitchens", icon: "chef-hat", action: "manage_kitchen" },
+      { name: "Galpões", to: "sheds", icon: "pig-variant", action: "manage_shed" },
     ],
   },
   {
     name: "Hardware",
     icon: "devices",
     sub: [
-      { name: "Placas", to: "hardware-devices", icon: "access-point" },
-      { name: "Conexões", to: "hardware-connections", icon: "ethernet" },
-      { name: "Pontos", to: "hardware-point-types", icon: "lightbulb" },
-      { name: "Tipos de Hardware", to: "hardware-kinds", icon: "tools" },
+      { name: "Placas", to: "hardware-devices", icon: "access-point", action: "manage_hardware_device" },
+      { name: "Conexões", to: "hardware-connections", icon: "ethernet", action: "manage_hardware_connection_template" },
+      { name: "Pontos", to: "hardware-point-types", icon: "lightbulb", action: "manage_hardware_point_type" },
+      { name: "Tipos de Hardware", to: "hardware-kinds", icon: "tools", action: "manage_hardware_kind" },
     ]
   }
 ];

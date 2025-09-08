@@ -16,9 +16,9 @@ class AuthService:
     def login(self, email: str, password: str):
         user = self.authenticate(email, password)
         token = self.security.create_access_token(data={
-            "sub": str(user.id),
+            "sub": str(user.id)
         })
-        return {"access_token": token, "token_type": "bearer"}
+        return {"access_token": token, "token_type": "bearer", "user_id": user.id, "permissions": user.profile.permissions}
 
     def verify_token(self, token: str):
         payload = self.security.decode_access_token(token)

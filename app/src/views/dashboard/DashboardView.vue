@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { userApi } from "../../services/usersApi";
-import { dataTransferApi } from "../../services/dataTransferApi";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -12,20 +11,6 @@ const fetchUser = async () => {
 };
 
 onMounted(async () => {
-  if (route.query?.token) {
-    const res = await dataTransferApi.get(route.query.token);
-    if (res.status === 200 && res.data?.content) {
-      const content = res.data?.content
-      for (const key in content) {
-        const value = content[key];
-        if (typeof value === 'object' && value !== null) {
-          localStorage.setItem(key, JSON.stringify(value));
-        } else {
-          localStorage.setItem(key, value);
-        }
-      }
-    }
-  }
   await fetchUser();
 });
 

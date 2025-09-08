@@ -117,23 +117,6 @@ const isMobile = computed(() => {
         </div>
       </div>
 
-      <div class="text-center p-0">
-        <RouterLink
-          @click="userHasOpenedMessagesMenu = true"
-          :to="{ name: 'user-messages' }"
-          class="btn btn-sm btn-alt-secondary position-relative"
-        >
-          <i class="fa fa-fw fa-bell"></i>
-          <span
-            v-if="
-              !userHasOpenedMessagesMenu &&
-              messagesStatusChanged &&
-              messages.length
-            "
-            class="new-notifications position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle"
-          />
-        </RouterLink>
-      </div>
 
       <!-- END Left Section -->
       <div class="dropdown d-inline-block">
@@ -154,6 +137,7 @@ const isMobile = computed(() => {
           class="dropdown-menu dropdown-menu-md dropdown-menu-end p-0 border-0"
           aria-labelledby="page-header-user-dropdown"
         >
+          <!--
           <div class="p-2">
             <RouterLink
               :to="{ name: 'user-profile' }"
@@ -164,6 +148,7 @@ const isMobile = computed(() => {
             </RouterLink>
           </div>
           <div role="separator" class="dropdown-divider m-0"></div>
+          -->
           <div class="p-2">
             <RouterLink
               :to="{ name: 'auth-signin' }"

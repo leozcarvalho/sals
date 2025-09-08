@@ -40,7 +40,6 @@ const openModal = () => {
     v-model="kitchenSelected"
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-      { name: 'account_id', label: 'Conta', type: 'async-select', entity: 'accounts' },
     ]"
     :api="shedsApi"
     @saved="onKitchenSaved"

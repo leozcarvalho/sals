@@ -8,7 +8,6 @@ import { required, minLength } from "@vuelidate/validators";
 import { userApi } from "../../services/usersApi";
 import { handleApiToast } from "../../components/toast";
 import { getLogo } from "@/helpers/subDomainHelper"
-import { useUserStore } from "../../stores/userStore";
 import Loader from "@/components/Loader.vue";
 
 
@@ -38,30 +37,17 @@ const rules = computed(() => {
 // Use vuelidate
 const v$ = useVuelidate(rules, state);
 
-const userStore = useUserStore();
 async function onSubmit() {
   const isValid = await v$.value.$validate();
   if (!isValid) {
     handleApiToast({ success: false, message: "Preencha os campos corretamente." });
     return;
   }
-
   loader.value.loaderOn()
   try {
     const res = await userApi.auth(state.username, state.password);
-    console.log(res)
     handleApiToast(res, "Login efetuado com sucesso!");
-
-    if (res.success) {
-      // 🔹 Salva dados essenciais no store (em memória)
-      userStore.setUser({
-        id: res.data.id,
-        permissions: res.data.permissions,
-        accessToken: res.access_token, // mantemos só em memória
-      });
-
-      router.push({ name: "home" });
-    }
+    if (res.success) router.push({ name: "home" });
   } catch (err) {
     console.error(err);
     handleApiToast({ success: false, message: "Erro no login." });
@@ -147,15 +133,7 @@ const togglePasswordVisibility = () => {
                     Senha necessária
                   </div>
                 </div>
-                <div class="mb-5">
-                  <RouterLink
-                    :to="{ name: 'auth-reminder' }"
-                    class="btn-primary"
-                  >
-                    Esqueci a senha
-                  </RouterLink>
-                </div>
-                <div class="row mb-5">
+                <div class="row mb-5 mt-4">
                   <div class="">
                     <button
                       class="btn rounded btn-warning green-dark border-0 text-light w-100"

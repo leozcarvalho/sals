@@ -1,6 +1,7 @@
 from fastapi import Depends
 from src.routers.base_router import BaseRouter
 from src.schemas.profile import ProfileRead, ProfileCreate, ProfileUpdate, ProfileFilter
+from src.schemas.api_response import ApiResponse
 from src.cruds.profile import ProfileRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
@@ -21,4 +22,5 @@ router_profiles = BaseRouter(
 
 @router_profiles.router.get("/permissions/all", summary="List all available permissions")
 def list_permissions(service: ProfileRepository = Depends(get_profile_service), current_user = Depends(get_current_user)):
-    return service.get_permissions()
+    permissions = service.get_permissions()
+    return ApiResponse(success=True, error=None, data=permissions)

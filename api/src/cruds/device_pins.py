@@ -52,10 +52,6 @@ class DevicePinRepository(Repository):
         return True
 
     def _get_in_use_subqueries(self):
-        DevicePin = DevicePin
-        Kitchen = Kitchen
-        FeederValve = FeederValve
-
         kitchen_subq = select(Kitchen.id).where(
             or_(
                 Kitchen.scale_pin_id == DevicePin.id,

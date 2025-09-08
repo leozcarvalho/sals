@@ -16,15 +16,15 @@ const store = useTemplateStore();
               <slot name="content-right">
                 <img
                   class="img-avatar img-avatar32"
-                  src="@/assets/img/i92l.png"
-                  alt="i92l"
+                  src="@/assets/img/sals.png"
+                  alt="SALS"
                 />
               </slot>
             </div>
             <div class="col-sm-6 order-sm-1 py-1 text-center text-sm-start">
               <slot name="content-left">
                 <div class="fw-semibold">
-                  &copy; {{ "VisioAgro" + " " + store.app.version }}
+                  &copy; {{ "SALS" + " " + store.app.version }}
                 </div>
               </slot>
             </div>

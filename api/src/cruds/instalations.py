@@ -10,6 +10,7 @@ from src.cruds.device_pins import DevicePinRepository
 from src.adapters.device_adapter import DeviceService
 from src.schemas.users import UserBase
 from src.schemas.device_pins import DevicePinCreate
+from src.schemas.instalations import Instalation as InstalationSchema
 from src.domain import exceptions as exc
 
 class InstalationRepository(Repository):
@@ -33,9 +34,13 @@ class InstalationRepository(Repository):
     def get(self, id, actor=None):
         instalation = super().get(id, actor)
         decimal_value, binary_string = self.device_pin_repo.get_pins_binary_and_decimal(instalation.id)
-        instalation.decimal_value = decimal_value
-        instalation.binary_value = binary_string
-        return instalation
+        return InstalationSchema(
+            **instalation.model_dump(),
+            device=instalation.device,
+            pins=instalation.pins,
+            decimal_value=decimal_value,
+            binary_value=binary_string
+        )
 
     def save(self, values, actor=None):
         instalation = super().save(values, actor)

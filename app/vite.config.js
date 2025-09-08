@@ -17,9 +17,9 @@ export default defineConfig({
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'VisioAgro',
-        short_name: 'VisioAgro',
-        description: 'Mindfulness',
+        name: 'SALS',
+        short_name: 'SALS',
+        description: 'SALS - Sistema de Automação para alimentação de suínos',
         theme_color: '#FF9900',
         /**
         icons: [

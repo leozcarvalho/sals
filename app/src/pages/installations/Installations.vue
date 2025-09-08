@@ -7,7 +7,7 @@ import BaseModalForm from "../../components/BaseModalForm.vue";
 
 const router = useRouter();
 
-const instalationsApi = new ApiClient("/instalations");
+const installationsApi = new ApiClient("/installations");
 const hardwareDevicesApi = new ApiClient("/hardware-devices");
 
 const baseList = ref(null);
@@ -22,11 +22,11 @@ const filter = reactive({
   device_id: null,
 });
 
-const instalationsSelected = ref(null);
+const installationsSelected = ref(null);
 
-const onInstalationsSaved = () => {
+const oninstallationsSaved = () => {
   baseList.value.refresh();
-  instalationsSelected.value = null;
+  installationsSelected.value = null;
 };
 
 const modalForm = ref(null);
@@ -49,21 +49,21 @@ onMounted(async () => {
 <template>
   <BaseModalForm 
     ref="modalForm" 
-    v-model="instalationsSelected" 
+    v-model="installationsSelected" 
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
       { name: 'ip_address', label: 'IP Address', type: 'text', rules: 'required' },
       { name: 'device_id', label: 'Dispositivo', type: 'select', options: devicesOptions, rules: 'required' }
     ]" 
-    :api="instalationsApi" 
-    @saved="onInstalationsSaved" 
-    @close="instalationsSelected = null" 
+    :api="installationsApi" 
+    @saved="oninstallationsSaved" 
+    @close="installationsSelected = null" 
   />
 
   <BaseList 
     ref="baseList" 
     :title="'Instalações'" 
-    :api="instalationsApi" 
+    :api="installationsApi" 
     :cols="cols" 
     :exportable="false" 
     :can-create="false"
@@ -116,21 +116,21 @@ onMounted(async () => {
     <template #row-actions="{ row }">
       <button 
         class="btn btn-sm btn-success text-white" 
-        @click="router.push({ name: 'instalation', query: { id: row.id } })"
+        @click="router.push({ name: 'installation', query: { id: row.id } })"
         title="Painel de controle"
       >
         <mdicon name="tune-vertical-variant" />
       </button>
       <button 
         class="btn btn-sm btn-primary text-white" 
-        @click="router.push({ name: 'instalation-pin-config', query: { id: row.id } })"
+        @click="router.push({ name: 'installation-pin-config', query: { id: row.id } })"
         title="Configurar Pinos"
       >
         <mdicon name="cog-outline" />
       </button>
       <button 
         class="btn btn-sm btn-warning text-white" 
-        @click="instalationsSelected = row; openModal()"
+        @click="installationsSelected = row; openModal()"
       >
         <mdicon name="circle-edit-outline" />
       </button>

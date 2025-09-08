@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
 import { useRoute } from "vue-router";
-import { AccountDeviceClient } from "../../services/accountDeviceApi";
+import { InstallationClient } from "../../services/installationsApi";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import Loader from "@/components/Loader.vue";
@@ -10,11 +10,11 @@ import deviceSvgFile from './pro-mini-nologo.svg?url';
 
 const svgContent = ref("");
 const route = useRoute();
-const accountDeviceApi = new AccountDeviceClient();
+const installationApi = new InstallationClient();
 const pinsApi = new ApiClient("/device-pins");
 
 const loader = ref(false);
-const accountDevice = ref(null);
+const installation = ref(null);
 const deviceId = ref(route.query.id || null);
 const selectedPin = ref(null);
 const modalForm = ref(null);
@@ -30,8 +30,8 @@ const setStroke = (el, active = false) => {
 const refresh = async () => {
   if (!deviceId.value) return;
   loader.value.loaderOn();
-  const response = await accountDeviceApi.get(deviceId.value);
-  accountDevice.value = response.data;
+  const response = await installationApi.get(deviceId.value);
+  installation.value = response.data;
   nextTick(fillPins);
   loader.value.loaderOff();
 };
@@ -66,9 +66,9 @@ function enableRegionSelection() {
 
 function fillPins() {
   const svgEl = document.querySelector('#uploaded-svg');
-  if (!svgEl || !accountDevice.value) return;
+  if (!svgEl || !installation.value) return;
 
-  accountDevice.value.pins.forEach(pin => {
+  installation.value.pins.forEach(pin => {
     const el = svgEl.querySelector(`[id="${pin.svg_region_id}"]`);
     const btn = document.querySelector(`#pin-btn-${pin.id}`);
 
@@ -173,7 +173,7 @@ const pinStyle = (pin) => {
   <Loader ref="loader" />
 
   <div class="device-page container mt-5">
-    <h2>Configurar pinos de {{ accountDevice?.name }}</h2>
+    <h2>Configurar pinos de {{ installation?.name }}</h2>
 
     <div class="text-center">
       <div v-if="svgContent" v-html="svgContent" id="uploaded-svg"></div>
@@ -183,7 +183,7 @@ const pinStyle = (pin) => {
       <h4>Pinos</h4>
       <h4 class="animated fadeIn" v-if="selectedRegion">Selecionar pino disponível</h4>
       <div class="row">
-        <div v-for="pin in accountDevice?.pins" :key="pin.id" class="col-6 col-md-2 mb-3 text-center position-relative">
+        <div v-for="pin in installation?.pins" :key="pin.id" class="col-6 col-md-2 mb-3 text-center position-relative">
           <button
             :id="`pin-btn-${pin.id}`"
             class="pin-box btn w-100 position-relative"

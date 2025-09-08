@@ -1,6 +1,7 @@
 import requests
 from typing import Dict
 from src.schemas.api_response import ApiResponse
+from src.domain import exceptions as exc
 
 class DeviceService:
     """
@@ -23,11 +24,14 @@ class DeviceService:
         print("Making request to device at url:", url)
         try:
             response = requests.get(url, params=params, timeout=self.timeout)
-            print("Response:", response.text)
+            response.raise_for_status()
+            print("Response from device:", response.text)
             return ApiResponse(success=True, data=response.text)
-        except requests.RequestException as e:
-            print("Error occurred while making request:", e)
-            return ApiResponse(success=False, error=str(e))
+        except requests.exceptions.RequestException as e:
+            # apenas loga o detalhe técnico
+            print(f"Falha ao conectar com dispositivo {self.ip}: {e}")
+            # lança ConnectionError para middleware traduzir em 503
+            raise ConnectionError(f"Não foi possível conectar ao dispositivo {self.ip}")
 
 
     def healthcheck(self) -> ApiResponse:
