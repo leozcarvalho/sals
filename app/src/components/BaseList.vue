@@ -4,6 +4,7 @@ import Paginator from "./Paginator.vue";
 import { useRouter } from "vue-router";
 import { handleApiToast } from "../components/toast";
 import { Dataset, DatasetItem } from "vue-dataset";
+import { can } from "../helpers/userSession";
 
 // Props
 const props = defineProps({
@@ -15,7 +16,8 @@ const props = defineProps({
   canEdit: { type: Boolean, default: true },
   canDelete: { type: Boolean, default: true },
   exportable: { type: Boolean, default: true },
-  filter: { type: Object, required: true }, // filtro controlado pelo pai
+  filter: { type: Object, required: true },
+  permission: { type: String, default: null },
 });
 
 // Emit
@@ -89,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="content">
+  <div class="content" v-if="props.permission === null || can(props.permission)">
     <BaseBlock :title="title" content-full>
       <!-- Ações -->
       <div class="d-flex justify-content-between mb-2">

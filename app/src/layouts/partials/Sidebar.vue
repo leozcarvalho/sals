@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import { useTemplateStore } from "@/stores/template";
-import { getLogo } from "@/helpers/subDomainHelper"
 import BaseNavigation from "@/components/BaseNavigation.vue";
 
 // SimpleBar, for more info and examples you can check out https://github.com/Grsmto/simplebar/tree/master/packages/simplebar-vue
@@ -78,8 +77,8 @@ onMounted(() => {
           <!-- Logo -->
           <RouterLink :to="{ name: 'home' }">
             <div class="text-center">
-              <img v-if="!store.settings.sidebarMini" class="logo" :src="getLogo()" alt="logo"/>
-              <img v-else class="logo" :src="getLogo" alt="logo"/>
+              <img v-if="!store.settings.sidebarMini" class="logo" src="../../assets/img/sals.png" alt="logo"/>
+              <img v-else class="logo" src="../../assets/img/sals.png" alt="logo"/>
             </div>
           </RouterLink>
           <!-- END Logo -->

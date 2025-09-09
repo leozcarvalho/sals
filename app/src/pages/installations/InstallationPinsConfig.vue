@@ -6,7 +6,6 @@ import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import Loader from "@/components/Loader.vue";
 import BaseModalForm from "../../components/BaseModalForm.vue";
-import deviceSvgFile from './pro-mini-nologo.svg?url';
 
 const svgContent = ref("");
 const route = useRoute();
@@ -32,6 +31,7 @@ const refresh = async () => {
   loader.value.loaderOn();
   const response = await installationApi.get(deviceId.value);
   installation.value = response.data;
+  svgContent.value = installation.value?.device?.svg_template || "";
   nextTick(fillPins);
   loader.value.loaderOff();
 };
@@ -119,8 +119,6 @@ const resetSelection = () => {
 /** Lifecycle */
 onMounted(async () => {
   await refresh();
-  const svg = await fetch(deviceSvgFile).then(res => res.text());
-  svgContent.value = svg;
   nextTick(() => {
     fillPins();
     enableRegionSelection();

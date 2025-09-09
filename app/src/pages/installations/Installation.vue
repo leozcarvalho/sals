@@ -6,18 +6,15 @@ import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import { formatDateBrl } from "@/helpers/formatters";
 import Loader from "@/components/Loader.vue";
-import deviceSvgFile from './pro-mini-nologo.svg?url';
 const svgContent = ref("");
 
 const route = useRoute();
 const installationApi = new InstallationClient();
-const pinsApi = new ApiClient("/device-pins");
 
 const loader = ref(false);
 const installation = ref(null);
 
 const deviceId = ref(route.query.id || null);
-const selectedPin = ref(null);
 const modalForm = ref(null);
 
 const openModal = () => {
@@ -57,6 +54,8 @@ const refresh = async () => {
   if (!deviceId.value) return;
   const response = await installationApi.get(deviceId.value);
   installation.value = response.data;
+  svgContent.value = installation.value?.device?.svg_template || "";
+  await nextTick();
   fillPins();
   loader.value.loaderOff();
 };
@@ -77,11 +76,6 @@ function fillPins() {
 
 
 onMounted(async () => {
-  fetch(deviceSvgFile)
-    .then(res => res.text())
-    .then(svg => {
-      svgContent.value = svg;
-    });
   await refresh();
 });
 </script>

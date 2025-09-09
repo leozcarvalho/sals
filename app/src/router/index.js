@@ -247,11 +247,9 @@ router.beforeResolve((to, from, next) => {
     loadUserFromCookie();
   }
   if (to.meta.requiresAuth && !userStore.id) {
-    console.log("Usuário não autenticado");
     return next({ path: "/auth-signin" });
   }
   if (from.meta.requiresAuth && to.name === "auth-signin") {
-    console.log("Usuário deslogado");
     userStore.logout();
   }
   next();

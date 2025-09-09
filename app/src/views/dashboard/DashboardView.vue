@@ -334,47 +334,6 @@ onMounted(async () => {
           </BaseBlock>
         </div>
       </div>
-
-      <div class="row">
-        <div class="col-md-4 col-4">
-          <BaseBlock class="d-flex flex-column h-100">
-            <template #content>
-              <div class="block-content justify-content-between">
-                <dl class="mb-0">
-                  <dt class="fs-3 fw-bold">88</dt>
-                  <dd class="fs-sm fw-medium text-muted mb-0">Baias</dd>
-                </dl>
-              </div>
-            </template>
-          </BaseBlock>
-        </div>
-
-        <div class="col-md-4 col-4">
-          <BaseBlock class="d-flex flex-column h-100">
-            <template #content>
-              <div class="block-content justify-content-between">
-                <dl class="mb-0">
-                  <dt class="fs-3 fw-bold">3794</dt>
-                  <dd class="fs-sm fw-medium text-muted mb-0">Suínos</dd>
-                </dl>
-              </div>
-            </template>
-          </BaseBlock>
-        </div>
-
-        <div class="col-md-4 col-4">
-          <BaseBlock class="d-flex flex-column h-100">
-            <template #content>
-              <div class="block-content justify-content-between">
-                <dl class="mb-0">
-                  <dt class="fs-3 fw-bold">2</dt>
-                  <dd class="fs-sm fw-medium text-muted mb-0">Galpões</dd>
-                </dl>
-              </div>
-            </template>
-          </BaseBlock>
-        </div>
-      </div>
     </div>
   </BaseBackground>
 </template>

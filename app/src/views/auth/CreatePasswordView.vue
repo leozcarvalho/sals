@@ -2,7 +2,6 @@
 import { reactive, computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { getLogo } from "@/helpers/subDomainHelper"
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
 import useVuelidate from "@vuelidate/core";
@@ -87,7 +86,7 @@ const togglePasswordConfirmVisibility = () => {
             <div v-else>
               <div class="text-center p-4">
                 <img
-                  :src="getLogo()"
+                  src="../../assets/img/sals.png"
                   alt="Logo"
                   style="max-width: 250px"
                 />

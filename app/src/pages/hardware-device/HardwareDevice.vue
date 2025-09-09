@@ -60,34 +60,60 @@ onMounted(async () => {
     value: p.id,
   }));
 });
+const svgPreview = ref("");
+const showSvgPreviewModal = (svg) => {
+  svgPreview.value = svg;
+  let modal = new bootstrap.Modal(
+    document.getElementById("modal-svg")
+  );
+  modal.show();
+};
 </script>
 
 <template>
-  <BaseModalForm 
-    ref="modalForm" 
-    v-model="hardwareDeviceSelected" 
-    :fields="[
-      { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-      { name: 'connection_template_id', label: 'Template', type: 'select', options: connectionTemplatesOptions, rules: 'required' },
-      { name: 'hardware_kind_id', label: 'Kind', type: 'select', options: hardwareKindsOptions, rules: 'required' },
-      { name: 'point_type_id', label: 'Point Type', type: 'select', options: hardwarePointTypesOptions, rules: 'required' }
-    ]" 
-    :api="hardwareDevicesApi" 
-    @saved="onHardwareDeviceSaved" 
-    @close="hardwareDeviceSelected = null" 
-  />
+  <BaseModalForm ref="modalForm" v-model="hardwareDeviceSelected" :fields="[
+    { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
+    { name: 'connection_template_id', label: 'Template', type: 'select', options: connectionTemplatesOptions, rules: 'required' },
+    { name: 'hardware_kind_id', label: 'Kind', type: 'select', options: hardwareKindsOptions, rules: 'required' },
+    { name: 'point_type_id', label: 'Point Type', type: 'select', options: hardwarePointTypesOptions, rules: 'required' },
+    { name: 'svg_template', label: 'SVG Template', slot: 'svg_template' }
+  ]" :api="hardwareDevicesApi" @saved="onHardwareDeviceSaved" @close="hardwareDeviceSelected = null">
+    <template #svg_template="{ model }">
+      <div class="flex flex-col gap-2">
+        <div v-if="model.svg_template" class="flex items-center gap-2">
+          <!-- Botão para abrir modal -->
+          <button type="button" class="btn btn-sm btn-primary ms-2" @click="showSvgPreviewModal(model.svg_template)">
+            Mostrar
+          </button>
 
-  <BaseList 
-    ref="baseList" 
-    :title="'Dispositivos de Hardware'" 
-    :api="hardwareDevicesApi" 
-    :cols="cols" 
-    :exportable="false" 
-    :can-create="false"
-    :can-edit="false" 
-    :filter="filter" 
-    v-model:filter="filter"
-  >
+          <!-- Botão para trocar -->
+          <button type="button" class="btn btn-sm btn-secondary ms-2" @click="model.svg_template = null">
+            Trocar
+          </button>
+        </div>
+
+        <!-- Input de upload -->
+        <div v-else>
+          <input type="file" class="form-control" accept=".svg" @change="async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const text = await file.text();
+            model.svg_template = text;
+          }" />
+        </div>
+      </div>
+      <div class="modal fade" id="modal-svg">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div v-html="svgPreview" class="w-full max-h-[80vh] overflow-auto"></div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </BaseModalForm>
+
+  <BaseList ref="baseList" :title="'Dispositivos de Hardware'" :api="hardwareDevicesApi" :cols="cols"
+    :exportable="false" :can-create="false" :can-edit="false" :filter="filter" v-model:filter="filter">
     <!-- Botão Criar -->
     <template #extra-actions>
       <button type="button" class="btn btn-sm btn-success ms-2" @click="openModal">
@@ -151,10 +177,7 @@ onMounted(async () => {
     </template>
     <!-- Ações de linha -->
     <template #row-actions="{ row }">
-      <button 
-        class="btn btn-sm btn-warning text-white" 
-        @click="hardwareDeviceSelected = row; openModal()"
-      >
+      <button class="btn btn-sm btn-warning text-white" @click="hardwareDeviceSelected = row; openModal()">
         <mdicon name="circle-edit-outline" />
       </button>
     </template>

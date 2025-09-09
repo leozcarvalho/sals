@@ -7,7 +7,6 @@ import useVuelidate from "@vuelidate/core";
 import { required, minLength } from "@vuelidate/validators";
 import { userApi } from "../../services/usersApi";
 import { handleApiToast } from "../../components/toast";
-import { getLogo } from "@/helpers/subDomainHelper"
 import Loader from "@/components/Loader.vue";
 
 
@@ -72,7 +71,7 @@ const togglePasswordVisibility = () => {
           <BaseBlock title="" class="mb-0">
             <div class="text-center p-4">
               <img
-                :src="getLogo()"
+                src="../../assets/img/sals.png"
                 alt="Logo VisioAgro"
                 style="max-width: 250px"
               />

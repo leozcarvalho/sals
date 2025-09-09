@@ -3,7 +3,6 @@ import { reactive, ref, onMounted } from "vue";
 import BaseList from "../../components/BaseList.vue";
 import BaseModalForm from "../../components/BaseModalForm.vue";
 import { ApiClient } from "../../services/genericApi";
-import { can } from "@/helpers/permissions";
 
 const baseList = ref(null);
 const modalForm = ref(null);
@@ -44,7 +43,7 @@ const openModal = () => {
 </script>
 
 <template>
-  <div v-if="can('manage-cruds')">
+  <div>
     <!-- Modal de Criação/Edição -->
     <BaseModalForm
       ref="modalForm"
@@ -71,6 +70,7 @@ const openModal = () => {
       :exportable="true"
       :can-create="false"
       :can-edit="false"
+      :permission="'manage_user'"
     >
       <!-- Botão Criar -->
       <template #extra-actions>

@@ -3,7 +3,6 @@ import { reactive, computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
 import { vMaska } from "maska";
-import { getLogo } from "@/helpers/subDomainHelper"
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
 import useVuelidate from "@vuelidate/core";
@@ -66,7 +65,7 @@ async function onSubmit() {
             </div>
             <div v-else>
               <div class="text-center p-4">
-                <img :src="getLogo()" style="max-width: 250px;" alt="Logo"/>
+                <img src="../../assets/img/sals.png" style="max-width: 250px;" alt="Logo"/>
               </div>
               <div class="p-sm-3 px-lg-4 px-xxl-5 py-lg-5">
                 <!-- Sign In Form -->

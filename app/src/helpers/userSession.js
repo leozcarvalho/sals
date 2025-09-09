@@ -36,9 +36,7 @@ export function loadUserFromCookie() {
 }
 
 export function can(permission) {
-  console.log("Checking permission:", permission);
   if (!permission) return true;
   const userStore = useUserStore();
-  console.log("User permissions:", userStore.permissions);
   return userStore.permissions.includes(permission);
 }

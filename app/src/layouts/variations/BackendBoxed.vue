@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useTemplateStore } from "@/stores/template";
-import { getLogo } from "@/helpers/subDomainHelper"
 
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import BaseNavigation from "@/components/BaseNavigation.vue";
@@ -66,14 +65,14 @@ const isMobile = computed(() => {
             <img
               v-if="!store.settings.sidebarMini"
               class="logo"
-              :src="getLogo()"
+              src="../../assets/img/sals.png"
               style="max-width: 150px"
               alt="logo"
             />
             <img
               v-else
               class="logo"
-              src="../../assets/img/icon.png"
+              src="../../assets/img/sals.png"
               alt="logo"
             />
           </div>
