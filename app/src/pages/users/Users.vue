@@ -37,9 +37,7 @@ const onUserSaved = () => {
   userSelected.value = null;
 };
 
-const openModal = () => {
-  modalForm.value.openModal();
-};
+
 </script>
 
 <template>
@@ -74,33 +72,14 @@ const openModal = () => {
     >
       <!-- Botão Criar -->
       <template #extra-actions>
-        <button type="button" class="btn btn-sm btn-success ms-2" @click="openModal">
+        <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
           <mdicon name="plus" />
         </button>
       </template>
-
-      <!-- Filtros -->
-      <template #filter>
-        <div class="row g-3 px-3 py-3">
-          <div class="col-md-4">
-            <label class="form-label">Nome</label>
-            <input v-model="filter.name" class="form-control" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Email</label>
-            <input v-model="filter.email" class="form-control" />
-          </div>
-          <div class="col-12 text-center mt-3">
-            <button class="btn btn-success" @click="baseList.refresh()">Filtrar</button>
-          </div>
-        </div>
-      </template>
-
-      <!-- Ações de Linha -->
       <template #row-actions="{ row }">
         <button
           class="btn btn-sm btn-warning text-white"
-          @click="userSelected = row; openModal()"
+          @click="userSelected = row; modalForm.openModal()"
         >
           <mdicon name="circle-edit-outline" />
         </button>
@@ -108,11 +87,3 @@ const openModal = () => {
     </BaseList>
   </div>
 </template>
-
-<style lang="scss" scoped>
-@import url("../../assets/scss/custom/_tablestyle.scss");
-
-.last-read {
-  cursor: pointer;
-}
-</style>

@@ -3,19 +3,19 @@ from urllib.parse import urlencode
 
 from sqlalchemy.orm import Session
 
-from src.domain import Instalation
+from src.domain import Installation
 from src.cruds.repo import Repository
 from src.cruds.hardware_device import HardwareDeviceRepository
 from src.cruds.device_pins import DevicePinRepository
 from src.adapters.device_adapter import DeviceService
 from src.schemas.users import UserBase
 from src.schemas.device_pins import DevicePinCreate
-from src.schemas.instalations import Instalation as InstalationSchema
+from src.schemas.installations import Installation as InstallationSchema
 from src.domain import exceptions as exc
 
-class InstalationRepository(Repository):
+class InstallationRepository(Repository):
     def __init__(self, session: Session):
-        super().__init__(Instalation, session)
+        super().__init__(Installation, session)
         self.device_pin_repo = DevicePinRepository(session)
 
     def create_pins(self, instalation_id: int, device_id: int, actor=None):
@@ -32,20 +32,20 @@ class InstalationRepository(Repository):
             self.device_pin_repo.save(pin_data.model_dump(), actor)
 
     def get(self, id, actor=None):
-        instalation = super().get(id, actor)
-        decimal_value, binary_string = self.device_pin_repo.get_pins_binary_and_decimal(instalation.id)
-        return InstalationSchema(
-            **instalation.model_dump(),
-            device=instalation.device,
-            pins=instalation.pins,
+        installation = super().get(id, actor)
+        decimal_value, binary_string = self.device_pin_repo.get_pins_binary_and_decimal(installation.id)
+        return InstallationSchema(
+            **installation.model_dump(),
+            device=installation.device,
+            pins=installation.pins,
             decimal_value=decimal_value,
             binary_value=binary_string
         )
 
     def save(self, values, actor=None):
-        instalation = super().save(values, actor)
-        self.create_pins(instalation.id, instalation.device_id, actor)
-        return instalation
+        installation = super().save(values, actor)
+        self.create_pins(installation.id, installation.device_id, actor)
+        return installation
 
     def set_online_device(self, id: int, actor: UserBase):
         values = {
@@ -61,10 +61,10 @@ class InstalationRepository(Repository):
         return self.update(id, values, actor)
 
     def health_check(self, id: int, actor: UserBase):
-        instalation = self.check_exists(id)
+        installation = self.check_exists(id)
 
         device_service = DeviceService(
-            ip=instalation.ip_address,
+            ip=installation.ip_address,
         )
 
         response = device_service.healthcheck()
@@ -77,15 +77,15 @@ class InstalationRepository(Repository):
         raise exc.NotFound("Dispositivo offline ou inacessível.")
 
     def restart_device(self, id: int, actor: UserBase):
-        instalation = self.check_exists(id)
+        installation = self.check_exists(id)
 
         device_service = DeviceService(
-            ip=instalation.ip_address,
+            ip=installation.ip_address,
         )
 
         response = device_service.restart()
 
-        self.device_pin_repo.deactivate_all_pins(instalation.id, actor)
+        self.device_pin_repo.deactivate_all_pins(installation.id, actor)
         if response.success:
             return True
 
@@ -93,13 +93,13 @@ class InstalationRepository(Repository):
         raise exc.NotFound("Dispositivo offline ou inacessível.")
 
     def toggle_pin(self, id: int, pin_id: int, actor: UserBase):
-        instalation = self.check_exists(id)
+        installation = self.check_exists(id)
         self.device_pin_repo.toggle_pin(pin_id, actor)
-        instalation = self.get(id, actor)
+        installation = self.get(id, actor)
         device_service = DeviceService(
-            ip=instalation.ip_address,
+            ip=installation.ip_address,
         )
-        response = device_service._request(path=urlencode({'valvula1': instalation.decimal_value, 'valvula2': 0}))
+        response = device_service._request(path=urlencode({'valvula1': installation.decimal_value, 'valvula2': 0}))
         if response.success:
             self.set_online_device(id, actor)
             return True

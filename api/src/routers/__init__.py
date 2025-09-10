@@ -1,6 +1,6 @@
 from .auth import auth_router
 from .profile import router_profiles
-from .instalations import router_installations
+from .installations import router_installations
 from .users import router_user
 from .hardware_connection_template import router_hardware_connection_templates
 from .hardware_kind import router_hardware_kinds
@@ -11,6 +11,7 @@ from .shed import router_sheds
 from .shed_room import router_shed_rooms
 from .kitchen import router_kitchens
 from .feeder_valves import router_feeder_valves
+from .room_stall import router_room_stalls
 from .stall_feeder import router_stall_feeders
 
 routers = [
@@ -26,6 +27,7 @@ routers = [
     router_sheds.router,
     router_shed_rooms.router,
     router_kitchens.router,
+    router_room_stalls.router,
     router_feeder_valves.router,
     router_stall_feeders.router,
 ]

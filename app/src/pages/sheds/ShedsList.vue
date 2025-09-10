@@ -1,51 +1,47 @@
 <script setup>
 import { reactive, ref } from "vue";
-import { useRoute } from "vue-router";
 import BaseList from "../../components/BaseList.vue";
 import { ApiClient } from "../../services/genericApi";
 import BaseModalForm from "../../components/BaseModalForm.vue";
+import PinSelect from "../../components/PinSelect.vue";
 
 // API Sheds
 const shedsApi = new ApiClient("/sheds");
 
 const baseList = ref(null);
-const route = useRoute();
 
 const cols = reactive([
   { name: "#", field: "id", sort: "" },
   { name: "Nome", field: "name", sort: "" },
+  { name: "Pino de Entrada", field: "entrance_pin_id", sort: "" },
 ]);
 
 const filter = reactive({
   name: null,
 });
 
-const kitchenSelected = ref(null);
+const shedSelected = ref(null);
 
-const onKitchenSaved = () => {
+const onshedSaved = () => {
   baseList.value.refresh();
-  kitchenSelected.value = null;
+  shedSelected.value = null;
 };
 
 const modalForm = ref(null);
-const openModal = () => {
-  modalForm.value.openModal();
-};
-
 </script>
 
 <template>
   <BaseModalForm
     ref="modalForm"
-    v-model="kitchenSelected"
+    v-model="shedSelected"
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
+      { name: 'entrance_pin_id', label: 'Pino de Entrada', component: PinSelect },
     ]"
     :api="shedsApi"
-    @saved="onKitchenSaved"
-    @close="kitchenSelected = null"
+    @saved="onshedSaved"
+    @close="shedSelected = null"
   />
-
   <BaseList
     ref="baseList"
     :title="'Galpões'"
@@ -59,7 +55,7 @@ const openModal = () => {
   >
     <!-- Ações Extras -->
     <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="openModal">
+      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
         <mdicon name="plus" />
       </button>
     </template>
@@ -77,9 +73,9 @@ const openModal = () => {
       </div>
     </template>
 
-    <template #cell-shaker_pin_id="{ row, col }">
+    <template #cell-entrance_pin_id="{ row, col }">
       <span>
-        {{ row.shaker_pin ? row.shaker_pin.name : 'N/A' }}
+        {{ row.entrance_pin ? row.entrance_pin.name : 'N/A' }}
       </span>
     </template>
 
@@ -88,17 +84,9 @@ const openModal = () => {
       <button class="btn btn-sm btn-primary text-white" @click="$router.push({ name: 'shed', query: { id: row.id } })">
         <mdicon name="eye" />
       </button>
-      <button class="btn btn-sm btn-warning text-white" @click="kitchenSelected = row; openModal()">
+      <button class="btn btn-sm btn-warning text-white" @click="shedSelected = row; modalForm.openModal()">
         <mdicon name="circle-edit-outline" />
       </button>
     </template>
   </BaseList>
 </template>
-
-<style lang="scss" scoped>
-@import url('../../assets/scss/custom/_tablestyle.scss');
-
-.last-read {
-  cursor: pointer;
-}
-</style>

@@ -1,11 +1,9 @@
-from typing import Optional, List, Dict
+from typing import Optional, List
 from sqlmodel import Field, Relationship
-from sqlalchemy import JSON
 from src.domain.base import Base
-from typing import ClassVar
 
-class Instalation(Base, table=True):
-    __tablename__ = "instalations"
+class Installation(Base, table=True):
+    __tablename__ = "installations"
 
     ip_address: str = Field(nullable=False, max_length=45)
     name: str = Field(nullable=False, max_length=255)
@@ -14,7 +12,7 @@ class Instalation(Base, table=True):
     device_id: int = Field(foreign_key="devices.id", nullable=False)
     
 
-    device: Optional["Device"] = Relationship(back_populates="instalations")
+    device: Optional["Device"] = Relationship(back_populates="installations")
     pins: List["DevicePin"] = Relationship(
         back_populates="device",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}

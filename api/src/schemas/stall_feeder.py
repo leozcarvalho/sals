@@ -17,6 +17,9 @@ class StallFeederPin(BaseModel):
     id: int
     pin: DevicePin
 
+    class Config:
+        from_attributes = True
+
 class StallFeeder(StallFeederBase, GlobalFields):
     device_pins: Optional[List[StallFeederPin]] = []
 

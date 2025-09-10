@@ -1,12 +1,12 @@
 import pytest
-from src.cruds.instalations import InstalationRepository
-from src.schemas.instalations import InstalationBase
+from src.cruds.installations import InstallationRepository
+from src.schemas.installations import InstallationBase
 
 @pytest.fixture
-def instalation_repository(session) -> InstalationRepository:
-    return InstalationRepository(session)
+def installation_repository(session) -> InstallationRepository:
+    return InstallationRepository(session)
 
-INSTALATION = InstalationBase(
+INSTALLATION = InstallationBase(
     ip_address="192.168.0.1",
     name="Dispositivo de Conta",
     last_seen=None,
@@ -15,11 +15,11 @@ INSTALATION = InstalationBase(
 )
 
 @pytest.fixture()
-def create_instalation(instalation_repository: InstalationRepository, actor):
-    def create_instalation(**overrides):
-        instalation_dict = INSTALATION.model_dump()
-        instalation_dict.update(overrides)
-        instalation = InstalationBase(**instalation_dict)
-        instalation = instalation_repository.save(instalation.model_dump(), actor=actor)
-        return instalation
-    return create_instalation
+def create_installation(installation_repository: InstallationRepository, actor):
+    def create_installation(**overrides):
+        installation = INSTALLATION.model_dump()
+        installation.update(overrides)
+        installation = InstallationBase(**installation)
+        installation = installation_repository.save(installation.model_dump(), actor=actor)
+        return installation
+    return create_installation

@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import BaseModalForm from "../../components/BaseModalForm.vue";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
+import PinSelect from "../../components/PinSelect.vue";
 
 const route = useRoute();
 
@@ -11,11 +12,9 @@ const roomsApi = new ApiClient("/shed-rooms");
 const stallsApi = new ApiClient("/room-stalls");
 const feedersApi = new ApiClient("/stall-feeders");
 const valvesApi = new ApiClient("/feeder-valves");
-const pinsApi = new ApiClient("/device-pins"); // Nova API para listar opções de pins
 
 const shedId = route.query.id;
 const rooms = ref([]);
-const pins = ref([]);
 
 const modalForm = ref(null);
 const modalData = reactive({
@@ -44,13 +43,6 @@ const loadAll = async () => {
       stall.feeders = feedersResponse.data.items || [];
     }
   }
-  await loadPins();
-};
-
-// Carrega lista de pins disponíveis
-const loadPins = async () => {
-  const res = await pinsApi.getList({in_use: false, limit: 1000});
-  pins.value = res.data.items.map(pin => ({ id: pin.id, value: pin.name }));
 };
 
 onMounted(async () => {
@@ -161,12 +153,12 @@ const addValve = async (feederId, pinId) => {
               </button>
             </div>
 
-            <!-- Adicionar nova válvula -->
             <div class="input-group mt-2">
-              <select class="form-select" v-model="feeder.newValvePin">
-                <option v-for="pin in pins" :key="pin.id" :value="pin.id">{{ pin.value }}</option>
-              </select>
-              <button :disabled="!feeder.newValvePin" class="btn btn-outline-success" @click="addValve(feeder.id, feeder.newValvePin)">+ Válvula</button>
+              <PinSelect v-model="feeder.newValvePin" class="flex-grow-1" />
+              <button :disabled="!feeder.newValvePin" class="btn btn-outline-success"
+                @click="addValve(feeder.id, feeder.newValvePin)">
+                + Válvula
+              </button>
             </div>
           </div>
         </div>
@@ -193,20 +185,14 @@ const addValve = async (feederId, pinId) => {
     </div>
 
     <!-- Modal único -->
-    <BaseModalForm
-      ref="modalForm"
-      v-model="modalData.entity"
+    <BaseModalForm ref="modalForm" v-model="modalData.entity"
       :fields="[{ name: 'name', label: 'Nome', type: 'text', rules: 'required' }]"
-      :api="modalData.type === 'room' ? roomsApi : modalData.type === 'stall' ? stallsApi : feedersApi"
-      :extra-payload="
-        modalData.type === 'room'
+      :api="modalData.type === 'room' ? roomsApi : modalData.type === 'stall' ? stallsApi : feedersApi" :extra-payload="modalData.type === 'room'
           ? { shed_id: modalData.parentId }
           : modalData.type === 'stall'
-          ? { shed_room_id: modalData.parentId }
-          : { room_stall_id: modalData.parentId }
-      "
-      @saved="onSaved"
-    />
+            ? { shed_room_id: modalData.parentId }
+            : { room_stall_id: modalData.parentId }
+        " @saved="onSaved" />
   </div>
 </template>
 

@@ -14,4 +14,4 @@ class Device(Base, table=True):
     connection_template: Optional["ConnectionTemplate"] = Relationship(back_populates="devices")
     hardware_kind: Optional["HardwareKind"] = Relationship(back_populates="devices")
     point_type: Optional["PointType"] = Relationship(back_populates="devices")
-    instalations: List["Instalation"] = Relationship(back_populates="device")
+    installations: List["Installation"] = Relationship(back_populates="device")

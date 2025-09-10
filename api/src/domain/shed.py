@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlmodel import Field, Relationship
 from src.domain.base import Base
 
@@ -9,3 +9,4 @@ class Shed(Base, table=True):
     entrance_pin_id: int = Field(foreign_key="device_pins.id", nullable=True)
 
     rooms: List["ShedRoom"] = Relationship(back_populates="shed")
+    entrance_pin: Optional["DevicePin"] = Relationship()

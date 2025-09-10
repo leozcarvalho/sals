@@ -3,7 +3,7 @@ from src.domain.stall_feeder import StallFeeder
 from src.cruds.repo import Repository
 from src.cruds.device_pins import DevicePinRepository
 from src.cruds.feeder_valves import FeederValveRepository
-from src.schemas.device_pins import DevicePin
+from src.schemas.stall_feeder import StallFeeder as StallFeederSchema, StallFeederPin
 
 class StallFeederRepository(Repository):
     def __init__(self, session: Session):
@@ -18,12 +18,16 @@ class StallFeederRepository(Repository):
         for valve in stall_feeder_valves:
             line['pin'] = self.device_pin_repo.get(valve.device_pin_id)
             line['id'] = valve.id
-            valves.append(line)
+            valves.append(StallFeederPin(**line))
             line = {}
         return valves
 
     def get_list(self, skip = 0, limit = None, filters = {}, order_by = ..., actor=None):
         result = super().get_list(skip, limit, filters, order_by, actor)
+        parsed_result = []
         for feeder in result:
-            feeder.device_pins = self.__get_feeder_pins(feeder.id)
-        return result
+            feeder_schema = StallFeederSchema(**feeder.model_dump())
+            feeder_schema.device_pins = self.__get_feeder_pins(feeder.id)
+            parsed_result.append(feeder_schema)
+        return parsed_result
+

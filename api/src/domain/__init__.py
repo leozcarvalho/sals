@@ -7,7 +7,7 @@ from .hardware_device import Device
 from .hardware_kind import HardwareKind
 from .hardware_point_types import PointType
 from .kitchen import Kitchen
-from .instalations import Instalation
+from .installations import Installation
 from .shed import Shed
 from .shed_room import ShedRoom
 from .room_stall import RoomStall
@@ -23,7 +23,7 @@ __all__ = [
     "HardwareKind",
     "PointType",
     "Kitchen",
-    "Instalation",
+    "Installation",
     "Shed",
     "ShedRoom",
     "RoomStall",

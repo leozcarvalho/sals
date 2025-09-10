@@ -25,11 +25,7 @@ const onProfileSaved = () => {
   profileSelected.value = null;
 };
 
-const openModal = () => {
-  modalForm.value.openModal();
-};
 
-// Opções de permissões carregadas da API
 const permissionsOptions = ref([]);
 
 onMounted(async () => {
@@ -96,7 +92,7 @@ const getPermissionLabels = (permissionKeys) => {
   >
     <!-- Botão criar -->
     <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="openModal">
+      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
         <mdicon name="plus" />
       </button>
     </template>
@@ -125,18 +121,10 @@ const getPermissionLabels = (permissionKeys) => {
     <template #row-actions="{ row }">
       <button
         class="btn btn-sm btn-warning text-white"
-        @click="profileSelected = row; openModal()"
+        @click="profileSelected = row; modalForm.openModal()"
       >
         <mdicon name="circle-edit-outline" />
       </button>
     </template>
   </BaseList>
 </template>
-
-<style lang="scss" scoped>
-@import url('../../assets/scss/custom/_tablestyle.scss');
-
-.last-read {
-  cursor: pointer;
-}
-</style>

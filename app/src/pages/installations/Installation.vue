@@ -2,7 +2,6 @@
 import { ref, onMounted, computed, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { InstallationClient } from "../../services/installationsApi";
-import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import { formatDateBrl } from "@/helpers/formatters";
 import Loader from "@/components/Loader.vue";
@@ -15,11 +14,6 @@ const loader = ref(false);
 const installation = ref(null);
 
 const deviceId = ref(route.query.id || null);
-const modalForm = ref(null);
-
-const openModal = () => {
-  modalForm.value.openModal();
-};
 
 const togglePin = async (pin) => {
   loader.value.loaderOn();

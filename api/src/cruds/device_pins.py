@@ -3,7 +3,8 @@ from src.cruds.repo import Repository
 from src.domain import Kitchen, FeederValve
 from sqlalchemy import or_, exists, select, case
 from src.domain import exceptions as exc
-from src.domain import DevicePin
+from src.domain import (DevicePin, Shed, Installation)
+from src.schemas.device_pins import DevicePin as DevicePinSchema
 
 class DevicePinRepository(Repository):
     def __init__(self, session: Session):
@@ -55,47 +56,47 @@ class DevicePinRepository(Repository):
         kitchen_subq = select(Kitchen.id).where(
             or_(
                 Kitchen.scale_pin_id == DevicePin.id,
-                Kitchen.product_pin_id == DevicePin.id,
                 Kitchen.pump_pin_id == DevicePin.id,
                 Kitchen.shaker_pin_id == DevicePin.id,
             )
         )
         feeder_subq = select(FeederValve.id).where(FeederValve.device_pin_id == DevicePin.id)
 
-        return kitchen_subq, feeder_subq
-    
-    def build_filter(self, query, filters):
-        # Pega o filtro in_use
-        in_use_filter = filters.pop("in_use", None)
+        shed_subq = select(Shed.id).where(Shed.entrance_pin_id == DevicePin.id)
 
-        kitchen_subq, feeder_subq = self._get_in_use_subqueries()
+        return kitchen_subq, feeder_subq, shed_subq
+
+    def build_filter(self, query, filters = {}):
+        # Pega o filtro in_use
+        in_use_filter = filters.pop("in_use", None) if filters else None
+
+        kitchen_subq, feeder_subq, shed_subq = self._get_in_use_subqueries()
         if in_use_filter is not None:
             if in_use_filter:
-                query = query.filter(exists(kitchen_subq) | exists(feeder_subq))
+                query = query.filter(exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq))
             else:
-                query = query.filter(~(exists(kitchen_subq) | exists(feeder_subq)))
+                query = query.filter(~(exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq)))
 
         # Chama o super para aplicar outros filtros
         return super().build_filter(query, filters)
 
     def build_query(self):
         query = self.db_session.query(DevicePin)
-        kitchen_subq, feeder_subq = self._get_in_use_subqueries()
+        kitchen_subq, feeder_subq, shed_subq = self._get_in_use_subqueries()
         query = self.db_session.query(
             DevicePin,
             case(
-                (exists(kitchen_subq) | exists(feeder_subq), True),
+                (exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq), True),
                 else_=False
-            ).label("in_use")
+            ).label("in_use"),
+            Installation.name.label("installation_name"),
         )
         return query
     
     def format_results(self, results):
         output = []
-        for dp, in_use in results:
-            dp_data = dp.__dict__.copy()
-            dp_data['in_use'] = in_use
-            output.append(DevicePin(**dp_data))
+        for dp, in_use, installation_name in results:
+            output.append(DevicePinSchema(**dp.model_dump(), in_use=in_use, installation_name=installation_name))
         return output
 
     def get_pin_usage(self, pin_id: int):
@@ -103,6 +104,12 @@ class DevicePinRepository(Repository):
         Retorna uma string com a entidade e campo onde o pino está em uso.
         Retorna None se não estiver sendo usado.
         """
+
+        # Shed
+        shed = self.db_session.query(Shed).filter(Shed.entrance_pin_id == pin_id).first()
+        if shed:
+            return f"entrada do galpão {shed.name}"
+
         # Kitchen
         kitchen = self.db_session.query(Kitchen).filter(Kitchen.shaker_pin_id == pin_id).first()
         if kitchen:
@@ -114,19 +121,12 @@ class DevicePinRepository(Repository):
         kitchen = self.db_session.query(Kitchen).filter(Kitchen.scale_pin_id == pin_id).first()
         if kitchen:
             return f"balança da cozinha {kitchen.name}"
-        kitchen = self.db_session.query(Kitchen).filter(Kitchen.product_pin_id == pin_id).first()
-        if kitchen:
-            return f"produto da cozinha {kitchen.name}"
 
         valve = self.db_session.query(FeederValve).filter(FeederValve.device_pin_id == pin_id).first()
         if valve:
             return f"válvula de alimentação {valve}"
 
         return None
-
-    def is_pin_in_use(self, pin_id: int) -> bool:
-        """Retorna True se o pino estiver sendo usado."""
-        return self.get_pin_usage(pin_id) is not None
 
     def _is_valid_pin(self, id: int) -> bool:
         """Valida se o pino está livre para uso."""
@@ -135,3 +135,21 @@ class DevicePinRepository(Repository):
         if usage:
             raise exc.InvalidData(f"Pino {device_pin.name} está em uso em: {usage}")
         return True
+
+    def get_grouped_not_used_device_pins(self):
+        results = self.get_list()
+        grouped = {}
+        for pin in results:
+            board = pin.instalation_name if pin.instalation_name else f"Instalação {pin.instalation_id}"
+            if board not in grouped:
+                grouped[board] = []
+            grouped[board].append({
+                "id": pin.id,
+                "name": pin.name,
+                "number": pin.number,
+                "is_active": pin.is_active,
+                "in_use": pin.in_use
+            })
+
+        output = [{"board": board, "pins": pins} for board, pins in grouped.items()]
+        return output

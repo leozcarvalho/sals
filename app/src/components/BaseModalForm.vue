@@ -31,25 +31,26 @@ const isLoading = ref(false);
 const form = reactive({});
 
 // popular inicialmente + defaults dos fields
-const ensureInitialState = () => {
+const ensureInitialState = (forNew = false) => {
   props.fields.forEach((f) => {
     const key = f.name;
-    if (props.modelValue?.hasOwnProperty(key)) {
+
+    // Se for criação (forNew=true), ignora modelValue
+    if (!forNew && props.modelValue?.hasOwnProperty(key)) {
+      console.log("set", key, props.modelValue[key]);
       form[key] = props.modelValue[key];
     } else if (f.hasOwnProperty("default")) {
       form[key] = typeof f.default === "function" ? f.default() : f.default;
     } else {
-      if (f.multiple) {
-        form[key] = [];
-      } else {
-        form[key] = f.type === "checkbox" ? false : null;
-      }
+      form[key] = f.multiple ? [] : f.type === "checkbox" ? false : null;
     }
   });
 
-  // garante que o idField sempre esteja no form
-  if (props.modelValue?.[props.idField]) {
+  // garante que o idField esteja correto
+  if (!forNew && props.modelValue?.[props.idField]) {
     form[props.idField] = props.modelValue[props.idField];
+  } else {
+    form[props.idField] = null;
   }
 };
 ensureInitialState();
@@ -209,8 +210,8 @@ const submit = async () => {
   }
   let res;
   const formData = { ...form, ...props.extraPayload };
-  if (props.modelValue?.[props.idField]) {
-    res = await props.api.update(props.modelValue[props.idField], formData);
+  if (form[props.idField]) {
+    res = await props.api.update(form[props.idField], formData);
   } else {
     res = await props.api.save(formData);
   }
@@ -222,24 +223,26 @@ const submit = async () => {
   isLoading.value = false;
 };
 
-const openModal = () => {
-  let modal = new bootstrap.Modal(
-    document.getElementById("modal-form")
-  );
+const openModal = (isNew = false) => {
+  ensureInitialState(isNew);
+  v$.value.$reset();
+  let modal = new bootstrap.Modal(document.getElementById("modal-form"));
   modal.show();
 };
+
 defineExpose({
   openModal,
 });
 
 const closeModal = () => {
-  ensureInitialState(); // <-- garante reset correto
-  v$.value.$reset();    // <-- reseta validações também
-  let modalEl = document.getElementById("modal-form");
-  let modal = bootstrap.Modal.getInstance(modalEl);
+  ensureInitialState(false);
+  v$.value.$reset();
+  const modalEl = document.getElementById("modal-form");
+  const modal = bootstrap.Modal.getInstance(modalEl);
   if (modal) modal.hide();
+
   emit("close");
-}
+};
 
 </script>
 

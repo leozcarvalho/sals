@@ -18,7 +18,9 @@ class DevicePinUpdate(DevicePinBase):
 
 class DevicePin(DevicePinCreate, GlobalFields):
     is_active: bool
-    
+    in_use: Optional[bool] = False
+    instalation_name: Optional[str] = None
+
 
 class DevicePinFilter(BaseFilter):
     name: Optional[str] = None

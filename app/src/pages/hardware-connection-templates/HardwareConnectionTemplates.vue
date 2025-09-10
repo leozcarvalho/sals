@@ -28,9 +28,6 @@ const onHardwareConnectionTemplateSaved = () => {
 };
 
 const modalForm = ref(null);
-const openModal = () => {
-  modalForm.value.openModal();
-};
 </script>
 
 <template>
@@ -59,7 +56,7 @@ const openModal = () => {
   >
     <!-- Botão Criar -->
     <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="openModal">
+      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
         <mdicon name="plus" />
       </button>
     </template>
@@ -85,18 +82,10 @@ const openModal = () => {
     <template #row-actions="{ row }">
       <button 
         class="btn btn-sm btn-warning text-white" 
-        @click="hardwareConnectionTemplateSelected = row; openModal()"
+        @click="hardwareConnectionTemplateSelected = row; modalForm.openModal()"
       >
         <mdicon name="circle-edit-outline" />
       </button>
     </template>
   </BaseList>
 </template>
-
-<style lang="scss" scoped>
-@import url('../../assets/scss/custom/_tablestyle.scss');
-
-.last-read {
-  cursor: pointer;
-}
-</style>

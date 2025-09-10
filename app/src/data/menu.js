@@ -8,7 +8,7 @@ export const baseMenu = [
   {
     name: "Instalações",
     to: "installations",
-    icon: "home-variant",
+    icon: "fa fa-microchip",
   },
   {
     name: "Cadastros",
@@ -17,7 +17,7 @@ export const baseMenu = [
       { name: "Usuários", to: "users", icon: "account-group", action: "manage_user" },
       { name: "Perfis", to: "profiles", icon: "account", action: "manage_profile" },
       { name: "Cozinhas", to: "kitchens", icon: "chef-hat", action: "manage_kitchen" },
-      { name: "Galpões", to: "sheds", icon: "pig-variant", action: "manage_shed" },
+      { name: "Galpões", to: "sheds", icon: "warehouse", action: "manage_shed" },
     ],
   },
   {

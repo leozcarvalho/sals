@@ -34,9 +34,6 @@ const onHardwareDeviceSaved = () => {
 };
 
 const modalForm = ref(null);
-const openModal = () => {
-  modalForm.value.openModal();
-};
 
 // opções para selects
 const connectionTemplatesOptions = ref([]);
@@ -104,7 +101,7 @@ const showSvgPreviewModal = (svg) => {
       </div>
       <div class="modal fade" id="modal-svg">
         <div class="modal-dialog">
-          <div class="modal-content">
+          <div class="text-center">
             <div v-html="svgPreview" class="w-full max-h-[80vh] overflow-auto"></div>
           </div>
         </div>
@@ -113,10 +110,10 @@ const showSvgPreviewModal = (svg) => {
   </BaseModalForm>
 
   <BaseList ref="baseList" :title="'Dispositivos de Hardware'" :api="hardwareDevicesApi" :cols="cols"
-    :exportable="false" :can-create="false" :can-edit="false" :filter="filter" v-model:filter="filter">
+    :can-create="false" :can-edit="false" :filter="filter" v-model:filter="filter">
     <!-- Botão Criar -->
     <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="openModal">
+      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
         <mdicon name="plus" />
       </button>
     </template>
@@ -177,17 +174,9 @@ const showSvgPreviewModal = (svg) => {
     </template>
     <!-- Ações de linha -->
     <template #row-actions="{ row }">
-      <button class="btn btn-sm btn-warning text-white" @click="hardwareDeviceSelected = row; openModal()">
+      <button class="btn btn-sm btn-warning text-white" @click="hardwareDeviceSelected = row; modalForm.openModal()">
         <mdicon name="circle-edit-outline" />
       </button>
     </template>
   </BaseList>
 </template>
-
-<style lang="scss" scoped>
-@import url('../../assets/scss/custom/_tablestyle.scss');
-
-.last-read {
-  cursor: pointer;
-}
-</style>

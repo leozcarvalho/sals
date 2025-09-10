@@ -15,7 +15,8 @@ const props = defineProps({
   canCreate: { type: Boolean, default: true },
   canEdit: { type: Boolean, default: true },
   canDelete: { type: Boolean, default: true },
-  exportable: { type: Boolean, default: true },
+  exportable: { type: Boolean, default: false },
+  canFilter: { type: Boolean, default: false },
   filter: { type: Object, required: true },
   permission: { type: String, default: null },
 });
@@ -96,7 +97,7 @@ onMounted(() => {
       <!-- Ações -->
       <div class="d-flex justify-content-between mb-2">
         <div>
-          <button class="btn btn-sm btn-primary" @click="toggleFilter">
+          <button class="btn btn-sm btn-primary" @click="toggleFilter" v-if="canFilter">
             <mdicon name="filter" />
           </button>
           <select v-model="perPage" @change="changePerPage" class="form-select d-inline w-auto ms-2">

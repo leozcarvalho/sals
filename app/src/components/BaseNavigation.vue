@@ -124,6 +124,7 @@ function linkClicked(e, submenu) {
         <RouterLink :to="node.to && node.to !== '#' ? { name: node.to } : '#'" class="nav-main-link"
           :active-class="node.to && node.to !== '#' ? 'active' : ''">
           <i v-if="String(node.icon).includes('si')" :class="`nav-main-link-icon ${node.icon}`"></i>
+          <i v-else-if="String(node.icon).includes('fa')" :class="`nav-main-link-icon ${node.icon}`"></i>
           <mdicon v-else class="nav-main-link-icon" :name="node.icon" />
           <span v-if="node.name" class="nav-main-link-name">
             {{ node.name }}

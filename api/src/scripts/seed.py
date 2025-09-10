@@ -8,7 +8,7 @@ from src.domain.permissions import PermissionEnum
 from src.cruds.profile import ProfileRepository
 from src.cruds.users import UsersRepository
 from src.cruds.hardware_kind import HardwareKindRepository
-from src.cruds.instalations import InstalationRepository
+from src.cruds.installations import InstallationRepository
 from src.cruds.hardware_connection_template import HardwareConnectionTemplateRepository
 from src.cruds.hardware_point_types import HardwarePointTypeRepository
 from src.cruds.hardware_device import HardwareDeviceRepository
@@ -129,8 +129,8 @@ def create_hardware_devices(db, user, hw_kind, balanca_kind, point_type, templat
     print(f"[SEED] Hardware Devices criados: {device.id}, {balanca.id}")
     return device, balanca
 
-def create_instalations(db, user, devices):
-    repo = InstalationRepository(db)
+def create_installations(db, user, devices):
+    repo = InstallationRepository(db)
     ip_list = ["192.168.60.100", "177.122.01.100"]
     for device in devices:
         repo.save({
@@ -138,13 +138,13 @@ def create_instalations(db, user, devices):
             "device_id": device.id,
             "ip_address": ip_list[devices.index(device) % len(ip_list)]
         }, actor=user)
-    print(f"[SEED] Instalations criados")
+    print(f"[SEED] Installations criados")
 
 def create_kitchens(db, user):
     repo = KitchenRepository(db)
     kitchens_data = [
-        {"name": "Cozinha Teste", "shaker_pin_id": 1, "pump_pin_id": 2, "scale_pin_id": 3, "product_pin_id": 4},
-        {"name": "Cozinha Teste 2", "shaker_pin_id": 5, "pump_pin_id": 6, "scale_pin_id": 7, "product_pin_id": 8},
+        {"name": "Cozinha Teste", "shaker_pin_id": 1, "pump_pin_id": 2, "scale_pin_id": 3},
+        {"name": "Cozinha Teste 2", "shaker_pin_id": 5, "pump_pin_id": 6, "scale_pin_id": 7},
     ]
     for data in kitchens_data:
         repo.save(data, actor=user)
@@ -162,7 +162,7 @@ def seed():
         point_type = create_hardware_point_type(db, user)
         template = create_hardware_connection_template(db, user)
         devices = create_hardware_devices(db, user, hw_kind, balanca_kind, point_type, template)
-        create_instalations(db, user, devices)
+        create_installations(db, user, devices)
         create_kitchens(db, user)
 
         db.commit()
@@ -178,4 +178,4 @@ def seed():
 if __name__ == "__main__":
     reset_database()
     seed()
-    stamp_alembic_head()
+    #stamp_alembic_head()

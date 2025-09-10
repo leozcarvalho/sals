@@ -8,7 +8,6 @@ class KitchenBase(BaseModel):
     shaker_pin_id: int
     pump_pin_id: int
     scale_pin_id: int
-    product_pin_id: int
 
 
 class KitchenCreate(KitchenBase):
@@ -21,7 +20,6 @@ class Kitchen(KitchenBase, GlobalFields):
     shaker_pin: DevicePin
     pump_pin: DevicePin
     scale_pin: DevicePin
-    product_pin: DevicePin
 
 class KitchenFilter(BaseFilter):
     kind: Optional[str] = None

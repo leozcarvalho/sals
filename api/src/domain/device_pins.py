@@ -7,7 +7,7 @@ class DevicePin(Base, table=True):
     __tablename__ = "device_pins"
 
     # Relação com o dispositivo
-    instalation_id: int = Field(foreign_key="instalations.id", nullable=False)
+    instalation_id: int = Field(foreign_key="installations.id", nullable=False)
 
     # Identificação do pino
     number: int = Field(nullable=False)  # ex: 1, 2, 3...
@@ -20,4 +20,4 @@ class DevicePin(Base, table=True):
     activation_color: Optional[str] = Field(default=None, max_length=20)  # ex: "#FF0000"
 
     # Relacionamento inverso
-    device: Optional["Instalation"] = Relationship(back_populates="pins")
+    device: Optional["Installation"] = Relationship(back_populates="pins")
