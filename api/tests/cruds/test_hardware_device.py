@@ -1,6 +1,5 @@
 import pytest
 from tests.fixtures.hardware_device_fixture import create_hardware_device, HARDWARE_DEVICE, hardware_device_repository
-from src.resources import exceptions as exc
 
 def test_create_hardware_device(hardware_device_repository, create_hardware_device, actor):
     hardware_device = create_hardware_device(name="Dispositivo de Teste")

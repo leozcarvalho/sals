@@ -55,3 +55,7 @@ dmypy.json
 .pytest_cache/
 data/*.sqlite
 *.sqlite
+
+#coverage
+.coverage
+.coverage.*

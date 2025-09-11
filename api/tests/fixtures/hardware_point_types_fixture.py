@@ -11,7 +11,7 @@ HARDWARE_POINT_TYPE = HardwarePointTypeCreate(
     kind="bit",
 )
 
-@pytest.fixture()
+@pytest.fixture
 def create_hardware_point_type(hardware_point_type_repository: HardwarePointTypeRepository, actor):
     def _create_hardware_point_type(**overrides):
         hardware_point_type_dict = HARDWARE_POINT_TYPE.model_dump()

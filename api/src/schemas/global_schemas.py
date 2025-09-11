@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from decimal import *
 import re
 
-from pydantic.main import BaseModel
+from pydantic.main import BaseModel, ConfigDict
 from pydantic import ValidationError, validator, constr, Json
 from pydantic.networks import EmailStr
 from typing import Optional, List
@@ -11,14 +11,13 @@ from typing import Optional, List
 class GlobalFields(BaseModel):
     id: int
     created_by: Optional[str]
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(UTC)
     created_at_l: Optional[str] = None
     updated_by: Optional[str]
-    updated_at: datetime = datetime.utcnow()
+    updated_at: datetime = datetime.now(UTC)
     updated_at_l: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Pagination(BaseModel):

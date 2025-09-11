@@ -14,7 +14,7 @@ USER = UserCreate(
     profile_id=1
 )
 
-@pytest.fixture()
+@pytest.fixture
 def create_user(user_repository: UsersRepository, actor):
     def _create_user(**overrides):
         user_dict = USER.model_dump()

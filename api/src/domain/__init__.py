@@ -31,4 +31,4 @@ __all__ = [
 ]
 
 for model_name in __all__:
-    globals()[model_name].update_forward_refs()
+    globals()[model_name].model_rebuild()

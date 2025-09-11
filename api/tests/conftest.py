@@ -2,9 +2,10 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from api.src import domain
-from api.src.cruds.users import UsersRepository
 from sqlmodel import SQLModel
+from src import domain
+from src.cruds.users import UsersRepository
+from tests.fixtures.user_fixture import USER
 
 @pytest.fixture(scope="session")
 def engine():
@@ -23,9 +24,9 @@ def session(engine):
         db.rollback()
         db.close()
 
-from tests.fixtures.user_fixtures import USER
 @pytest.fixture
 def actor(session):
-    user_dict = USER.dict()
+    user_dict = USER.model_dump()
+    user_dict['email'] = "test@admin.com"
     repo = UsersRepository(session)
     return repo.save(user_dict)

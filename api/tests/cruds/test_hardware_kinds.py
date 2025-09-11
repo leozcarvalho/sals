@@ -1,7 +1,6 @@
 import pytest
 from tests.fixtures.hardware_kind_fixture import create_hardware_kind, hardware_kind_repository
-from src.schemas.hardware_kind import HardwareKind
-from src.resources import exceptions as exc
+from src.domain import exceptions as exc
 
 def test_create_hardware_kind(create_hardware_kind):
     hw_kind = create_hardware_kind(kind="Sensor Teste")

@@ -50,5 +50,5 @@ async def handle_domain_exceptions(request: Request, call_next):
         )
 
 @app.get("/")
-async def root():
+def root():
     return {"message": "API rodando 🚀"}

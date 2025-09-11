@@ -1,10 +1,9 @@
 import pytest
 from tests.fixtures.hardware_connection_template_fixture import hardware_connection_template_repository, create_hardware_connection_template, HARDWARE_CONNECTION_TEMPLATE
-from src.resources import exceptions as exc
 
 def test_create_hardware_connection_template(hardware_connection_template_repository, actor):
-    hw_template = HARDWARE_CONNECTION_TEMPLATE.copy()
-    created_template = hardware_connection_template_repository.save(hw_template.dict(), actor=actor)
+    hw_template = HARDWARE_CONNECTION_TEMPLATE.model_copy()
+    created_template = hardware_connection_template_repository.save(hw_template.model_dump(), actor=actor)
     assert created_template.id is not None
     assert created_template.name == hw_template.name
 

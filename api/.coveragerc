@@ -1,0 +1,11 @@
+[run]
+parallel = true
+relative_files = true
+source = 
+    src
+omit = 
+    */schemas/*
+    */__init__.py
+
+[xml]
+    package_depth = 0

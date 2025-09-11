@@ -1,7 +1,7 @@
 import pytest
-from .hardware_kind_fixture import create_hardware_kind
-from .hardware_point_types_fixture import create_hardware_point_type
-from tests.fixtures.hardware_connection_template_fixture import create_hardware_connection_template
+from tests.fixtures.hardware_point_types_fixture import hardware_point_type_repository, HARDWARE_POINT_TYPE, create_hardware_point_type
+from tests.fixtures.hardware_connection_template_fixture import hardware_connection_template_repository, HARDWARE_CONNECTION_TEMPLATE, create_hardware_connection_template
+#from tests.fixtures.hardware_kind_fixture import hardware_kind_repository, HARDWARE_KIND, create_hardware_kind
 
 from src.cruds.hardware_device import HardwareDeviceRepository
 from src.schemas.hardware_device import HardwareDeviceCreate
@@ -18,9 +18,18 @@ HARDWARE_DEVICE = HardwareDeviceCreate(
     svg_template="<svg></svg>"
 )
 
-@pytest.fixture()
-def create_hardware_device(hardware_device_repository: HardwareDeviceRepository, actor):
+@pytest.fixture
+def create_hardware_device(
+    hardware_device_repository: HardwareDeviceRepository,
+    create_hardware_kind,
+    create_hardware_connection_template,
+    create_hardware_point_type,
+    actor
+):
     def _create_hardware_device(**overrides):
+        create_hardware_kind()
+        create_hardware_connection_template()
+        create_hardware_point_type()
         hardware_device_dict = HARDWARE_DEVICE.model_dump()
         hardware_device_dict.update(overrides)
         hardware_device = HardwareDeviceCreate(**hardware_device_dict)

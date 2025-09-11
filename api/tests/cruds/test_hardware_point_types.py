@@ -1,6 +1,5 @@
 import pytest
 from tests.fixtures.hardware_point_types_fixture import hardware_point_type_repository, create_hardware_point_type
-from src.resources import exceptions as exc
 
 def test_create_hardware_point_type(create_hardware_point_type):
     hw_point_type = create_hardware_point_type(points_quantity=32, kind="bits")

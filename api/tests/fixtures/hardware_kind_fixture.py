@@ -7,10 +7,10 @@ def hardware_kind_repository(session) -> HardwareKindRepository:
     return HardwareKindRepository(session)
 
 HARDWARE_KIND = HardwareKindBase(
-        kind="Saída Digital",
-    )
+    kind="Saída Digital",
+)
 
-@pytest.fixture()
+@pytest.fixture
 def create_hardware_kind(hardware_kind_repository: HardwareKindRepository, actor):
     def _create_hardware_kind(**overrides):
         hardware_kind_dict = HARDWARE_KIND.model_dump()

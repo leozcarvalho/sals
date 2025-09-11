@@ -35,7 +35,7 @@ class BaseRouter(Generic[ReadSchemaType, CreateSchemaType, UpdateSchemaType]):
     def _add_routes(self):
         @self.router.post("", response_model=ApiResponse[self.read_schema])
         def create(data: self.create_schema, service: Repository = Depends(self.get_service), current_user: UserBase = Depends(self.get_current_user)):
-            obj = service.save(data.dict(), actor=current_user)
+            obj = service.save(data.model_dump(), actor=current_user)
             return ApiResponse(success=True, data=obj, error=None)
 
         @self.router.get("", response_model=ApiResponse[ApiResponseList[self.read_schema]])
@@ -54,7 +54,7 @@ class BaseRouter(Generic[ReadSchemaType, CreateSchemaType, UpdateSchemaType]):
 
         @self.router.put("/{item_id}", response_model=ApiResponse[self.read_schema])
         def update(item_id: int, data: self.update_schema, service: Repository = Depends(self.get_service), current_user: UserBase = Depends(self.get_current_user)):
-            obj = service.update(item_id, data.dict(exclude_unset=True), actor=current_user)
+            obj = service.update(item_id, data.model_dump(exclude_unset=True), actor=current_user)
             return ApiResponse(success=True, data=obj, error=None)
 
         @self.router.delete("/{item_id}", response_model=ApiResponse[self.read_schema])

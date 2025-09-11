@@ -1,6 +1,6 @@
 from typing import List
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, asc, desc, text
+from sqlalchemy import and_, or_, asc, desc, text, true
 from src.domain import exceptions as exc
 
 class Repository:
@@ -98,7 +98,7 @@ class Repository:
                     # Se o valor for diretamente passado, assume-se igualdade (eq)
                     condition = value if isinstance(value, dict) else {'op': 'eq', 'value': value}
                     conditions.append(self._apply_condition(key, condition))
-        return query.filter(and_(*conditions))
+        return query.filter(and_(*conditions) if conditions else true())
 
     def _apply_condition(self, attr: str, condition: dict):
         """
@@ -159,17 +159,5 @@ class Repository:
     def get_columns(self):
         return self.model.__table__.columns.keys()
 
-    def parse_obj_dict(self, obj):
-        obj_dict = {}
-        for attr in dir(obj):
-            if not attr.startswith("_"):
-                try:
-                    value = getattr(obj, attr)
-                    if not callable(value):
-                        obj_dict[attr] = value
-                except AttributeError: # pragma: no cover
-                    pass
-        return obj_dict
-    
     def commit(self):
         self.db_session.commit()
