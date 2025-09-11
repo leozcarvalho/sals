@@ -5,6 +5,7 @@ from src.routers.base_router import BaseRouter
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
 from src.schemas.api_response import ApiResponse
+from src.domain.permissions import PermissionEnum
 
 def get_user_service(session = Depends(get_session)):
     return UsersRepository(session)
@@ -17,7 +18,8 @@ router_user = BaseRouter(
     filter_schema=UserFilter,
     get_service=get_user_service,
     get_current_user=get_current_user,
-    tags=["Users"]
+    tags=["Users"],
+    default_permission=PermissionEnum.MANAGE_USER,
 )
 
 

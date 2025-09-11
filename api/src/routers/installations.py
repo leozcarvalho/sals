@@ -7,6 +7,7 @@ from src.schemas.api_response import ApiResponse
 from src.schemas.users import UserBase
 from src.cruds.installations import InstallationRepository
 from src.routers.base_router import BaseRouter
+from src.domain.permissions import PermissionEnum
 
 def get_installation_service(session=Depends(get_session)):
     return InstallationRepository(session)
@@ -19,7 +20,8 @@ router_installations = BaseRouter(
     filter_schema=InstallationFilter,
     get_service=get_installation_service,
     get_current_user=get_current_user,
-    tags=["Instalações"]
+    tags=["Instalações"],
+    default_permission=PermissionEnum.MANAGE_INSTALLATION,
 )
 
 @router_installations.router.post("/{installation_id}/health-check")

@@ -12,3 +12,6 @@ class InvalidData(Exception):
  
 class ConnectionError(Exception):
     pass
+
+class Forbidden(Exception):
+    pass

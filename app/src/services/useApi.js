@@ -13,14 +13,26 @@ export function createApi() {
   api.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response?.status === 401) {
+      const status = error.response?.status;
+      const currentPath = window.location.pathname;
+
+      if (status === 401) {
         const userStore = useUserStore();
         userStore.logout();
-        router.push({ name: "auth-signin" });
+        if (currentPath !== '/login' && currentPath !== '/') {
+          window.location.href = '/login';
+        }
+      } else if (status === 403) {
+        // Redireciona para página de erro / acesso negado
+        if (currentPath !== '/errors/403') {
+          window.location.href = '/errors/403';
+        }
       }
+
       return Promise.reject(error);
     }
   );
+
   return api;
 }
 

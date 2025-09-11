@@ -1,5 +1,3 @@
-import hashlib
-
 from sqlalchemy.orm import Session
 from src.domain import User
 from src.cruds.repo import Repository

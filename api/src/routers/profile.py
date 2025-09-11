@@ -5,6 +5,7 @@ from src.schemas.api_response import ApiResponse
 from src.cruds.profile import ProfileRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
+from src.domain.permissions import PermissionEnum
 
 def get_profile_service(session = Depends(get_session)):
     return ProfileRepository(session)
@@ -17,10 +18,12 @@ router_profiles = BaseRouter(
     filter_schema=ProfileFilter,
     get_service=get_profile_service,
     get_current_user=get_current_user,
-    tags=["Profiles"]
+    tags=["Profiles"],
+    default_permission=PermissionEnum.MANAGE_PROFILE,
 )
 
 @router_profiles.router.get("/permissions/all", summary="List all available permissions")
 def list_permissions(service: ProfileRepository = Depends(get_profile_service), current_user = Depends(get_current_user)):
+    router_profiles._check_permission(current_user, "list")
     permissions = service.get_permissions()
     return ApiResponse(success=True, error=None, data=permissions)

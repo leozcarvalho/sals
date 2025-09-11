@@ -12,8 +12,7 @@ userApi.auth = async (email, password) => {
     const response = await api.post("/login", formData);
     return response.data;
   } catch (error) {
-    console.log("response error", error)
-    return error;
+    return error.response;
   }
 };
 

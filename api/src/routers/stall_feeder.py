@@ -4,7 +4,7 @@ from src.schemas.stall_feeder import StallFeeder, StallFeederCreate, StallFeeder
 from src.cruds.stall_feeder import StallFeederRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
-
+from src.domain.permissions import PermissionEnum
 
 def get_stall_feeder_service(session = Depends(get_session)):
     return StallFeederRepository(session)
@@ -17,5 +17,6 @@ router_stall_feeders = BaseRouter(
     filter_schema=StallFeederFilter,
     get_service=get_stall_feeder_service,
     get_current_user=get_current_user,
-    tags=["Stall Feeders"]
+    tags=["Stall Feeders"],
+    default_permission=PermissionEnum.MANAGE_STALL_FEEDER,
 )

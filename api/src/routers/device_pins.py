@@ -5,6 +5,7 @@ from src.cruds.device_pins import DevicePinRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
 from src.schemas.api_response import ApiResponse
+from src.domain.permissions import PermissionEnum
 
 def get_device_pin_service(session = Depends(get_session)):
     return DevicePinRepository(session)
@@ -17,7 +18,8 @@ router_device_pins = BaseRouter(
     filter_schema=DevicePinFilter,
     get_service=get_device_pin_service,
     get_current_user=get_current_user,
-    tags=["Device Pins"]
+    tags=["Device Pins"],
+    default_permission=PermissionEnum.MANAGE_DEVICE_PIN,
 )
 
 

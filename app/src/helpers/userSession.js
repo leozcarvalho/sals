@@ -1,10 +1,5 @@
 import { useUserStore } from "../stores/userStore";
 
-export const isLoggedIn = () => {
-  const userStore = useUserStore();
-  return Boolean(userStore.accessToken);
-}
-
 export const logout = () => {
   const userStore = useUserStore();
   userStore.logout();

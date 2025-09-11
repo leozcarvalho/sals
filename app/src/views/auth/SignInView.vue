@@ -33,7 +33,6 @@ const rules = computed(() => {
   };
 });
 
-// Use vuelidate
 const v$ = useVuelidate(rules, state);
 
 async function onSubmit() {
@@ -43,16 +42,10 @@ async function onSubmit() {
     return;
   }
   loader.value.loaderOn()
-  try {
-    const res = await userApi.auth(state.username, state.password);
-    handleApiToast(res, "Login efetuado com sucesso!");
-    if (res.success) router.push({ name: "home" });
-  } catch (err) {
-    console.error(err);
-    handleApiToast({ success: false, message: "Erro no login." });
-  } finally {
-    loader.value.loaderOff()
-  }
+  const res = await userApi.auth(state.username, state.password);
+  handleApiToast(res, "Login efetuado com sucesso!");
+  loader.value.loaderOff();
+  if (res.success) router.push({ name: "home" });
 }
 
 const togglePasswordVisibility = () => {

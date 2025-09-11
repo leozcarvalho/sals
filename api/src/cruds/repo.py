@@ -2,6 +2,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, asc, desc, text, true
 from src.domain import exceptions as exc
+from src.domain.permissions import PermissionEnum
 
 class Repository:
     def __init__(self, model, db_session: Session):

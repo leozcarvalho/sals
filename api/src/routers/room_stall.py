@@ -4,7 +4,7 @@ from src.schemas.room_stall import RoomStall, RoomStallCreate, RoomStallUpdate, 
 from src.cruds.room_stall import RoomStallRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
-
+from src.domain.permissions import PermissionEnum
 
 def get_room_stall_service(session = Depends(get_session)):
     return RoomStallRepository(session)
@@ -17,5 +17,6 @@ router_room_stalls = BaseRouter(
     filter_schema=RoomStallFilter,
     get_service=get_room_stall_service,
     get_current_user=get_current_user,
-    tags=["Room Stalls"]
+    tags=["Room Stalls"],
+    default_permission=PermissionEnum.MANAGE_SHED_ROOM,
 )

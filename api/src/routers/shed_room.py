@@ -4,6 +4,7 @@ from src.schemas.shed_room import ShedRoom, ShedRoomCreate, ShedRoomUpdate, Shed
 from src.cruds.shed_room import ShedRoomRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
+from src.domain.permissions import PermissionEnum
 
 
 def get_shed_room_service(session = Depends(get_session)):
@@ -17,5 +18,6 @@ router_shed_rooms = BaseRouter(
     filter_schema=ShedRoomFilter,
     get_service=get_shed_room_service,
     get_current_user=get_current_user,
-    tags=["Shed Rooms"]
+    tags=["Shed Rooms"],
+    default_permission=PermissionEnum.MANAGE_SHED_ROOM,
 )

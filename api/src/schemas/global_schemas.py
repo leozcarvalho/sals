@@ -42,7 +42,7 @@ class Message(BaseModel):
 
 class BaseFilter(BaseModel):
     skip: Optional[int] = 0
-    limit: Optional[int] = 10
+    limit: Optional[int] = None
     order_by: Optional[str] = 'id'
     order_desc: Optional[bool] = False
 

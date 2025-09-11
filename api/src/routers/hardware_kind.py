@@ -4,7 +4,7 @@ from src.schemas.hardware_kind import HardwareKindCreate, HardwareKindUpdate, Ha
 from src.cruds.hardware_kind import HardwareKindRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
-
+from src.domain.permissions import PermissionEnum
 
 def get_hardware_kind_service(session = Depends(get_session)):
     return HardwareKindRepository(session)
@@ -17,5 +17,6 @@ router_hardware_kinds = BaseRouter(
     filter_schema=HardwareKindFilter,
     get_service=get_hardware_kind_service,
     get_current_user=get_current_user,
-    tags=["Hardware Kinds"]
+    tags=["Hardware Kinds"],
+    default_permission=PermissionEnum.MANAGE_HARDWARE_KIND,
 )
