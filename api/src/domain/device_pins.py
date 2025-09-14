@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from src.domain.base import Base
 
@@ -7,7 +7,7 @@ class DevicePin(Base, table=True):
     __tablename__ = "device_pins"
 
     # Relação com o dispositivo
-    instalation_id: int = Field(foreign_key="installations.id", nullable=False)
+    installation_id: int = Field(foreign_key="installations.id", nullable=False)
 
     # Identificação do pino
     number: int = Field(nullable=False)  # ex: 1, 2, 3...
@@ -19,5 +19,9 @@ class DevicePin(Base, table=True):
     svg_region_id: Optional[str] = Field(default=None, max_length=100)
     activation_color: Optional[str] = Field(default=None, max_length=20)  # ex: "#FF0000"
 
-    # Relacionamento inverso
-    device: Optional["Installation"] = Relationship(back_populates="pins")
+    installation: Optional["Installation"] = Relationship(
+        back_populates="pins",
+        sa_relationship_kwargs={"lazy": "selectin"}  # evita cartesian product
+    )
+
+    kitchen_products: List["KitchenProduct"] = Relationship(back_populates="device_pin")

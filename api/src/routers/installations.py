@@ -30,8 +30,8 @@ def health_check(installation_id: int, service: InstallationRepository = Depends
     return ApiResponse(success=True)
 
 @router_installations.router.post("/{installation_id}/restart")
-def restart_device(instalation_id: int, service: InstallationRepository = Depends(get_installation_service), current_user: UserBase = Depends(get_current_user)):
-    service.restart_device(instalation_id, current_user)
+def restart_device(installation_id: int, service: InstallationRepository = Depends(get_installation_service), current_user: UserBase = Depends(get_current_user)):
+    service.restart_device(installation_id, current_user)
     return ApiResponse(success=True)
 
 @router_installations.router.post("/{installation_id}/toggle-pin/{pin_number}")

@@ -3,20 +3,20 @@ from src.cruds.repo import Repository
 from src.domain import Kitchen, FeederValve
 from sqlalchemy import or_, exists, select, case
 from src.domain import exceptions as exc
-from src.domain import (DevicePin, Shed, Installation)
+from src.domain import (DevicePin, ShedRoom, Installation, KitchenProduct)
 from src.schemas.device_pins import DevicePin as DevicePinSchema
 
 class DevicePinRepository(Repository):
     def __init__(self, session: Session):
         super().__init__(DevicePin, session)
 
-    def get_pins_binary_and_decimal(self, instalation_id: int):
+    def get_pins_binary_and_decimal(self, installation_id: int):
         """
         pins: lista de objetos DevicePin
         total_bits: número total de bits da placa (32)
         retorna: (decimal_value, binary_string)
         """
-        pins = self.get_list(filters={"instalation_id": instalation_id}, limit=10000)
+        pins = self.get_list(filters={"installation_id": installation_id})
         total_bits = len(pins)
         decimal_value = 0
         # inicializa string binária com zeros
@@ -45,9 +45,9 @@ class DevicePinRepository(Repository):
         pin = self.check_exists(id, actor)
         new_state = not pin.is_active
         return self.update(id, {"is_active": new_state}, actor)
-    
-    def deactivate_all_pins(self, instalation_id: int, actor=None):
-        pins = self.get_list(filters={"instalation_id": instalation_id}, limit=10000)
+
+    def deactivate_all_pins(self, installation_id: int, actor=None):
+        pins = self.get_list(filters={"installation_id": installation_id})
         for pin in pins:
             self.update(pin.id, {"is_active": False}, actor)
         return True
@@ -62,31 +62,33 @@ class DevicePinRepository(Repository):
         )
         feeder_subq = select(FeederValve.id).where(FeederValve.device_pin_id == DevicePin.id)
 
-        shed_subq = select(Shed.id).where(Shed.entrance_pin_id == DevicePin.id)
+        room_subq = select(ShedRoom.id).where(ShedRoom.entrance_pin_id == DevicePin.id)
 
-        return kitchen_subq, feeder_subq, shed_subq
+        kitchen_product_subq = select(KitchenProduct.id).where(KitchenProduct.device_pin_id == DevicePin.id)
+
+        return kitchen_subq, feeder_subq, room_subq, kitchen_product_subq
 
     def build_filter(self, query, filters = {}):
         # Pega o filtro in_use
         in_use_filter = filters.pop("in_use", None) if filters else None
 
-        kitchen_subq, feeder_subq, shed_subq = self._get_in_use_subqueries()
+        kitchen_subq, feeder_subq, shed_subq, kitchen_product_subq = self._get_in_use_subqueries()
         if in_use_filter is not None:
             if in_use_filter:
-                query = query.filter(exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq))
+                query = query.filter(exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq) | exists(kitchen_product_subq))
             else:
-                query = query.filter(~(exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq)))
+                query = query.filter(~(exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq) | exists(kitchen_product_subq)))
 
         # Chama o super para aplicar outros filtros
         return super().build_filter(query, filters)
 
     def build_query(self):
         query = self.db_session.query(DevicePin)
-        kitchen_subq, feeder_subq, shed_subq = self._get_in_use_subqueries()
+        kitchen_subq, feeder_subq, shed_subq, kitchen_product_subq = self._get_in_use_subqueries()
         query = self.db_session.query(
             DevicePin,
             case(
-                (exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq), True),
+                (exists(kitchen_subq) | exists(feeder_subq) | exists(shed_subq) | exists(kitchen_product_subq), True),
                 else_=False
             ).label("in_use"),
             Installation.name.label("installation_name"),
@@ -105,10 +107,10 @@ class DevicePinRepository(Repository):
         Retorna None se não estiver sendo usado.
         """
 
-        # Shed
-        shed = self.db_session.query(Shed).filter(Shed.entrance_pin_id == pin_id).first()
-        if shed:
-            return f"entrada do galpão {shed.name}"
+        # Room
+        room = self.db_session.query(ShedRoom).filter(ShedRoom.entrance_pin_id == pin_id).first()
+        if room:
+            return f"entrada da sala {room.name}"
 
         # Kitchen
         kitchen = self.db_session.query(Kitchen).filter(Kitchen.shaker_pin_id == pin_id).first()
@@ -118,6 +120,7 @@ class DevicePinRepository(Repository):
         kitchen = self.db_session.query(Kitchen).filter(Kitchen.pump_pin_id == pin_id).first()
         if kitchen:
             return f"bomba da cozinha {kitchen.name}"
+
         kitchen = self.db_session.query(Kitchen).filter(Kitchen.scale_pin_id == pin_id).first()
         if kitchen:
             return f"balança da cozinha {kitchen.name}"
@@ -140,7 +143,7 @@ class DevicePinRepository(Repository):
         results = self.get_list()
         grouped = {}
         for pin in results:
-            board = pin.instalation_name if pin.instalation_name else f"Instalação {pin.instalation_id}"
+            board = pin.installation_name if pin.installation_name else f"Instalação {pin.installation_id}"
             if board not in grouped:
                 grouped[board] = []
             grouped[board].append({

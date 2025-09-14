@@ -1,6 +1,7 @@
 from typing import Optional, List
 from sqlmodel import Field, Relationship
 from src.domain.base import Base
+from pydantic import computed_field
 
 class Installation(Base, table=True):
     __tablename__ = "installations"
@@ -10,10 +11,24 @@ class Installation(Base, table=True):
     last_seen: Optional[str] = Field(default=None)
     is_online: bool = Field(default=False, nullable=False)
     device_id: int = Field(foreign_key="devices.id", nullable=False)
-    
 
     device: Optional["Device"] = Relationship(back_populates="installations")
     pins: List["DevicePin"] = Relationship(
-        back_populates="device",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+        back_populates="installation",
+        sa_relationship_kwargs={"lazy": "selectin"}
     )
+
+    @computed_field
+    @property
+    def binary_value(self) -> str:
+        if not self.pins:
+            return "0"
+        return "".join(
+            "1" if pin.is_active else "0"
+            for pin in sorted(self.pins, key=lambda p: p.number)
+        )
+
+    @computed_field
+    @property
+    def decimal_value(self) -> int:
+        return int(self.binary_value, 2)

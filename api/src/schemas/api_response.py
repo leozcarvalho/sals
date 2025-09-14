@@ -6,7 +6,7 @@ T = TypeVar("T")
 class ApiResponse(BaseModel, Generic[T]):
     success: bool
     data: Optional[T] = None
-    error: Optional[str]
+    error: Optional[str] = None
 
 class ApiResponseList(BaseModel, Generic[T]):
     count: int

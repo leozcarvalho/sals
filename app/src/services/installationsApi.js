@@ -2,7 +2,7 @@ import { ApiClient } from './genericApi'
 
 class InstallationClient extends ApiClient {
   constructor() {
-    super("/installations"); // chama o construtor da classe pai
+    super("/installations");
   }
 
   async healthCheck(id) {

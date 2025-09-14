@@ -15,7 +15,10 @@ case "$1" in
     echo "⬆️  Rodando upgrade no banco..."
     alembic upgrade head
     ;;
-
+  seed)
+    echo "🌱 Populando o banco de dados com dados iniciais..."
+    docker compose run --rm api python -m src.scripts.seed
+    ;;
   downgrade)
     if [ -z "$2" ]; then
       echo "❌ Informe uma versão para dar downgrade"
@@ -25,7 +28,6 @@ case "$1" in
     echo "⬇️  Fazendo downgrade para $2"
     alembic downgrade "$2"
     ;;
-  
   script)
     if [ -z "$2" ]; then
       echo "❌ Informe o caminho do script"

@@ -63,15 +63,6 @@ class ApiClient {
     link.click();
     document.body.removeChild(link);
   }
-
-  async deleteFile(fileId) {
-    try {
-      const response = await this.api.delete(`/s3/${fileId}`);
-      return response;
-    } catch (error) {
-      return error.response;
-    }
-  }
 }
 
 export { ApiClient };

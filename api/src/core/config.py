@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DB_URL_TEST: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    ENVIRONMENT: str = "development"
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -10,7 +10,6 @@ INSTALLATION = InstallationBase(
     device_id=1
 )
 
-@pytest.fixture()
 def create_installation(session, actor=None, **overrides):
     repo = InstallationRepository(session)
     installation = INSTALLATION.model_dump()

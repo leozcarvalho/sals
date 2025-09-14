@@ -12,6 +12,7 @@ from .shed import Shed
 from .shed_room import ShedRoom
 from .room_stall import RoomStall
 from .stall_feeder import StallFeeder
+from .kitchen_products import KitchenProduct
 
 __all__ = [
     "Profile",
@@ -28,6 +29,7 @@ __all__ = [
     "ShedRoom",
     "RoomStall",
     "StallFeeder",
+    "KitchenProduct",
 ]
 
 for model_name in __all__:

@@ -37,7 +37,6 @@ const ensureInitialState = (forNew = false) => {
 
     // Se for criação (forNew=true), ignora modelValue
     if (!forNew && props.modelValue?.hasOwnProperty(key)) {
-      console.log("set", key, props.modelValue[key]);
       form[key] = props.modelValue[key];
     } else if (f.hasOwnProperty("default")) {
       form[key] = typeof f.default === "function" ? f.default() : f.default;
@@ -252,7 +251,7 @@ const closeModal = () => {
     <div class="modal-dialog modal-dialog-centered modal-dialog-popin" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ title  }}</h5>
+          <h5 class="modal-title">{{ form[props.idField] ? 'Editar' : 'Criar' }}</h5>
           <button type="button" class="btn-close" @click="closeModal"></button>
         </div>
 

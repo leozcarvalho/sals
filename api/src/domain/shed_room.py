@@ -7,6 +7,8 @@ class ShedRoom(Base, table=True):
 
     name: str = Field(nullable=False, max_length=100)
     shed_id: int = Field(foreign_key="sheds.id", nullable=False)
+    entrance_pin_id: int = Field(foreign_key="device_pins.id", nullable=True)
 
     shed: Optional["Shed"] = Relationship(back_populates="rooms")
     stalls: List["RoomStall"] = Relationship(back_populates="room")
+    entrance_pin: Optional["DevicePin"] = Relationship()

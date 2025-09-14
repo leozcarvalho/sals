@@ -186,7 +186,16 @@ const addValve = async (feederId, pinId) => {
 
     <!-- Modal único -->
     <BaseModalForm ref="modalForm" v-model="modalData.entity"
-      :fields="[{ name: 'name', label: 'Nome', type: 'text', rules: 'required' }]"
+      :fields="
+          modalData.type === 'room'
+            ? [
+                { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
+                { name: 'entrance_pin_id', label: 'Pino de Entrada', component: PinSelect }
+              ]
+            : [
+                { name: 'name', label: 'Nome', type: 'text', rules: 'required' }
+              ]
+        "
       :api="modalData.type === 'room' ? roomsApi : modalData.type === 'stall' ? stallsApi : feedersApi" :extra-payload="modalData.type === 'room'
           ? { shed_id: modalData.parentId }
           : modalData.type === 'stall'

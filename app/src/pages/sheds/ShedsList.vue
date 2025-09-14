@@ -13,7 +13,6 @@ const baseList = ref(null);
 const cols = reactive([
   { name: "#", field: "id", sort: "" },
   { name: "Nome", field: "name", sort: "" },
-  { name: "Pino de Entrada", field: "entrance_pin_id", sort: "" },
 ]);
 
 const filter = reactive({
@@ -36,7 +35,6 @@ const modalForm = ref(null);
     v-model="shedSelected"
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-      { name: 'entrance_pin_id', label: 'Pino de Entrada', component: PinSelect },
     ]"
     :api="shedsApi"
     @saved="onshedSaved"
@@ -72,13 +70,6 @@ const modalForm = ref(null);
         </div>
       </div>
     </template>
-
-    <template #cell-entrance_pin_id="{ row, col }">
-      <span>
-        {{ row.entrance_pin ? row.entrance_pin.name : 'N/A' }}
-      </span>
-    </template>
-
     <!-- Ações de Linha -->
     <template #row-actions="{ row }">
       <button class="btn btn-sm btn-primary text-white" @click="$router.push({ name: 'shed', query: { id: row.id } })">

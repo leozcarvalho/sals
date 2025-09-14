@@ -11,7 +11,7 @@ class DevicePinBase(BaseModel):
 
 class DevicePinCreate(DevicePinBase):
     number: int
-    instalation_id: int
+    installation_id: int
 
 class DevicePinUpdate(DevicePinBase):
     pass
@@ -19,12 +19,12 @@ class DevicePinUpdate(DevicePinBase):
 class DevicePin(DevicePinCreate, GlobalFields):
     is_active: bool
     in_use: Optional[bool] = False
-    instalation_name: Optional[str] = None
+    installation_name: Optional[str] = None
 
 
 class DevicePinFilter(BaseFilter):
     name: Optional[str] = None
-    instalation_id: Optional[int] = None
+    installation_id: Optional[int] = None
     number: Optional[int] = None
     is_active: Optional[bool] = None
     mode: Optional[str] = None

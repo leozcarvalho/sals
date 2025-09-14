@@ -11,8 +11,8 @@ class Kitchen(Base, table=True):
     shaker_pin_id: int = Field(foreign_key="device_pins.id", nullable=False)
     pump_pin_id: int = Field(foreign_key="device_pins.id", nullable=False)
     scale_pin_id: int = Field(foreign_key="device_pins.id", nullable=False)
-    #TODO: PRODUTO é 1 pra N
 
     shaker_pin: Optional["DevicePin"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Kitchen.shaker_pin_id]"})
     pump_pin: Optional["DevicePin"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Kitchen.pump_pin_id]"})
     scale_pin: Optional["DevicePin"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Kitchen.scale_pin_id]"})
+    products: Optional[list["KitchenProduct"]] = Relationship(back_populates="kitchen", sa_relationship_kwargs={"lazy": "selectin"})
