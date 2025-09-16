@@ -35,7 +35,7 @@ case "$1" in
       exit 1
     fi
     echo "📜 Executando script: $2"
-    python -m src.scripts."$2"
+    docker compose run --rm api python3 -m src.scripts."$2"
     ;;
 
   test)

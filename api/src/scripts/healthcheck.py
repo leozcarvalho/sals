@@ -5,15 +5,14 @@ from src.cruds.installations import InstallationRepository
 from src.cruds.healthcheck_priority import HealthcheckPriorityRepository
 from src.domain import User
 
-async def healthcheck_level(priority_data, actor_id):
+async def healthcheck_level(priority_data, actor):
     """
     Loop contínuo para um nível específico.
     priority_data: dict com keys id, level, interval_seconds
-    actor_id: ID do usuário sistema
+    actor: Usuário sistema
     """
     while True:
         with session_scope() as session:
-            actor = session.get(User, actor_id)
             installation_repo = InstallationRepository(session)
 
             installations = installation_repo.get_list(
@@ -36,17 +35,14 @@ async def healthcheck_level(priority_data, actor_id):
 async def main():
     with session_scope() as session:
         priority_repo = HealthcheckPriorityRepository(session)
-        actor = session.get(User, 1)  # Usuário sistema
-
-        # Carrega apenas os campos essenciais para não ter DetachedInstanceError
+        actor = session.get(User, 1)
         raw_priorities = priority_repo.get_list(order_by={"level": "asc"})
         priorities = [
             {"id": p.id, "level": p.level, "interval_seconds": p.interval_seconds}
             for p in raw_priorities
         ]
 
-    # Cria uma tarefa concorrente para cada nível
-    tasks = [healthcheck_level(priority, actor_id=1) for priority in priorities]
+    tasks = [healthcheck_level(priority, actor=actor) for priority in priorities]
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
