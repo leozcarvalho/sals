@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from src.routers import routers
 from src.schemas.api_response import ApiResponse
-from src.domain.exceptions import NotFound, Conflict, Unauthorized, InvalidData, Forbidden
+from src.domain.exceptions import NotFound, Conflict, Unauthorized, InvalidData, Forbidden, Timeout, ConnectionError
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -33,7 +33,8 @@ EXCEPTION_STATUS_MAP = {
     Unauthorized: 401,
     Forbidden: 403,
     InvalidData: 422,
-    ConnectionError: 503,
+    Timeout: 503,
+    ConnectionError: 502,
 }
 
 @app.middleware("http")
@@ -68,3 +69,8 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message": "API rodando 🚀"}
+
+@app.on_event("shutdown")
+def shutdown_event():
+    from src.cruds.installations import InstallationRepository
+    InstallationRepository.close_all_device_sessions()

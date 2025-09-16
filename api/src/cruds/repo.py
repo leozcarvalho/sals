@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, asc, desc, text, true
 from src.domain import exceptions as exc
 from src.domain.permissions import PermissionEnum
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 class Repository:
     def __init__(self, model, db_session: Session):
@@ -131,13 +132,16 @@ class Repository:
 
 
     def save(self, values: dict, actor=None):
-        if actor:
-            values['created_by'] = str(actor.id)
-            values['updated_by'] = str(actor.id)
-        obj = self.model(**values)
-        self.db_session.add(obj)
-        self.db_session.flush()
-        return obj
+        try:
+            if actor:
+                values['created_by'] = str(actor.id)
+                values['updated_by'] = str(actor.id)
+            obj = self.model(**values)
+            self.db_session.add(obj)
+            self.db_session.flush()
+            return obj
+        except IntegrityError as e:
+            raise exc.Conflict(f"Erro de integridade: {e.orig}")
 
     def update(self, id: int, values: dict, actor=None):
         obj = self.check_exists(id)

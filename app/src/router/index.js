@@ -34,6 +34,7 @@ const HardwareDevices = () => import("@/pages/hardware-device/HardwareDevice.vue
 const Installations = () => import("@/pages/installations/Installations.vue");
 const Installation = () => import("@/pages/installations/Installation.vue");
 const InstallationPinsConfig = () => import("@/pages/installations/InstallationPinsConfig.vue");
+const SettingsRoutines = () => import("@/pages/settings/Routines.vue");
 
 const Profiles = () => import("@/pages/profiles/Profiles.vue");
 
@@ -152,6 +153,18 @@ const routes = [
         component: InstallationPinsConfig,
       }
     ]
+  },
+  {
+    path: "/settings",
+    component: LayoutBackendBoxed,
+    children: [
+      {
+        path: "/routines",
+        name: "settings-routines",
+        meta: { requiresAuth: true },
+        component: SettingsRoutines,
+      },
+    ],
   },
 
 

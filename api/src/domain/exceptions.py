@@ -15,3 +15,6 @@ class ConnectionError(Exception):
 
 class Forbidden(Exception):
     pass
+
+class Timeout(Exception):
+    pass

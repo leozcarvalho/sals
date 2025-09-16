@@ -13,6 +13,7 @@ from .kitchen import router_kitchens
 from .feeder_valves import router_feeder_valves
 from .room_stall import router_room_stalls
 from .stall_feeder import router_stall_feeders
+from .healthcheck_priority import router_healthcheck_priorities
 
 routers = [
     auth_router,
@@ -30,4 +31,5 @@ routers = [
     router_room_stalls.router,
     router_feeder_valves.router,
     router_stall_feeders.router,
+    router_healthcheck_priorities.router,
 ]

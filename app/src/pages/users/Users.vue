@@ -65,7 +65,6 @@ const onUserSaved = () => {
       :cols="cols"
       :filter="filter"
       v-model:filter="filter"
-      :exportable="true"
       :can-create="false"
       :can-edit="false"
       :permission="'manage_user'"

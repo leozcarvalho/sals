@@ -29,5 +29,13 @@ export const baseMenu = [
       { name: "Pontos", to: "hardware-point-types", icon: "lightbulb", action: "manage_hardware_point_type" },
       { name: "Tipos de Hardware", to: "hardware-kinds", icon: "tools", action: "manage_hardware_kind" },
     ]
+  },
+  {
+    name: "Configurações",
+    icon: "cog",
+    sub: [
+      { name: "Rotinas", to: "settings-routines", icon: "tune", action: "manage_healthcheck_priority" },
+      //{ name: "Logs", to: "settings-logs", icon: "file-document-box-multiple", action: "view_log" },
+    ],
   }
 ];

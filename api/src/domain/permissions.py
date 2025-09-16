@@ -18,6 +18,7 @@ class PermissionEnum(str, Enum):
     MANAGE_SHED_ROOM = "manage_shed_room"
     MANAGE_ROOM_STALL = "manage_room_stall"
     MANAGE_STALL_FEEDER = "manage_stall_feeder"
+    MANAGE_HEALTHCHECK_PRIORITY = "manage_healthcheck_priority"
 
     @property
     def label(self) -> str:
@@ -39,5 +40,6 @@ class PermissionEnum(str, Enum):
             "manage_stall_feeder": "Gerenciar Comedouros",
             "manage_shed": "Gerenciar Galpões",
             "manage_stall": "Gerenciar Baias",
+            "manage_healthcheck_priority": "Gerenciar Prioridades de Healthcheck",
         }
         return labels[self.value]

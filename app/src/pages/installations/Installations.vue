@@ -9,6 +9,7 @@ const router = useRouter();
 
 const installationsApi = new ApiClient("/installations");
 const hardwareDevicesApi = new ApiClient("/hardware-devices");
+const routinesApi = new ApiClient("/healthcheck-priorities");
 
 const baseList = ref(null);
 
@@ -32,10 +33,16 @@ const oninstallationsSaved = () => {
 const modalForm = ref(null);
 
 const devicesOptions = ref([]);
+const healthCheckOptions = ref([]);
 
 onMounted(async () => {
   const res2 = await hardwareDevicesApi.getList()
   devicesOptions.value = res2.data.items.map(d => ({
+    label: d.name,
+    value: d.id,
+  }));
+  const res3 = await routinesApi.getList()
+  healthCheckOptions.value = res3.data.items.map(d => ({
     label: d.name,
     value: d.id,
   }));
@@ -49,7 +56,8 @@ onMounted(async () => {
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
       { name: 'ip_address', label: 'IP Address', type: 'text', rules: 'required' },
-      { name: 'device_id', label: 'Dispositivo', type: 'select', options: devicesOptions, rules: 'required' }
+      { name: 'device_id', label: 'Dispositivo', type: 'select', options: devicesOptions, rules: 'required' },
+      { name: 'healthcheck_priority_id', label: 'Rotina de Verificação', type: 'select', options: healthCheckOptions }
     ]" 
     :api="installationsApi" 
     @saved="oninstallationsSaved" 

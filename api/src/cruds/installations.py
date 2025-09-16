@@ -12,10 +12,36 @@ from src.schemas.users import UserBase
 from src.schemas.device_pins import DevicePinCreate
 from src.domain import exceptions as exc
 
+
 class InstallationRepository(Repository):
+    # Cache compartilhado entre todas as instâncias
+    _device_services = {}  # chave: ip, valor: DeviceService
+
     def __init__(self, session: Session):
         super().__init__(Installation, session)
         self.device_pin_repo = DevicePinRepository(session)
+
+    # ---------- DeviceService ----------
+
+    @classmethod
+    def _get_device_service(cls, ip: str) -> DeviceService:
+        """
+        Retorna um DeviceService para o IP. Cria se não existir.
+        """
+        if ip not in cls._device_services:
+            cls._device_services[ip] = DeviceService(ip=ip)
+        return cls._device_services[ip]
+
+    @classmethod
+    def close_all_device_sessions(cls):
+        """
+        Fecha todas as sessões de DeviceService compartilhadas.
+        """
+        for ds in cls._device_services.values():
+            ds.session.close()
+        cls._device_services.clear()
+
+    # ---------- CRUD e Pins ----------
 
     def create_pins(self, installation_id: int, device_id: int, actor=None):
         hardware_device_repo = HardwareDeviceRepository(self.db_session)
@@ -34,6 +60,8 @@ class InstallationRepository(Repository):
         installation = super().save(values, actor)
         self.create_pins(installation.id, installation.device_id, actor)
         return installation
+
+    # ---------- Device Status ----------
 
     def set_online_device(self, id: int, actor: UserBase):
         values = {
@@ -55,15 +83,17 @@ class InstallationRepository(Repository):
         self.set_offline_device(id, actor)
         raise exc.NotFound("Dispositivo offline ou inacessível.")
 
+    # ---------- Device Operations ----------
+
     def health_check(self, id: int, actor: UserBase):
         installation = self.check_exists(id)
-        device_service = DeviceService(ip=installation.ip_address)
+        device_service = self._get_device_service(installation.ip_address)
         response = device_service.healthcheck()
         return self._handle_device_response(response, id, actor)
 
     def restart_device(self, id: int, actor: UserBase):
         installation = self.check_exists(id)
-        device_service = DeviceService(ip=installation.ip_address)
+        device_service = self._get_device_service(installation.ip_address)
         response = device_service.restart()
         self.device_pin_repo.deactivate_all_pins(installation.id, actor)
         return self._handle_device_response(response, id, actor)
@@ -72,6 +102,8 @@ class InstallationRepository(Repository):
         installation = self.check_exists(id)
         self.device_pin_repo.toggle_pin(pin_id, actor)
         installation = self.get(id, actor)
-        device_service = DeviceService(ip=installation.ip_address)
-        response = device_service._request(path=urlencode({'valvula1': installation.decimal_value, 'valvula2': 0}))
+        device_service = self._get_device_service(installation.ip_address)
+        response = device_service._request(
+            params=urlencode({'valvula1': installation.decimal_value, 'valvula2': 0})
+        )
         return self._handle_device_response(response, id, actor)

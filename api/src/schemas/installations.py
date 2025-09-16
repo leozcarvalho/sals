@@ -11,6 +11,7 @@ class InstallationBase(BaseModel):
     last_seen: Optional[datetime] = None
     is_online: bool = False
     device_id: int
+    healthcheck_priority_id: Optional[int] = None
 
 class InstallationCreate(InstallationBase):
     pass
