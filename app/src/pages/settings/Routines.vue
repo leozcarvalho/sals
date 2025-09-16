@@ -16,8 +16,6 @@ const cols = reactive([
   { name: "Intervalo (segundos)", field: "interval_seconds" },
 ]);
 
-const filter = reactive({});
-
 const prioritySelected = ref(null);
 
 const onPrioritySaved = () => {
@@ -41,33 +39,14 @@ const modalForm = ref(null);
     @saved="onPrioritySaved" 
     @close="prioritySelected = null" 
   />
-
   <BaseList 
     ref="baseList" 
     :title="'Prioridades de Healthcheck'" 
     :api="prioritiesApi" 
     :cols="cols" 
-    :exportable="false" 
-    :can-create="false"
-    :can-edit="false" 
     :filter="filter" 
     v-model:filter="filter"
-  >
-    <!-- Botão Criar -->
-    <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-        <mdicon name="plus" />
-      </button>
-    </template>
-
-    <!-- Ações de linha -->
-    <template #row-actions="{ row }">
-      <button 
-        class="btn btn-sm btn-warning text-white" 
-        @click="prioritySelected = row; modalForm.openModal()"
-      >
-        <mdicon name="circle-edit-outline" />
-      </button>
-    </template>
-  </BaseList>
+    @create="modalForm.openModal(true)"
+    @edit="prioritySelected = $event; modalForm.openModal()"
+  />
 </template>

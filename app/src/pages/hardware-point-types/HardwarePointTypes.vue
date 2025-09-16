@@ -3,23 +3,16 @@ import { reactive, ref } from "vue";
 import BaseList from "../../components/BaseList.vue";
 import { ApiClient } from "../../services/genericApi";
 import BaseModalForm from "../../components/BaseModalForm.vue";
-import { required } from "@vuelidate/validators";
 
 const pinsApi = new ApiClient("/hardware-point-types");
 
 const baseList = ref(null);
 
 const cols = reactive([
-  { name: "#", field: "id", sort: "" },
-  { name: "Tipo", field: "kind", sort: "" },
-  { name: "Qnt", field: "points_quantity", sort: "" },
+  { name: "#", field: "id" },
+  { name: "Tipo", field: "kind" },
+  { name: "Qnt", field: "points_quantity" },
 ]);
-
-const filter = reactive(
-  {
-    kind: null,
-  }
-);
 
 const pinSelected = ref(null);
 
@@ -36,14 +29,9 @@ const modalForm = ref(null);
     { name: 'points_quantity', label: 'Pontos', type: 'number', rules: 'required' },
     { name: 'kind', label: 'Tipo', type: 'select', options: [{ label: 'Bit', value: 'bit' }, { label: 'Dword', value: 'dword' }], rules: 'required' },
   ]" :api="pinsApi" @saved="onPinSaved" @close="pinSelected = null" />
-  <BaseList ref="baseList" :title="'Pontos'" :api="pinsApi" :cols="cols" :exportable="false" :can-create="false"
-    :can-edit="false" :filter="filter" v-model:filter="filter">
-    <!-- Filtros -->
-    <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-        <mdicon name="plus" />
-      </button>
-    </template>
+  <BaseList ref="baseList" :title="'Pontos'" :api="pinsApi" :cols="cols"
+    @create="modalForm.openModal(true)"
+    @edit="pinSelected = $event; modalForm.openModal()">
     <template #filter>
       <div class="row px-5 py-5">
         <div class="col-md-4">
@@ -54,11 +42,6 @@ const modalForm = ref(null);
           <button type="button" class="btn btn-success" @click="baseList.refresh()">FILTRAR</button>
         </div>
       </div>
-    </template>
-    <template #row-actions="{ row }">
-      <button class="btn btn-sm btn-warning text-white" @click="pinSelected = row; modalForm.openModal()">
-        <mdicon name="circle-edit-outline" />
-      </button>
     </template>
   </BaseList>
 </template>

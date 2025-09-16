@@ -6,9 +6,8 @@ import { handleApiToast } from "../components/toast";
 import { Dataset, DatasetItem } from "vue-dataset";
 import { can } from "../helpers/userSession";
 
-// Props
 const props = defineProps({
-  api: { type: Object, required: true }, // agora a API vem do pai
+  api: { type: Object, required: true },
   formPath: { type: String, default: "" },
   cols: { type: Array, required: true },
   title: { type: String, default: "Lista" },
@@ -17,7 +16,8 @@ const props = defineProps({
   canDelete: { type: Boolean, default: true },
   exportable: { type: Boolean, default: false },
   canFilter: { type: Boolean, default: false },
-  filter: { type: Object, required: true },
+  filter: { type: Object, default: {} },
+  canPaginate: { type: Boolean, default: false },
   permission: { type: String, default: null },
 });
 
@@ -50,12 +50,14 @@ const toggleFilter = () => {
 };
 
 const changePage = (page) => {
+  if (!props.filter) return;
   props.filter.skip = perPage.value * (page - 1);
   emit("update:filter", props.filter);
   refresh();
 };
 
 const changePerPage = () => {
+  if (!props.filter) return;
   props.filter.limit = perPage.value;
   props.filter.skip = 0;
   emit("update:filter", props.filter);
@@ -97,19 +99,19 @@ onMounted(() => {
       <!-- Ações -->
       <div class="d-flex justify-content-between mb-2">
         <div>
-          <button class="btn btn-sm btn-primary" @click="toggleFilter" v-if="canFilter">
+          <button class="btn btn-lg btn-primary" @click="toggleFilter" v-if="canFilter">
             <mdicon name="filter" />
           </button>
-          <select v-model="perPage" @change="changePerPage" class="form-select d-inline w-auto ms-2">
+          <select v-if="canPaginate" v-model="perPage" @change="changePerPage" class="form-select d-inline w-auto ms-2">
             <option v-for="option in pages" :key="option" :value="option">{{ option }}</option>
           </select>
         </div>
         <div>
           <slot name="extra-actions"></slot>
-          <button v-if="canCreate" class="btn btn-sm btn-success" @click="router.push({ name: props.formPath })">
-            <mdicon name="plus" />
+          <button v-if="canCreate" class="btn btn-lg btn-outline-success" @click="$emit('create')"> 
+            <i class="fa fa-plus"></i>
           </button>
-          <button v-if="exportable" class="btn btn-sm btn-success ms-2" @click="exportList">
+          <button v-if="exportable" class="btn btn-lg btn-success ms-2" @click="exportList">
             <mdicon name="file-excel" />
           </button>
         </div>
@@ -138,20 +140,20 @@ onMounted(() => {
                   <td v-for="col in cols" :key="col.field">
                     <!-- 🔹 Prioriza slot nomeado pelo field da coluna -->
                     <slot :name="`cell-${col.field}`" :row="row" :value="row[col.field]">
-                      {{ row[col.field] }}
+                      {{ col.formatter ? col.formatter(row[col.field], row) : row[col.field] }}
                     </slot>
                   </td>
                   <td v-if="canEdit || canDelete || $slots['row-actions']">
                     <div class="btn-group">
                       <slot name="row-actions" :row="row"></slot>
-                      <button v-if="canEdit" class="btn btn-sm btn-warning text-white"
-                        @click="router.push({ name: props.formPath, query: { id: row.id } })">
-                        <mdicon name="circle-edit-outline" />
+                      <button v-if="canEdit" class="btn btn-lg btn-outline-warning"
+                        @click="$emit('edit', row)">
+                        <i class="fa fa-pencil"></i>
                       </button>
-                      <button v-if="canDelete" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                      <button v-if="canDelete" class="btn btn-lg btn-outline-danger" data-bs-toggle="modal"
                         data-bs-target="#modal-delete" @click="idOnDeleting = row.id">
-                        <mdicon name="delete-circle-outline" />
-                      </button>     
+                        <i class="fa fa-trash"></i>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -159,7 +161,7 @@ onMounted(() => {
             </DatasetItem>
           </table>
         </div>
-        <Paginator :per-page="perPage" :total-rows="totalRows" @change-page="changePage" />
+        <Paginator v-if="canPaginate" :per-page="perPage" :total-rows="totalRows" @change-page="changePage" />
       </Dataset>
 
     </BaseBlock>

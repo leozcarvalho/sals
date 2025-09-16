@@ -14,10 +14,6 @@ const cols = reactive([
   { name: "Tipo", field: "kind", sort: "" },
 ]);
 
-const filter = reactive({
-  kind: null,
-});
-
 const hardwareKindSelected = ref(null);
 
 const onHardwareKindSaved = () => {
@@ -45,40 +41,9 @@ const modalForm = ref(null);
     :title="'Tipos de Hardware'" 
     :api="hardwareKindsApi" 
     :cols="cols" 
-    :exportable="false" 
-    :can-create="false"
-    :can-edit="false" 
     :filter="filter" 
     v-model:filter="filter"
-  >
-    <!-- Botão Criar -->
-    <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-        <mdicon name="plus" />
-      </button>
-    </template>
-
-    <!-- Filtros -->
-    <template #filter>
-      <div class="row px-5 py-5">
-        <div class="col-md-4">
-          <label class="form-label">Nome</label>
-          <input v-model="filter.name" class="form-control" />
-        </div>
-        <div class="text-center mt-4">
-          <button type="button" class="btn btn-success" @click="baseList.refresh()">FILTRAR</button>
-        </div>
-      </div>
-    </template>
-
-    <!-- Ações de linha -->
-    <template #row-actions="{ row }">
-      <button 
-        class="btn btn-sm btn-warning text-white" 
-        @click="hardwareKindSelected = row; modalForm.openModal()"
-      >
-        <mdicon name="circle-edit-outline" />
-      </button>
-    </template>
-  </BaseList>
+    @create="modalForm.openModal(true)"
+    @edit="hardwareKindSelected = $event; modalForm.openModal()"
+  />
 </template>

@@ -14,14 +14,9 @@ const routinesApi = new ApiClient("/healthcheck-priorities");
 const baseList = ref(null);
 
 const cols = reactive([
-  { name: "Nome", field: "name", sort: "" },
-  { name: "Placa", field: "device_id", sort: "" },
+  { name: "Nome", field: "name" },
+  { name: "Placa", field: "device_id", formatter: (value, row) => row.device.name },
 ]);
-
-const filter = reactive({
-  name: null,
-  device_id: null,
-});
 
 const installationsSelected = ref(null);
 
@@ -69,74 +64,24 @@ onMounted(async () => {
     :title="'Instalações'" 
     :api="installationsApi" 
     :cols="cols" 
-    :exportable="false" 
-    :can-create="false"
-    :can-edit="false" 
     :can-delete="false"
-    :filter="filter" 
-    v-model:filter="filter"
+    @create="modalForm.openModal(true)"
+    @edit="installationsSelected = $event; modalForm.openModal()"
   >
-    <!-- Botão Criar -->
-    <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-        <mdicon name="plus" />
-      </button>
-    </template>
-
-    <!-- Filtros -->
-    <template #filter>
-      <div class="row px-5 py-5">
-        <div class="col-md-4">
-          <label class="form-label">Nome</label>
-          <input v-model="filter.name" class="form-control" />
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Dispositivo</label>
-          <select v-model="filter.device_id" class="form-control">
-            <option :value="null">Todos</option>
-            <option v-for="opt in devicesOptions" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-        </div>
-        <div class="text-center mt-4">
-          <button type="button" class="btn btn-success" @click="baseList.refresh()">FILTRAR</button>
-        </div>
-      </div>
-    </template>
-
-    <template #cell-account_id="{ row }">
-      <span>
-        {{ row.account.name }}
-      </span>
-    </template>
-    <template #cell-device_id="{ row }">
-      <span>
-        {{ row.device.name }}
-      </span>
-    </template>
-
-    <!-- Ações de linha -->
     <template #row-actions="{ row }">
       <button 
-        class="btn btn-sm btn-success text-white" 
+        class="btn btn-lg btn-outline-success text-white" 
         @click="router.push({ name: 'installation', query: { id: row.id } })"
         title="Painel de controle"
       >
         <mdicon name="tune-vertical-variant" />
       </button>
       <button 
-        class="btn btn-sm btn-primary text-white" 
+        class="btn btn-lg btn-outline-primary text-white" 
         @click="router.push({ name: 'installation-pin-config', query: { id: row.id } })"
         title="Configurar Pinos"
       >
         <mdicon name="cog-outline" />
-      </button>
-      <button 
-        class="btn btn-sm btn-warning text-white" 
-        @click="installationsSelected = row; modalForm.openModal()"
-      >
-        <mdicon name="circle-edit-outline" />
       </button>
     </template>
   </BaseList>

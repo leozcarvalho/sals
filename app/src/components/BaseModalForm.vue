@@ -308,8 +308,8 @@ const closeModal = () => {
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="closeModal">Cancelar</button>
-          <button type="button" class="btn btn-primary" @click="submit">Salvar</button>
+          <button type="button" class="btn btn-danger" @click="closeModal">Cancelar</button>
+          <button type="button" class="btn btn-success" @click="submit">Salvar</button>
         </div>
       </div>
     </div>

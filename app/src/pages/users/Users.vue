@@ -11,15 +11,10 @@ const userApi = new ApiClient("/users");
 const profilesApi = new ApiClient("/profiles");
 
 const cols = reactive([
-  { name: "Nome", field: "name", sort: "" },
-  { name: "Email", field: "email", sort: "" },
-  { name: "Perfil", field: "profile_name", sort: "" },
+  { name: "Nome", field: "name" },
+  { name: "Email", field: "email" },
+  { name: "Perfil", field: "profile_name" },
 ]);
-
-const filter = reactive({
-  name: null,
-  email: null,
-});
 
 const profilesOptions = ref([]);
 onMounted(async () => {
@@ -36,13 +31,10 @@ const onUserSaved = () => {
   baseList.value.refresh();
   userSelected.value = null;
 };
-
-
 </script>
 
 <template>
   <div>
-    <!-- Modal de Criação/Edição -->
     <BaseModalForm
       ref="modalForm"
       v-model="userSelected"
@@ -56,33 +48,14 @@ const onUserSaved = () => {
       @saved="onUserSaved"
       @close="userSelected = null"
     />
-
-    <!-- Lista de Usuários -->
     <BaseList
       ref="baseList"
       :title="'Usuários'"
       :api="userApi"
       :cols="cols"
-      :filter="filter"
-      v-model:filter="filter"
-      :can-create="false"
-      :can-edit="false"
       :permission="'manage_user'"
-    >
-      <!-- Botão Criar -->
-      <template #extra-actions>
-        <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-          <mdicon name="plus" />
-        </button>
-      </template>
-      <template #row-actions="{ row }">
-        <button
-          class="btn btn-sm btn-warning text-white"
-          @click="userSelected = row; modalForm.openModal()"
-        >
-          <mdicon name="circle-edit-outline" />
-        </button>
-      </template>
-    </BaseList>
+      @create="modalForm.openModal(true)"
+      @edit="userSelected = $event; modalForm.openModal()"
+    />
   </div>
 </template>

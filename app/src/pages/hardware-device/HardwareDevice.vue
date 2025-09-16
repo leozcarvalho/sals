@@ -12,19 +12,12 @@ const hardwarePointTypesApi = new ApiClient("/hardware-point-types");
 const baseList = ref(null);
 
 const cols = reactive([
-  { name: "#", field: "id", sort: "" },
-  { name: "Nome", field: "name", sort: "" },
-  { name: "Template", field: "connection_template_id", sort: "" },
-  { name: "Tipo", field: "hardware_kind_id", sort: "" },
-  { name: "Tipo de Pino", field: "point_type_id", sort: "" },
+  { name: "#", field: "id" },
+  { name: "Nome", field: "name" },
+  { name: "Template", field: "connection_template_id", formatter: (value, row) => row.connection_template.name },
+  { name: "Tipo", field: "hardware_kind_id", formatter: (value, row) => row.hardware_kind.kind },
+  { name: "Tipo de Pino", field: "point_type_id", formatter: (value, row) => `${row.point_type.kind} (${row.point_type.points_quantity})` },
 ]);
-
-const filter = reactive({
-  name: null,
-  connection_template_id: null,
-  hardware_kind_id: null,
-  point_type_id: null,
-});
 
 const hardwareDeviceSelected = ref(null);
 
@@ -35,7 +28,6 @@ const onHardwareDeviceSaved = () => {
 
 const modalForm = ref(null);
 
-// opções para selects
 const connectionTemplatesOptions = ref([]);
 const hardwareKindsOptions = ref([]);
 const hardwarePointTypesOptions = ref([]);
@@ -78,18 +70,13 @@ const showSvgPreviewModal = (svg) => {
     <template #svg_template="{ model }">
       <div class="flex flex-col gap-2">
         <div v-if="model.svg_template" class="flex items-center gap-2">
-          <!-- Botão para abrir modal -->
           <button type="button" class="btn btn-sm btn-primary ms-2" @click="showSvgPreviewModal(model.svg_template)">
             Mostrar
           </button>
-
-          <!-- Botão para trocar -->
           <button type="button" class="btn btn-sm btn-secondary ms-2" @click="model.svg_template = null">
             Trocar
           </button>
         </div>
-
-        <!-- Input de upload -->
         <div v-else>
           <input type="file" class="form-control" accept=".svg" @change="async (e) => {
             const file = e.target.files[0];
@@ -108,75 +95,8 @@ const showSvgPreviewModal = (svg) => {
       </div>
     </template>
   </BaseModalForm>
-
   <BaseList ref="baseList" :title="'Dispositivos de Hardware'" :api="hardwareDevicesApi" :cols="cols"
-    :can-create="false" :can-edit="false" :filter="filter" v-model:filter="filter">
-    <!-- Botão Criar -->
-    <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-        <mdicon name="plus" />
-      </button>
-    </template>
-
-    <!-- Filtros -->
-    <template #filter>
-      <div class="row px-5 py-5">
-        <div class="col-md-3">
-          <label class="form-label">Nome</label>
-          <input v-model="filter.name" class="form-control" />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Template</label>
-          <select v-model="filter.connection_template_id" class="form-control">
-            <option :value="null">Todos</option>
-            <option v-for="opt in connectionTemplatesOptions" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Kind</label>
-          <select v-model="filter.hardware_kind_id" class="form-control">
-            <option :value="null">Todos</option>
-            <option v-for="opt in hardwareKindsOptions" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Point Type</label>
-          <select v-model="filter.point_type_id" class="form-control">
-            <option :value="null">Todos</option>
-            <option v-for="opt in hardwarePointTypesOptions" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-        </div>
-        <div class="text-center mt-4">
-          <button type="button" class="btn btn-success" @click="baseList.refresh()">FILTRAR</button>
-        </div>
-      </div>
-    </template>
-    <template #cell-connection_template_id="{ row }">
-      <span>
-        {{ row.connection_template.name }}
-      </span>
-    </template>
-    <template #cell-hardware_kind_id="{ row }">
-      <span>
-        {{ row.hardware_kind.kind }}
-      </span>
-    </template>
-    <template #cell-point_type_id="{ row }">
-      <span>
-        {{ row.point_type.kind }} ({{ row.point_type.points_quantity }})
-      </span>
-    </template>
-    <!-- Ações de linha -->
-    <template #row-actions="{ row }">
-      <button class="btn btn-sm btn-warning text-white" @click="hardwareDeviceSelected = row; modalForm.openModal()">
-        <mdicon name="circle-edit-outline" />
-      </button>
-    </template>
-  </BaseList>
+    :filter="filter" v-model:filter="filter" @create="modalForm.openModal(true)"
+    @edit="hardwareDeviceSelected = $event; modalForm.openModal()"
+  />
 </template>

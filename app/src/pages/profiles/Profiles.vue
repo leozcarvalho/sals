@@ -13,24 +13,19 @@ const profileSelected = ref(null);
 const cols = reactive([
   { name: "#", field: "id", sort: "" },
   { name: "Nome", field: "name", sort: "" },
-  { name: "Permissões", field: "permissions", sort: "" },
+  { name: "Permissões", field: "permissions", formatter: (value, row) => getPermissionLabels(row.permissions).join(", "), sort: "" },
 ]);
-
-const filter = reactive({
-  name: null,
-});
 
 const onProfileSaved = () => {
   baseList.value.refresh();
   profileSelected.value = null;
 };
 
-
 const permissionsOptions = ref([]);
 
 onMounted(async () => {
   const res = await profilesApi.getPermissions();
-  permissionsOptions.value = res.data; // [{ value: "manage_user", label: "Gerenciar Usuários" }, ...]
+  permissionsOptions.value = res.data;
 });
 
 // Função utilitária para pegar labels traduzidos
@@ -38,13 +33,12 @@ const getPermissionLabels = (permissionKeys) => {
   if (!permissionKeys) return [];
   return permissionKeys.map((key) => {
     const opt = permissionsOptions.value.find((p) => p.value === key);
-    return opt ? opt.label : key; // fallback para a key caso não encontre
+    return opt ? opt.label : key;
   });
 };
 </script>
 
 <template>
-  <!-- Modal para criar/editar perfil -->
   <BaseModalForm
     ref="modalForm"
     v-model="profileSelected"
@@ -55,6 +49,8 @@ const getPermissionLabels = (permissionKeys) => {
     :api="profilesApi"
     @saved="onProfileSaved"
     @close="profileSelected = null"
+    @create="modalForm.openModal(true)"
+    @edit="profileSelected = $event; modalForm.openModal()"
   >
     <template #permissionsSlot="{ model, field }">
       <div class="d-flex flex-column">
@@ -77,54 +73,10 @@ const getPermissionLabels = (permissionKeys) => {
       </div>
     </template>
   </BaseModalForm>
-
-  <!-- Listagem de perfis -->
   <BaseList
     ref="baseList"
     :title="'Perfis'"
     :api="profilesApi"
     :cols="cols"
-    :exportable="false"
-    :can-create="false"
-    :can-edit="false"
-    :filter="filter"
-    v-model:filter="filter"
-  >
-    <!-- Botão criar -->
-    <template #extra-actions>
-      <button type="button" class="btn btn-sm btn-success ms-2" @click="modalForm.openModal(true)">
-        <mdicon name="plus" />
-      </button>
-    </template>
-
-    <!-- Filtros -->
-    <template #filter>
-      <div class="row px-5 py-5">
-        <div class="col-md-4">
-          <label class="form-label">Nome</label>
-          <input v-model="filter.name" class="form-control" />
-        </div>
-        <div class="text-center mt-4">
-          <button type="button" class="btn btn-success" @click="baseList.refresh()">FILTRAR</button>
-        </div>
-      </div>
-    </template>
-
-    <!-- Renderização personalizada da coluna permissions -->
-    <template #cell-permissions="{ row }">
-      <span>
-        {{ getPermissionLabels(row.permissions).join(", ") }}
-      </span>
-    </template>
-
-    <!-- Ações de linha -->
-    <template #row-actions="{ row }">
-      <button
-        class="btn btn-sm btn-warning text-white"
-        @click="profileSelected = row; modalForm.openModal()"
-      >
-        <mdicon name="circle-edit-outline" />
-      </button>
-    </template>
-  </BaseList>
+  />
 </template>
