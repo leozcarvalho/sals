@@ -22,7 +22,7 @@ const props = defineProps({
 });
 
 // Emit
-const emit = defineEmits(["update:filter"]);
+const emit = defineEmits(["update:filter", "create", "edit"]);
 
 // Estado
 const items = ref([]);
@@ -108,7 +108,7 @@ onMounted(() => {
         </div>
         <div>
           <slot name="extra-actions"></slot>
-          <button v-if="canCreate" class="btn btn-lg btn-outline-success" @click="$emit('create')"> 
+          <button v-if="canCreate" class="btn btn-lg btn-success" @click="$emit('create')"> 
             <i class="fa fa-plus"></i>
           </button>
           <button v-if="exportable" class="btn btn-lg btn-success ms-2" @click="exportList">
@@ -117,12 +117,10 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Slot para formulário de filtro (pai) -->
       <div v-if="showFilter" class="mb-3">
         <slot name="filter"></slot>
       </div>
 
-      <!-- Tabela -->
       <Dataset v-slot="{ ds }" :ds-data="items" :ds-sortby="props.filter.sort_by ? [props.filter.sort_by] : []">
         <div class="table-responsive">
           <table class="table table-striped">
@@ -138,7 +136,6 @@ onMounted(() => {
               <template #default="{ row }">
                 <tr>
                   <td v-for="col in cols" :key="col.field">
-                    <!-- 🔹 Prioriza slot nomeado pelo field da coluna -->
                     <slot :name="`cell-${col.field}`" :row="row" :value="row[col.field]">
                       {{ col.formatter ? col.formatter(row[col.field], row) : row[col.field] }}
                     </slot>
@@ -146,11 +143,11 @@ onMounted(() => {
                   <td v-if="canEdit || canDelete || $slots['row-actions']">
                     <div class="btn-group">
                       <slot name="row-actions" :row="row"></slot>
-                      <button v-if="canEdit" class="btn btn-lg btn-outline-warning"
+                      <button v-if="canEdit" class="btn btn-lg btn-warning"
                         @click="$emit('edit', row)">
                         <i class="fa fa-pencil"></i>
                       </button>
-                      <button v-if="canDelete" class="btn btn-lg btn-outline-danger" data-bs-toggle="modal"
+                      <button v-if="canDelete" class="btn btn-lg btn-danger" data-bs-toggle="modal"
                         data-bs-target="#modal-delete" @click="idOnDeleting = row.id">
                         <i class="fa fa-trash"></i>
                       </button>
@@ -166,7 +163,6 @@ onMounted(() => {
 
     </BaseBlock>
 
-    <!-- Modal de deleção -->
     <div class="modal fade" id="modal-delete" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">

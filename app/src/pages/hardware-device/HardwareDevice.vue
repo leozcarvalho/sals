@@ -96,7 +96,7 @@ const showSvgPreviewModal = (svg) => {
     </template>
   </BaseModalForm>
   <BaseList ref="baseList" :title="'Dispositivos de Hardware'" :api="hardwareDevicesApi" :cols="cols"
-    :filter="filter" v-model:filter="filter" @create="modalForm.openModal(true)"
+    @create="modalForm.openModal(true)"
     @edit="hardwareDeviceSelected = $event; modalForm.openModal()"
   />
 </template>

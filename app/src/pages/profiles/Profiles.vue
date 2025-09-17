@@ -28,7 +28,6 @@ onMounted(async () => {
   permissionsOptions.value = res.data;
 });
 
-// Função utilitária para pegar labels traduzidos
 const getPermissionLabels = (permissionKeys) => {
   if (!permissionKeys) return [];
   return permissionKeys.map((key) => {
@@ -49,8 +48,6 @@ const getPermissionLabels = (permissionKeys) => {
     :api="profilesApi"
     @saved="onProfileSaved"
     @close="profileSelected = null"
-    @create="modalForm.openModal(true)"
-    @edit="profileSelected = $event; modalForm.openModal()"
   >
     <template #permissionsSlot="{ model, field }">
       <div class="d-flex flex-column">
@@ -78,5 +75,7 @@ const getPermissionLabels = (permissionKeys) => {
     :title="'Perfis'"
     :api="profilesApi"
     :cols="cols"
+    @create="modalForm.openModal(true)"
+    @edit="profileSelected = $event; modalForm.openModal()"
   />
 </template>

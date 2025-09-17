@@ -24,7 +24,13 @@ const props = defineProps({
   extraPayload: { type: Object, default: () => ({}) }, // dados extras para enviar na criação
 });
 
-const emit = defineEmits(["update:modelValue", "saved", "close"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "saved",
+  "close",
+  "create",
+  "edit"
+]);
 
 // =============== Estado do Form ===============
 const isLoading = ref(false);
@@ -78,8 +84,10 @@ const validatorMap = {
   maxValue,
 };
 
-// helper para criar validator com mensagem
-const withMsg = (msg, v) => (msg ? helpers.withMessage(msg, v) : v);
+const withMsg = (msg, v, name) => {
+  if (name === "required" && !msg) return helpers.withMessage("Campo necessário", v);
+  return msg ? helpers.withMessage(msg, v) : v;
+};
 
 // converte "minLength:3" -> { name: 'minLength', args: [3] }
 function parseRuleString(str) {
@@ -88,16 +96,21 @@ function parseRuleString(str) {
     const [name, rawArgs] = str.split(":");
     const args = rawArgs
       .split(",")
-      .map((a) => (isNaN(a) ? a : Number(a.trim())));
+      .map((a) => {
+        const n = Number(a.trim());
+        return isNaN(n) ? a.trim() : n;
+      });
     return { name: name.trim(), args };
   }
-  // também aceita sintaxe "minLength(3)"
   const m = str.match(/^(\w+)\((.*)\)$/);
   if (m) {
     const name = m[1];
     const args = m[2]
       .split(",")
-      .map((a) => (isNaN(a) ? a.trim() : Number(a.trim())));
+      .map((a) => {
+        const n = Number(a.trim());
+        return isNaN(n) ? a.trim() : n;
+      });
     return { name, args };
   }
   return { name: str.trim(), args: [] };
@@ -121,7 +134,7 @@ function buildRulesForField(field) {
         const base = validatorMap[parsed.name];
         if (!base) return;
         const v = parsed.args?.length ? base(...parsed.args) : base;
-        out[parsed.name] = withMsg(messages[parsed.name], v);
+        out[parsed.name] = withMsg(messages[parsed.name], v, parsed.name);
       } else if (item && typeof item === "object") {
         // ex.: { minLength: 3 } ou { minLength: { value: 3, message: "..." } }
         Object.entries(item).forEach(([name, val]) => {
@@ -142,7 +155,7 @@ function buildRulesForField(field) {
           } else {
             v = base(val);
           }
-          out[name] = withMsg(msg, v);
+          out[name] = withMsg(msg, v, name);
         });
       }
     });
@@ -202,6 +215,7 @@ const v$ = useVuelidate(rules, form);
 // =============== Ações ===============
 const submit = async () => {
   isLoading.value = true;
+  v$.value.$touch();
   const valid = await v$.value.$validate();
   if (!valid) {
     isLoading.value = false;
@@ -263,28 +277,29 @@ const closeModal = () => {
             </label>
 
             <!-- Slot dinâmico (template custom) -->
-            <slot v-if="field.slot" :name="field.slot" :field="field" :model="form" :v="v$.value" />
+            <slot v-if="field.slot" :name="field.slot" :field="field" :model="form" :v="v$" />
 
             <!-- Componente custom (ex.: VAsyncSelect) -->
             <component v-else-if="field.component" :is="field.component" v-model="form[field.name]" v-bind="field.props"
               :class="[
                 field.class,
-                { 'is-invalid': v$.value?.[field.name]?.$error && field.addInvalidClass !== false }
-              ]" @blur="v$.value?.[field.name]?.$touch()" />
+                { 'is-invalid': v$?.[field.name]?.$error && field.addInvalidClass !== false }
+              ]" @blur="v$?.[field.name]?.$touch()" />
 
             <!-- Tipos básicos -->
+             
             <input v-else-if="['text', 'email', 'number', 'password', 'date', 'tel'].includes(field.type)"
               v-model="form[field.name]" :type="field.type" class="form-control" :placeholder="field.placeholder"
-              :disabled="field.disabled" v-maska :data-maska="field.mask" :class="{ 'is-invalid': v$.value?.[field.name]?.$error }"
-              @blur="v$.value?.[field.name]?.$touch()" />
+              :disabled="field.disabled" v-maska :data-maska="field.mask" :class="{ 'is-invalid': v$?.[field.name]?.$errors.length }"
+              @blur="v$?.[field.name]?.$touch" />
 
             <textarea v-else-if="field.type === 'textarea'" v-model="form[field.name]" class="form-control"
               :rows="field.rows || 3" :placeholder="field.placeholder" :disabled="field.disabled"
-              :class="{ 'is-invalid': v$.value?.[field.name]?.$error }" @blur="v$.value?.[field.name]?.$touch()" />
+              :class="{ 'is-invalid': v$?.[field.name]?.$error }" @blur="v$?.[field.name]?.$touch()" />
 
             <select v-else-if="field.type === 'select'" v-model="form[field.name]" class="form-select"
-              :disabled="field.disabled" :class="{ 'is-invalid': v$.value?.[field.name]?.$error }"
-              @blur="v$.value?.[field.name]?.$touch()">
+              :disabled="field.disabled" :class="{ 'is-invalid': v$?.[field.name]?.$error }"
+              @blur="v$?.[field.name]?.$touch()">
               <option v-for="opt in field.options || []" :key="opt.value" :value="opt.value">
                 {{ opt.label }}
               </option>
@@ -292,14 +307,12 @@ const closeModal = () => {
             <VAsyncSelect v-if="field.type === 'async-select'" :entity="field.entity" v-model="form[field.name]" :pre-filled-value="form[field.name]" />
             <div v-else-if="field.type === 'checkbox'" class="form-check">
               <input v-model="form[field.name]" type="checkbox" class="form-check-input" :id="field.name"
-                @change="v$.value?.[field.name]?.$touch()" />
+                @change="v$?.[field.name]?.$touch()" />
               <label class="form-check-label" :for="field.name">{{ field.label }}</label>
             </div>
-
-            <!-- Mensagem de erro -->
-            <div v-if="v$.value?.[field.name]?.$error" class="invalid-feedback d-block">
+            <div v-if="v$?.[field.name]?.$errors.length" class="invalid-feedback d-block">
               {{
-                v$.value[field.name].$errors?.[0]?.$message
+                v$[field.name].$errors?.[0]?.$message
                 || field.errorMessage
                 || "Campo inválido"
               }}

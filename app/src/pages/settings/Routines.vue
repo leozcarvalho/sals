@@ -44,8 +44,6 @@ const modalForm = ref(null);
     :title="'Prioridades de Healthcheck'" 
     :api="prioritiesApi" 
     :cols="cols" 
-    :filter="filter" 
-    v-model:filter="filter"
     @create="modalForm.openModal(true)"
     @edit="prioritySelected = $event; modalForm.openModal()"
   />

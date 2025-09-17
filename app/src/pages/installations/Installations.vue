@@ -70,14 +70,14 @@ onMounted(async () => {
   >
     <template #row-actions="{ row }">
       <button 
-        class="btn btn-lg btn-outline-success text-white" 
+        class="btn btn-lg btn-success text-white" 
         @click="router.push({ name: 'installation', query: { id: row.id } })"
         title="Painel de controle"
       >
         <mdicon name="tune-vertical-variant" />
       </button>
       <button 
-        class="btn btn-lg btn-outline-primary text-white" 
+        class="btn btn-lg btn-primary text-white" 
         @click="router.push({ name: 'installation-pin-config', query: { id: row.id } })"
         title="Configurar Pinos"
       >

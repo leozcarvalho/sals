@@ -41,8 +41,6 @@ const modalForm = ref(null);
     :title="'Tipos de Hardware'" 
     :api="hardwareKindsApi" 
     :cols="cols" 
-    :filter="filter" 
-    v-model:filter="filter"
     @create="modalForm.openModal(true)"
     @edit="hardwareKindSelected = $event; modalForm.openModal()"
   />

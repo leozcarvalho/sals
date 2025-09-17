@@ -50,6 +50,6 @@ const modalForm = ref(null);
       </div>
     </template>
   </BaseModalForm>
-  <BaseList ref="baseList" :title="'Cozinhas'" :api="kitchensApi" :cols="cols" :filter="filter" v-model:filter="filter"
+  <BaseList ref="baseList" :title="'Cozinhas'" :api="kitchensApi" :cols="cols"
     @create="modalForm.openModal(true)" @edit="kitchenSelected = $event; modalForm.openModal()" />
 </template>

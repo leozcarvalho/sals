@@ -45,8 +45,8 @@ const modalForm = ref(null);
     @edit="shedSelected = $event; modalForm.openModal()"
   >
     <template #row-actions="{ row }">
-      <button class="btn btn-sm btn-primary text-white" @click="$router.push({ name: 'shed', query: { id: row.id } })">
-        <mdicon name="eye" />
+      <button class="btn btn-lg btn-primary text-white" @click="$router.push({ name: 'shed', query: { id: row.id } })">
+        <i class="fa fa-eye"></i>
       </button>
     </template>
   </BaseList>
