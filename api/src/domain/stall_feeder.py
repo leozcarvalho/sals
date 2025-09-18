@@ -7,5 +7,5 @@ class StallFeeder(Base, table=True):
 
     name: str = Field(nullable=False, max_length=100)
     room_stall_id: int = Field(foreign_key="room_stalls.id", nullable=False)
-
+    max_weight: float = Field(nullable=True)
     room_stall: Optional["RoomStall"] = Relationship(back_populates="feeders")

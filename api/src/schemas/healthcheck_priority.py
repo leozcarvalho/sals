@@ -4,8 +4,7 @@ from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class HealthcheckPriorityBase(BaseModel):
     name: str
-    level: int
-    interval_seconds: int
+    interval_milliseconds: int
 
 
 class HealthcheckPriorityCreate(HealthcheckPriorityBase):
@@ -19,5 +18,4 @@ class HealthcheckPriority(HealthcheckPriorityBase, GlobalFields):
 
 class HealthcheckPriorityFilter(BaseFilter):
     name: Optional[str] = None
-    level: Optional[int] = None
-    interval_seconds: Optional[int] = None
+    interval_milliseconds: Optional[int] = None

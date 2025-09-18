@@ -6,6 +6,7 @@ from src.schemas.device_pins import DevicePin
 class StallFeederBase(BaseModel):
     name: str
     room_stall_id: int
+    max_weight: Optional[float] = None
 
 class StallFeederCreate(StallFeederBase):
     pass

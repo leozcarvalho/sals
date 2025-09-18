@@ -29,7 +29,6 @@ class DeviceService:
         - Se 'params' for fornecido, envia como ?key1=val1&key2=val2
         """
         url = f"http://{self.ip}/get"
-        logger.info(f"Enviando requisição para {url} com command={command} params={params}")   
         try:
             if params:
                 # Ex: valvula1, valvula2
@@ -39,7 +38,7 @@ class DeviceService:
                 response = self.session.get(f"{url}?{command}", timeout=self.timeout)
             else:
                 raise ValueError("É necessário fornecer 'command' ou 'params'")
-
+            logger.info(f"Enviando requisição para {response.url} com command={command} params={params}")
             response.raise_for_status()
             return ApiResponse(success=True, data=response.text)
 

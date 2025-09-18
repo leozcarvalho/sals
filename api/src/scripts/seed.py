@@ -17,9 +17,17 @@ from tests.fixtures.hardware_device_fixture import create_hardware_device
 from tests.fixtures.user_fixture import create_user
 from tests.fixtures.kitchen_fixture import create_kitchen
 from tests.fixtures.installation_fixture import create_installation
+from tests.fixtures.shed_fixture import create_shed
+from tests.fixtures.shed_room_fixture import create_shed_room
+from tests.fixtures.room_stall_fixture import create_room_stall
+from tests.fixtures.stall_feeder_fixture import create_stall_feeder
+from tests.fixtures.feeder_valve_fixture import create_feeder_valve
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+global PINS_COUNT
+PINS_COUNT = 0
 
 
 def reset_database():
@@ -61,6 +69,18 @@ def create_profiles(db):
             PermissionEnum.MANAGE_INSTALLATION,
         ],
     )
+    create_profile(
+        db,
+        name="Supervisor",
+        permissions=[
+            PermissionEnum.MANAGE_HARDWARE_KIND,
+            PermissionEnum.MANAGE_HARDWARE_DEVICE,
+            PermissionEnum.MANAGE_HARDWARE_POINT_TYPE,
+            PermissionEnum.MANAGE_HARDWARE_CONNECTION_TEMPLATE,
+            PermissionEnum.MANAGE_DEVICE_PIN,
+            PermissionEnum.MANAGE_INSTALLATION,
+        ],
+    )
     logger.info("[SEED] Perfis criados/atualizados com sucesso")
 
 
@@ -73,7 +93,7 @@ def create_users(db):
 
 def create_hardware_kinds(db, user):
     hw_kind = create_hardware_kind(db, user)
-    balanca_kind = create_hardware_kind(db, user, kind="Balança")
+    balanca_kind = create_hardware_kind(db, user, kind="Entrada balança")
     logger.info(f"[SEED] Hardware Kinds criados: {hw_kind.id}, {balanca_kind.id}")
     return hw_kind, balanca_kind
 
@@ -104,9 +124,43 @@ def create_installations(db, user):
 
 
 def create_kitchens(db, user):
+    global PINS_COUNT
     create_kitchen(db, actor=user, name="Cozinha Central", shaker_pin_id=1, pump_pin_id=2, scale_pin_id=3)
     create_kitchen(db, actor=user, name="Cozinha Secundária", shaker_pin_id=4, pump_pin_id=5, scale_pin_id=6)
+    PINS_COUNT = 7
     logger.info("[SEED] Cozinhas criadas")
+
+
+def create_stall_feeders(db, room_stall_id, user):
+    global PINS_COUNT
+    for i in range(1, 4):
+        feeder = create_stall_feeder(db, actor=user, name=f"Comedouro {i}", room_stall_id=room_stall_id, max_weight=1000.0)
+        if PINS_COUNT < 32:
+            create_feeder_valve(db, actor=user, device_pin_id=PINS_COUNT, stall_feeder_id=feeder.id)
+        PINS_COUNT += 1
+    logger.info("[SEED] Comedouros de baia criados")
+
+def create_room_stalls(db, shed_room_id, user):
+    for i in range(1, 5):
+        stall = create_room_stall(db, actor=user, name=f"Baia {i}", shed_room_id=shed_room_id)
+        create_stall_feeders(db, stall.id, user)
+    logger.info("[SEED] Baias de sala criadas")
+
+def create_shed_rooms(db, shed_id, user):
+    global PINS_COUNT
+    for i in range(1, 5):
+        room = create_shed_room(db, actor=user, name=f"Sala {i}", shed_id=shed_id, entrance_pin_id=PINS_COUNT)
+        PINS_COUNT += 1
+        create_room_stalls(db, room.id, user)
+    logger.info("[SEED] Salas de galpão criadas")
+
+def create_sheds(db, user):
+    for i in range(1, 5):
+        shed = create_shed(db, actor=user, name=f"Galpão {i}")
+        create_shed_rooms(db, shed.id, user)
+    logger.info("[SEED] Galpões criados")
+
+
 
 def seed():
     with session_scope() as db:
@@ -121,6 +175,7 @@ def seed():
             devices = create_hardware_devices(db, user, hw_kind, balanca_kind, point_type, template)
             create_installations(db, user)
             create_kitchens(db, user)
+            create_sheds(db, user)
 
             db.commit()
             logger.info("[SEED] Seed executado com sucesso")

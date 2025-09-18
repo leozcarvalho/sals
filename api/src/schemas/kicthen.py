@@ -9,6 +9,8 @@ class KitchenBase(BaseModel):
     shaker_pin_id: int
     pump_pin_id: int
     scale_pin_id: int
+    max_bowl_weight: float
+    bowl_weight_fraction: float
 
 class KitchenCreate(KitchenBase):
     products: Optional[List[KitchenProductCreate]] = []
@@ -23,4 +25,4 @@ class Kitchen(KitchenBase, GlobalFields):
     products: Optional[list[KitchenProduct]] = []
 
 class KitchenFilter(BaseFilter):
-    kind: Optional[str] = None
+    name: Optional[str] = None

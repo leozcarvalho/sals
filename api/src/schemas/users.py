@@ -2,6 +2,7 @@ from pydantic.networks import EmailStr
 from pydantic import BaseModel, Json
 from src.schemas.global_schemas import GlobalFields, BaseFilter
 from typing import Optional
+from src.schemas.profile import ProfileRead
 
 
 class UserBase(BaseModel):
@@ -21,7 +22,7 @@ class UserUpdate(UserBaseData):
     pass
 
 class UserRead(GlobalFields, UserBase):
-    pass
+    profile: Optional[ProfileRead] = None
 
 class UserFilter(BaseFilter):
     email: Optional[str] = None

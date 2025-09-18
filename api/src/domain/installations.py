@@ -28,7 +28,7 @@ class Installation(Base, table=True):
         return "".join(
             "1" if pin.is_active else "0"
             for pin in sorted(self.pins, key=lambda p: p.number)
-        )
+        )[::-1]
 
     @computed_field
     @property
