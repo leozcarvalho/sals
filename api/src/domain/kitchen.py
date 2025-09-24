@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import Field, Relationship
 from src.domain.base import Base
 
@@ -15,7 +15,16 @@ class Kitchen(Base, table=True):
     max_bowl_weight: float = Field(nullable=False)
     bowl_weight_fraction: float = Field(nullable=False)
 
-    shaker_pin: Optional["DevicePin"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Kitchen.shaker_pin_id]"})
-    pump_pin: Optional["DevicePin"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Kitchen.pump_pin_id]"})
-    scale_pin: Optional["DevicePin"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Kitchen.scale_pin_id]"})
-    products: Optional[list["KitchenProduct"]] = Relationship(back_populates="kitchen", sa_relationship_kwargs={"lazy": "selectin"})
+    shaker_pin: Optional["DevicePin"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Kitchen.shaker_pin_id]"}
+    )
+    pump_pin: Optional["DevicePin"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Kitchen.pump_pin_id]"}
+    )
+    scale_pin: Optional["DevicePin"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Kitchen.scale_pin_id]"}
+    )
+    tanks: List["KitchenTank"] = Relationship(
+        back_populates="kitchen",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )

@@ -12,8 +12,13 @@ from .shed import Shed
 from .shed_room import ShedRoom
 from .room_stall import RoomStall
 from .stall_feeder import StallFeeder
-from .kitchen_products import KitchenProduct
 from .healthcheck_priority import HealthcheckPriority
+from .product import Product
+from .product_tank import ProductTank
+from .formula import Formula
+from .formula_detail import FormulaDetail
+from .feeding_curve import FeedingCurve
+from .feeding_curve_detail import FeedingCurveDetail
 
 __all__ = [
     "Profile",
@@ -30,8 +35,13 @@ __all__ = [
     "ShedRoom",
     "RoomStall",
     "StallFeeder",
-    "KitchenProduct",
     "HealthcheckPriority",
+    "Product",
+    "ProductTank",
+    "Formula",
+    "FormulaDetail",
+    "FeedingCurve",
+    "FeedingCurveDetail",
 ]
 
 for model_name in __all__:

@@ -2,7 +2,7 @@ from pydantic.main import BaseModel
 from typing import Optional, List
 from src.schemas.global_schemas import BaseFilter, GlobalFields
 from src.schemas.device_pins import DevicePin
-from src.schemas.kitchen_products import KitchenProduct, KitchenProductCreate
+from src.schemas.kitchen_tanks import KitchenTank, KitchenTankCreate
 
 class KitchenBase(BaseModel):
     name: str
@@ -13,16 +13,16 @@ class KitchenBase(BaseModel):
     bowl_weight_fraction: float
 
 class KitchenCreate(KitchenBase):
-    products: Optional[List[KitchenProductCreate]] = []
+    tanks: Optional[List[KitchenTankCreate]] = []
 
 class KitchenUpdate(KitchenBase):
-    products: Optional[List[KitchenProductCreate]] = []
+    tanks: Optional[List[KitchenTankCreate]] = []
 
 class Kitchen(KitchenBase, GlobalFields):
     shaker_pin: DevicePin
     pump_pin: DevicePin
     scale_pin: DevicePin
-    products: Optional[list[KitchenProduct]] = []
+    tanks: Optional[list[KitchenTank]] = []
 
 class KitchenFilter(BaseFilter):
     name: Optional[str] = None

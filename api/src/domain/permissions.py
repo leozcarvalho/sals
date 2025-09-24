@@ -19,6 +19,11 @@ class PermissionEnum(str, Enum):
     MANAGE_ROOM_STALL = "manage_room_stall"
     MANAGE_STALL_FEEDER = "manage_stall_feeder"
     MANAGE_HEALTHCHECK_PRIORITY = "manage_healthcheck_priority"
+    MANAGE_PRODUCT = "manage_product"
+    MANAGE_PRODUCT_TANK = "manage_product_tank"
+    MANAGE_KITCHEN_TANK = "manage_kitchen_tank"
+    MANAGE_FORMULA = "manage_formula"
+    MANAGE_FEEDING_CURVE = "manage_feeding_curve"
 
     @property
     def label(self) -> str:
@@ -41,5 +46,10 @@ class PermissionEnum(str, Enum):
             "manage_shed": "Gerenciar Galpões",
             "manage_stall": "Gerenciar Baias",
             "manage_healthcheck_priority": "Gerenciar Prioridades de Healthcheck",
+            "manage_product": "Gerenciar Produtos",
+            "manage_product_tank": "Gerenciar Tanques de Produto",
+            "manage_kitchen_tank": "Gerenciar Tanques da Cozinha",
+            "manage_formula": "Gerenciar Fórmulas",
+            "manage_feeding_curve": "Gerenciar Curvas de Alimentação",
         }
         return labels[self.value]

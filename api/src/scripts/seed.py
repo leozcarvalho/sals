@@ -22,6 +22,8 @@ from tests.fixtures.shed_room_fixture import create_shed_room
 from tests.fixtures.room_stall_fixture import create_room_stall
 from tests.fixtures.stall_feeder_fixture import create_stall_feeder
 from tests.fixtures.feeder_valve_fixture import create_feeder_valve
+from tests.fixtures.product_fixture import create_product
+from tests.fixtures.product_tank_fixture import create_product_tank
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -125,8 +127,8 @@ def create_installations(db, user):
 
 def create_kitchens(db, user):
     global PINS_COUNT
-    create_kitchen(db, actor=user, name="Cozinha Central", shaker_pin_id=1, pump_pin_id=2, scale_pin_id=3)
-    create_kitchen(db, actor=user, name="Cozinha Secundária", shaker_pin_id=4, pump_pin_id=5, scale_pin_id=6)
+    create_kitchen(db, actor=user, name="CZ01", shaker_pin_id=1, pump_pin_id=2, scale_pin_id=3)
+    create_kitchen(db, actor=user, name="CZ02", shaker_pin_id=4, pump_pin_id=5, scale_pin_id=6)
     PINS_COUNT = 7
     logger.info("[SEED] Cozinhas criadas")
 
@@ -135,9 +137,9 @@ def create_stall_feeders(db, room_stall_id, user):
     global PINS_COUNT
     for i in range(1, 4):
         feeder = create_stall_feeder(db, actor=user, name=f"Comedouro {i}", room_stall_id=room_stall_id, max_weight=1000.0)
-        if PINS_COUNT < 32:
+        if PINS_COUNT < 25:
             create_feeder_valve(db, actor=user, device_pin_id=PINS_COUNT, stall_feeder_id=feeder.id)
-        PINS_COUNT += 1
+            PINS_COUNT += 1
     logger.info("[SEED] Comedouros de baia criados")
 
 def create_room_stalls(db, shed_room_id, user):
@@ -160,6 +162,23 @@ def create_sheds(db, user):
         create_shed_rooms(db, shed.id, user)
     logger.info("[SEED] Galpões criados")
 
+def create_products(db, user):
+    create_product(db, actor=user, name="Água", description="Água natural", moisture_percentage=0, kind="liquid", density=1000, is_active=True)
+    create_product(db, actor=user, name="Milho", description="Milho em grão", moisture_percentage=12, kind="solid", density=600, is_active=True)
+    create_product(db, actor=user, name="Soja", description="Soja em grão", moisture_percentage=0, kind="solid", density=800, is_active=True)
+    create_product(db, actor=user, name="Farelo de soja", description="Farelo de soja", moisture_percentage=10, kind="solid", density=500, is_active=True)
+    logger.info("[SEED] Produtos criados")
+
+
+def create_product_tanks(db, user):
+    # Cria tanques para cada produto cadastrado
+    # Supondo que IDs dos produtos são 1=Água, 2=Milho, 3=Soja, 4=Farelo de soja
+    global PINS_COUNT
+    create_product_tank(db, actor=user, name="Tanque Água", description="Tanque para água", pin_id=PINS_COUNT, product_id=1)
+    create_product_tank(db, actor=user, name="Tanque Milho", description="Tanque para milho", pin_id=PINS_COUNT+1, product_id=2)
+    create_product_tank(db, actor=user, name="Tanque Soja", description="Tanque para soja", pin_id=PINS_COUNT+2, product_id=3)
+    create_product_tank(db, actor=user, name="Tanque Farelo de soja", description="Tanque para farelo de soja", pin_id=PINS_COUNT+3, product_id=4)
+    logger.info("[SEED] Tanques de produtos criados")
 
 
 def seed():
@@ -176,6 +195,8 @@ def seed():
             create_installations(db, user)
             create_kitchens(db, user)
             create_sheds(db, user)
+            create_products(db, user)
+            create_product_tanks(db, user)
 
             db.commit()
             logger.info("[SEED] Seed executado com sucesso")

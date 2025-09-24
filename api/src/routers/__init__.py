@@ -14,6 +14,10 @@ from .feeder_valves import router_feeder_valves
 from .room_stall import router_room_stalls
 from .stall_feeder import router_stall_feeders
 from .healthcheck_priority import router_healthcheck_priorities
+from .product import router_products
+from .product_tank import router_product_tanks
+from .formula import router_formulas
+from .feeding_curve import router_feeding_curves
 
 routers = [
     auth_router,
@@ -32,4 +36,8 @@ routers = [
     router_feeder_valves.router,
     router_stall_feeders.router,
     router_healthcheck_priorities.router,
+    router_products.router,
+    router_product_tanks.router,
+    router_formulas.router,
+    router_feeding_curves.router,
 ]

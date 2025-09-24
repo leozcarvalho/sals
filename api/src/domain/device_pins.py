@@ -24,4 +24,8 @@ class DevicePin(Base, table=True):
         sa_relationship_kwargs={"lazy": "selectin"}  # evita cartesian product
     )
 
-    kitchen_products: List["KitchenProduct"] = Relationship(back_populates="device_pin")
+    # Relação com tanques de produto
+    product_tanks: Optional[List["ProductTank"]] = Relationship(
+        back_populates="device_pin",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
