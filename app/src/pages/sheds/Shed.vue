@@ -29,31 +29,37 @@ const deleteData = reactive({
   entity: null,
 });
 
-// Carrega toda a árvore de dados
 const loadAll = async () => {
   const roomsResponse = await roomsApi.getList({ shed_id: shedId });
-  rooms.value = roomsResponse.data.items || [];
+  const roomsData = roomsResponse.data.items || [];
 
-  for (const room of rooms.value) {
-    const stallsResponse = await stallsApi.getList({ shed_room_id: room.id });
-    room.stalls = stallsResponse.data.items || [];
+  await Promise.all(
+    roomsData.map(async (room) => {
+      const stallsResponse = await stallsApi.getList({ shed_room_id: room.id });
+      room.stalls = stallsResponse.data.items || [];
 
-    for (const stall of room.stalls) {
-      const feedersResponse = await feedersApi.getList({ room_stall_id: stall.id });
-      stall.feeders = feedersResponse.data.items || [];
-    }
-  }
+      await Promise.all(
+        room.stalls.map(async (stall) => {
+          const feedersResponse = await feedersApi.getList({ room_stall_id: stall.id });
+          stall.feeders = feedersResponse.data.items || [];
+        })
+      );
+    })
+  );
+
+  rooms.value = roomsData;
 };
 
 onMounted(async () => {
   await loadAll();
 });
 
-// Abre modal para criação/edição
 const openModal = (type, entity = null, parentId = null) => {
-  modalData.type = type;
-  modalData.entity = entity || { name: "" };
-  modalData.parentId = parentId;
+  Object.assign(modalData, {
+    type,
+    entity: entity ?? {},
+    parentId,
+  });
   modalForm.value.openModal();
 };
 
@@ -84,12 +90,43 @@ const deleteItem = async () => {
   }
 };
 
-// Adiciona uma nova válvula
-const addValve = async (feederId, pinId) => {
-  const res = await valvesApi.save({ stall_feeder_id: feederId, device_pin_id: pinId });
-  handleApiToast(res, "Válvula adicionada");
-  if (res.success) await loadAll();
-};
+const formConfig = ref({
+  room: {
+    api: roomsApi,
+    fields: [
+      { name: "name", label: "Nome", type: "text", rules: "required" },
+      { name: "entrance_pin_id", label: "Pino de Entrada", component: PinSelect },
+    ],
+    extraPayload: () => ({ shed_id: modalData.parentId }),
+  },
+  stall: {
+    api: stallsApi,
+    fields: [
+      { name: "name", label: "Nome", type: "text", rules: "required" },
+    ],
+    extraPayload: () => ({ shed_room_id: modalData.parentId }),
+  },
+  feeder: {
+    api: feedersApi,
+    fields: [
+      { name: "name", label: "Nome", type: "text", rules: "required" },
+      {
+        name: "max_weight",
+        label: "Peso máximo (kg)",
+        type: "number",
+        rules: "required|numeric|min:0",
+      },
+    ],
+    extraPayload: () => ({ room_stall_id: modalData.parentId }),
+  },
+  valve: {
+    api: valvesApi,
+    fields: [
+      { name: "device_pin_id", label: "Pino do Dispositivo", component: PinSelect, rules: "required" },
+    ],
+    extraPayload: () => ({ stall_feeder_id: modalData.parentId }),
+  },
+});
 </script>
 
 <template>
@@ -103,68 +140,69 @@ const addValve = async (feederId, pinId) => {
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">{{ room.name }}</h5>
         <div>
-          <button class="btn btn-sm btn-warning" @click="openModal('room', room, shedId)">
+          <button class="btn btn-lg btn-info me-1" type="button" data-bs-toggle="collapse"
+            :data-bs-target="'#room-' + room.id" aria-expanded="false" :aria-controls="'room-' + room.id">
+            <i class="fa fa-chevron-down"></i>
+          </button>
+          <button class="btn btn-lg btn-warning" @click="openModal('room', room, shedId)">
             <i class="fa fa-pencil"></i>
           </button>
-          <button class="btn btn-sm btn-danger ms-1" @click="openConfirm('room', room)">
+          <button class="btn btn-lg btn-danger ms-1" @click="openConfirm('room', room)">
             <i class="fa fa-trash"></i>
           </button>
-          <button class="btn btn-sm btn-success ms-1" @click="openModal('stall', null, room.id)">
+          <button class="btn btn-lg btn-success ms-1" @click="openModal('stall', null, room.id)">
             + Baia
           </button>
         </div>
       </div>
 
-      <div v-for="stall in room.stalls" :key="stall.id" class="card mb-2 ms-3 p-2 shadow-sm stall-card">
-        <div class="d-flex justify-content-between align-items-center">
-          <strong>{{ stall.name }}</strong>
-          <div>
-            <button class="btn btn-sm btn-warning" @click="openModal('stall', stall, room.id)">
-              <i class="fa fa-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-danger ms-1" @click="openConfirm('stall', stall)">
-              <i class="fa fa-trash"></i>
-            </button>
-            <button class="btn btn-sm btn-success ms-1" @click="openModal('feeder', null, stall.id)">
-              + Comedouro
-            </button>
-          </div>
-        </div>
-
-        <div v-for="feeder in stall.feeders" :key="feeder.id" class="card mt-2 ms-3 p-2 feeder-card">
+      <!-- Conteúdo colapsável -->
+      <div class="collapse" :id="'room-' + room.id">
+        <div v-for="stall in room.stalls" :key="stall.id" class="card mb-2 ms-3 p-2 shadow-sm stall-card">
           <div class="d-flex justify-content-between align-items-center">
-            <span>{{ feeder.name }}</span>
+            <strong>{{ stall.name }}</strong>
             <div>
-              <button class="btn btn-sm btn-warning" @click="openModal('feeder', feeder, stall.id)">
+              <button class="btn btn-lg btn-warning" @click="openModal('stall', stall, room.id)">
                 <i class="fa fa-pencil"></i>
               </button>
-              <button class="btn btn-sm btn-danger ms-1" @click="openConfirm('feeder', feeder)">
+              <button class="btn btn-lg btn-danger ms-1" @click="openConfirm('stall', stall)">
                 <i class="fa fa-trash"></i>
+              </button>
+              <button class="btn btn-lg btn-success ms-1" @click="openModal('feeder', null, stall.id)">
+                + Comedouro
               </button>
             </div>
           </div>
 
-          <!-- Lista de válvulas -->
-          <div class="mt-2 ms-3 row">
-            <div v-for="valve in feeder.device_pins" :key="valve.id" class="d-flex align-items-center mb-1 col-auto">
-              <span class="badge bg-primary me-2">{{ valve.pin.name }}</span>
-              <button class="btn btn-sm btn-danger" @click="openConfirm('feeder-valves', valve)">
-                <i class="fa fa-trash"></i>
-              </button>
+          <div v-for="feeder in stall.feeders" :key="feeder.id" class="card mt-2 ms-3 p-2 feeder-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>{{ feeder.name }}</span>
+              <div>
+                <button class="btn btn-lg btn-warning" @click="openModal('feeder', feeder, stall.id)">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="btn btn-lg btn-danger ms-1" @click="openConfirm('feeder', feeder)">
+                  <i class="fa fa-trash"></i>
+                </button>
+                <button class="btn btn-lg btn-success ms-1" @click="openModal('valve', null, feeder.id)">
+                  + Válvula
+                </button>
+              </div>
             </div>
 
-            <div class="input-group mt-2">
-              <PinSelect v-model="feeder.newValvePin" class="flex-grow-1" />
-              <button :disabled="!feeder.newValvePin" class="btn btn-outline-success"
-                @click="addValve(feeder.id, feeder.newValvePin)">
-                + Válvula
-              </button>
+            <!-- Lista de válvulas -->
+            <div class="mt-2 ms-3 row">
+              <div v-for="valve in feeder.device_pins" :key="valve.id" class="d-flex align-items-center mb-1 col-auto">
+                <button class="btn btn-lg btn-primary disabled me-2">{{ valve.pin.name }}</button>
+                <button class="btn btn-lg btn-danger" @click="openConfirm('feeder-valves', valve)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- Modal de exclusão -->
     <div class="modal fade" id="modal-delete" tabindex="-1">
       <div class="modal-dialog">
@@ -183,25 +221,9 @@ const addValve = async (feederId, pinId) => {
         </div>
       </div>
     </div>
-
-    <!-- Modal único -->
-    <BaseModalForm ref="modalForm" v-model="modalData.entity"
-      :fields="
-          modalData.type === 'room'
-            ? [
-                { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-                { name: 'entrance_pin_id', label: 'Pino de Entrada', component: PinSelect }
-              ]
-            : [
-                { name: 'name', label: 'Nome', type: 'text', rules: 'required' }
-              ]
-        "
-      :api="modalData.type === 'room' ? roomsApi : modalData.type === 'stall' ? stallsApi : feedersApi" :extra-payload="modalData.type === 'room'
-          ? { shed_id: modalData.parentId }
-          : modalData.type === 'stall'
-            ? { shed_room_id: modalData.parentId }
-            : { room_stall_id: modalData.parentId }
-        " @saved="onSaved" />
+    <BaseModalForm ref="modalForm" v-model="modalData.entity" :fields="formConfig[modalData.type]?.fields || []"
+      :api="formConfig[modalData.type]?.api || {}" :extra-payload="formConfig[modalData.type]?.extraPayload()"
+      @saved="onSaved" />
   </div>
 </template>
 

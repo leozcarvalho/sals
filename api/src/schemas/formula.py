@@ -11,10 +11,10 @@ class FormulaBase(BaseModel):
     is_active: bool = True
 
 class FormulaCreate(FormulaBase):
-    details: Optional[List[FormulaDetailCreate]] = None
+    details: Optional[List[FormulaDetailCreate]] = []
 
 class FormulaUpdate(FormulaBase):
-    details: Optional[List[FormulaDetailUpdate]] = None
+    details: Optional[List[FormulaDetailUpdate]] = []
 
 class FormulaRead(FormulaBase, GlobalFields):
     details: List[FormulaDetailRead] = []

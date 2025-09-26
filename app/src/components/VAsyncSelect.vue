@@ -80,18 +80,25 @@ const onSelect = (selectedItem) => {
 </template>
 
 <style>
+.multiselect {
+  border: 1px !important;
+}
+
 .multiselect__tags {
-  background-color: #171e28 !important;
-  border-color: #2e3c51 !important;
+  background-color: #09111d !important;
+  border-color: #192f4d !important;
+  appearance: none;
+  border-radius: 0.375rem;
 }
 
 .multiselect__tags * {
-  background-color: inherit; /* Os elementos internos herdam a cor de fundo */
-  color: inherit; /* Os elementos internos herdam a cor do texto */
+  background-color: inherit;
+  color: inherit;
+  padding: 0%;
 }
 .multiselect--above {
-  background-color: #171e28 !important;
-  border-color: #2e3c51 !important;
+  background-color: #09111d !important;
+  border-color: #192f4d !important;
 }
 
 .multiselect__single {

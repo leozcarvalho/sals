@@ -39,15 +39,10 @@ class KitchenRepository(Repository):
         return kitchen
 
     def __update_tanks(self, kitchen_id: int, tanks: List[KitchenTankCreate], actor=None):
-        ids = [tank['product_tank_id'] for tank in tanks]
-        if len(ids) != len(set(ids)):
-            raise exc.InvalidData("Não é permitido usar o mesmo pino em mais de uma função.")
-
         self.kitchen_tank_repo.delete_by_kitchen_id(kitchen_id)
         for tank in tanks:
-            self.device_pin_repo._is_valid_pin(tank['device_pin_id'])
             values = dict(
                 kitchen_id=kitchen_id,
-                device_pin_id=tank['device_pin_id']
+                product_tank_id=tank['product_tank_id']
             )
             self.kitchen_tank_repo.save(values, actor)

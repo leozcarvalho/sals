@@ -6,6 +6,7 @@ import NProgress from "nprogress/nprogress.js";
 
 import LayoutSimple from "@/layouts/variations/Simple.vue";
 import LayoutBackendBoxed from "@/layouts/variations/BackendBoxed.vue";
+import { path } from "d3";
 
 const BackendDashboard = () => import("@/views/dashboard/DashboardView.vue");
 
@@ -39,8 +40,16 @@ const SettingsRoutines = () => import("@/pages/settings/Routines.vue");
 const Profiles = () => import("@/pages/profiles/Profiles.vue");
 
 const Kitchens = () => import("@/pages/kitchens/Kitchens.vue");
+const KitchenForm = () => import("@/pages/kitchens/KitchenForm.vue");
+
 const Sheds = () => import("@/pages/sheds/ShedsList.vue");
 const Shed = () => import("@/pages/sheds/Shed.vue");
+
+const Products = () => import("@/pages/products/Products.vue");
+const ProductTanks = () => import("@/pages/product-tanks/ProductTanks.vue");
+const Formulas = () => import("@/pages/formulas/Formulas.vue");
+const FeedingCurves = () => import("@/pages/feeding-curves/FeedingCurves.vue");
+
 
 // Set all routes
 const routes = [
@@ -92,6 +101,12 @@ const routes = [
         component: Kitchens,
       },
       {
+        path: "kitchen-form/:id?",
+        name: "kitchen-form",
+        meta: { requiresAuth: true },
+        component: KitchenForm,
+      },
+      {
         path: "sheds",
         name: "sheds",
         meta: { requiresAuth: true },
@@ -102,7 +117,31 @@ const routes = [
         name: "shed",
         meta: { requiresAuth: true },
         component: Shed,
-      }
+      },
+      {
+        path: "products",
+        name: "products",
+        meta: { requiresAuth: true },
+        component: Products,
+      },
+      {
+        path: "product-tanks",
+        name: "product-tanks",
+        meta: { requiresAuth: true },
+        component: ProductTanks,
+      },
+      {
+        path: "formulas",
+        name: "formulas",
+        meta: { requiresAuth: true },
+        component: Formulas,
+      },
+      {
+        path: "feeding-curves",
+        name: "feeding-curves",
+        meta: { requiresAuth: true },
+        component: FeedingCurves,
+      },
     ],
   },
 

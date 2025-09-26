@@ -32,8 +32,7 @@ const modalForm = ref(null);
     v-model="prioritySelected" 
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-      { name: 'level', label: 'Nível', type: 'number', rules: 'required|minValue:1' },
-      { name: 'interval_seconds', label: 'Intervalo (segundos)', type: 'number', rules: 'required|minValue:1' }
+      { name: 'interval_milliseconds', label: 'Intervalo (milissegundos)', type: 'number', rules: 'required|minValue:1' }
     ]" 
     :api="prioritiesApi" 
     @saved="onPrioritySaved" 

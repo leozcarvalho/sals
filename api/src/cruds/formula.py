@@ -11,18 +11,24 @@ class FormulaRepository(Repository):
         self.formula_details_repo = FormulaDetailRepository(db_session)
     
     def save(self, values, actor=None):
-        details = values.pop('details', [])
+        details = values.pop('details', None) or []
         formula = super().save(values, actor)
         self.__update_details(formula.id, details, actor)
         return formula
     
     def update(self, id, values, actor=None):
-        details = values.pop('details', [])
+        details = values.pop('details', None) or []
         formula = super().update(id, values, actor)
         self.__update_details(formula.id, details, actor)
         return formula
 
+    def __validate_details(self, details: List[FormulaDetailCreate]):
+        total_percentage = sum(detail['product_percentage_without_moisture'] for detail in details)
+        if total_percentage != 100:
+            raise ValueError("A soma das porcentagens dos produtos deve ser igual a 100%.")
+
     def __update_details(self, formula_id: int, details: List[FormulaDetailCreate], actor=None):
+        self.__validate_details(details)
         self.formula_details_repo.delete_by_formula_id(formula_id)
         for detail in details:
             values = dict(

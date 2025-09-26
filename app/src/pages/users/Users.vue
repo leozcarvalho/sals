@@ -13,7 +13,7 @@ const profilesApi = new ApiClient("/profiles");
 const cols = reactive([
   { name: "Nome", field: "name" },
   { name: "Email", field: "email" },
-  { name: "Perfil", field: "profile_name" },
+  { name: "Perfil", field: "profile", formatter: (item) => item.name },
 ]);
 
 const profilesOptions = ref([]);

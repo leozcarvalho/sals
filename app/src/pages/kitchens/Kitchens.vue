@@ -7,6 +7,7 @@ import PinSelect from "../../components/PinSelect.vue";
 
 const kitchensApi = new ApiClient("/kitchens");
 
+
 const baseList = ref(null);
 
 const cols = reactive([
@@ -24,32 +25,15 @@ const onKitchenSaved = () => {
   kitchenSelected.value = null;
 };
 
-const modalForm = ref(null);
 </script>
 
 <template>
-  <BaseModalForm ref="modalForm" v-model="kitchenSelected" :fields="[
-    { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-    { name: 'shaker_pin_id', label: 'Agitador', component: PinSelect, rules: 'required' },
-    { name: 'pump_pin_id', label: 'Bomba', component: PinSelect, rules: 'required' },
-    { name: 'scale_pin_id', label: 'Balança', component: PinSelect, rules: 'required' },
-    { name: 'products', label: 'Produtos', slot: 'products' },
-  ]" :api="kitchensApi" @saved="onKitchenSaved" @close="kitchenSelected = null">
-    <template #products>
-      <div>
-        <button type="button" class="btn btn-sm btn-success mb-2"
-          @click="kitchenSelected?.products.push({ device_pin_id: null })">
-          <mdicon name="plus" />
-        </button>
-      </div>
-      <div v-for="(product, index) in kitchenSelected?.products" :key="index" class="d-flex align-items-center mb-2">
-        <PinSelect v-model="product.device_pin_id" class="me-2 w-100" />
-        <button type="button" class="btn btn-sm btn-danger" @click="kitchenSelected?.products.splice(index, 1)">
-          <mdicon name="close" />
-        </button>
-      </div>
-    </template>
-  </BaseModalForm>
-  <BaseList ref="baseList" :title="'Cozinhas'" :api="kitchensApi" :cols="cols"
-    @create="modalForm.openModal(true)" @edit="kitchenSelected = $event; modalForm.openModal()" />
+  <BaseList ref="baseList" :title="'Cozinhas'" :api="kitchensApi" :cols="cols" :can-edit="false" :can-create="false"
+    @create="modalForm.openModal(true)" @edit="kitchenSelected = $event; modalForm.openModal()">
+  <template #row-actions="{ row }">
+    <button  class="btn btn-lg btn-warning" @click="$router.push({ name: 'kitchen-form', params: { id: row.id } })">
+      <i class="fa fa-pencil"></i>
+    </button>
+  </template>
+</BaseList>
 </template>

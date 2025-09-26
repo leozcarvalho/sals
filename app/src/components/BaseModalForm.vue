@@ -39,6 +39,7 @@ const form = reactive({});
 // popular inicialmente + defaults dos fields
 const ensureInitialState = (forNew = false) => {
   props.fields.forEach((f) => {
+    if (f.skipInit) return;
     const key = f.name;
 
     // Se for criação (forNew=true), ignora modelValue
@@ -84,9 +85,30 @@ const validatorMap = {
   maxValue,
 };
 
+const defaultMessages = {
+  required: "Campo obrigatório",
+  email: "E-mail inválido",
+  minLength: (ctx) => `Mínimo de ${ctx.$params.min} caracteres`,
+  maxLength: (ctx) => `Máximo de ${ctx.$params.max} caracteres`,
+  minValue: (ctx) => `O valor mínimo é ${ctx.$params.min}`,
+  maxValue: (ctx) => `O valor máximo é ${ctx.$params.max}`,
+};
+
+// aplica mensagem custom ou padrão
 const withMsg = (msg, v, name) => {
-  if (name === "required" && !msg) return helpers.withMessage("Campo necessário", v);
-  return msg ? helpers.withMessage(msg, v) : v;
+  if (msg) {
+    return helpers.withMessage(msg, v);
+  }
+
+  // se houver default no dicionário
+  if (defaultMessages[name]) {
+    const def = defaultMessages[name];
+    if (typeof def === "function") {
+      return helpers.withMessage((ctx) => def(ctx), v);
+    }
+    return helpers.withMessage(def, v);
+  }
+  return helpers.withMessage("Campo inválido", v);
 };
 
 // converte "minLength:3" -> { name: 'minLength', args: [3] }
@@ -182,7 +204,7 @@ function buildRulesForField(field) {
       } else {
         v = base(val);
       }
-      out[name] = withMsg(msg, v);
+      out[name] = withMsg(msg, v, name);
     });
     return out;
   }
@@ -194,7 +216,7 @@ function buildRulesForField(field) {
       const base = validatorMap[parsed.name];
       if (base) {
         const v = parsed.args?.length ? base(...parsed.args) : base;
-        out[parsed.name] = withMsg(messages[parsed.name], v);
+        out[parsed.name] = withMsg(messages[parsed.name], v, parsed.name);
       }
     }
   }
@@ -262,7 +284,7 @@ const closeModal = () => {
 <template>
   <Loader :loading="isLoading" />
   <div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-popin" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-popin modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ form[props.idField] ? 'Editar' : 'Criar' }}</h5>
@@ -321,8 +343,8 @@ const closeModal = () => {
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" @click="closeModal">Cancelar</button>
-          <button type="button" class="btn btn-success" @click="submit">Salvar</button>
+          <button type="button" class="btn btn-danger btn-lg" @click="closeModal">Cancelar</button>
+          <button type="button" class="btn btn-success btn-lg" @click="submit">Salvar</button>
         </div>
       </div>
     </div>

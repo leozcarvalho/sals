@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, nextTick } from "vue";
+import { ref, watch, onMounted, nextTick, useAttrs } from "vue";
 import { ApiClient } from "@/services/genericApi";
 
 const props = defineProps({
@@ -49,6 +49,7 @@ const loadPins = async () => {
     loading.value = false;
   }
 };
+const attrs = useAttrs();
 
 onMounted(loadPins);
 </script>
@@ -59,6 +60,7 @@ onMounted(loadPins);
       class="form-select"
       :disabled="disabled || loading"
       v-model="selected"
+      v-bind="attrs"
     >
       <option value="">Selecione um pino</option>
       <template v-for="group in pinGroups" :key="group.board">

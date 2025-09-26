@@ -94,10 +94,10 @@ onMounted(async () => {
         </span>
       </div>
       <div>
-        <button class="btn btn-info btn-sm me-2" title="Verificar conexão" @click="healthCheck">
+        <button class="btn btn-info btn-lg me-2" title="Verificar conexão" @click="healthCheck">
           <mdicon name="check" />
         </button>
-        <button class="btn btn-warning btn-sm" title="Reiniciar dispositivo" @click="restartDevice">
+        <button class="btn btn-warning btn-lg" title="Reiniciar dispositivo" @click="restartDevice">
           <mdicon name="restart" />
         </button>
       </div>
