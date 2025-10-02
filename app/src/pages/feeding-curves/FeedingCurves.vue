@@ -2,31 +2,29 @@
 import { ref, reactive } from "vue";
 import BaseList from "../../components/BaseList.vue";
 import { ApiClient } from "../../services/genericApi";
-import BaseModalForm from "../../components/BaseModalForm.vue";
 
 const feedingCurvesApi = new ApiClient("/feeding-curves");
 const baseList = ref(null);
-const curveSelected = ref(null);
 
 const cols = reactive([
   { name: "#", field: "id" },
   { name: "Nome", field: "name" },
   { name: "Descrição", field: "description" },
 ]);
-
-const onCurveSaved = () => {
-  baseList.value.refresh();
-  curveSelected.value = null;
-};
-
-const modalForm = ref(null);
 </script>
 
 <template>
-  <BaseModalForm ref="modalForm" v-model="curveSelected" :fields="[
-    { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-    { name: 'description', label: 'Descrição', type: 'text' }
-  ]" :api="feedingCurvesApi" @saved="onCurveSaved" @close="curveSelected = null" />
-  <BaseList ref="baseList" :title="'Curvas de Alimentação'" :api="feedingCurvesApi" :cols="cols"
-    @create="modalForm.openModal(true)" @edit="curveSelected = $event; modalForm.openModal()" />
+  <BaseList ref="baseList" :title="'Curvas de Alimentação'" :api="feedingCurvesApi" :cols="cols" :can-create="false"
+    :can-edit="false">
+    <template #extra-actions>
+      <button class="btn btn-lg btn-success" @click="$router.push({ name: 'feeding-curve-form' })" title="Adicionar fórmula">
+        <i class="fa fa-plus"></i>
+      </button>
+    </template>
+    <template #row-actions="{ row }">
+      <button class="btn btn-lg btn-warning" @click="$router.push({ name: 'feeding-curve-form', params: { id: row.id } })">
+        <i class="fa fa-pencil"></i>
+      </button>
+    </template>
+  </BaseList>
 </template>

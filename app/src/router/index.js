@@ -47,9 +47,12 @@ const Shed = () => import("@/pages/sheds/Shed.vue");
 
 const Products = () => import("@/pages/products/Products.vue");
 const ProductTanks = () => import("@/pages/product-tanks/ProductTanks.vue");
-const Formulas = () => import("@/pages/formulas/Formulas.vue");
-const FeedingCurves = () => import("@/pages/feeding-curves/FeedingCurves.vue");
 
+const Formulas = () => import("@/pages/formulas/Formulas.vue");
+const FormulaForm = () => import("@/pages/formulas/FormulaForm.vue");
+
+const FeedingCurves = () => import("@/pages/feeding-curves/FeedingCurves.vue");
+const FeedingCurveForm = () => import("@/pages/feeding-curves/FeedingCurveForm.vue");
 
 // Set all routes
 const routes = [
@@ -137,10 +140,22 @@ const routes = [
         component: Formulas,
       },
       {
+        path: "formula-form/:id?",
+        name: "formula-form",
+        meta: { requiresAuth: true },
+        component: FormulaForm,
+      },
+      {
         path: "feeding-curves",
         name: "feeding-curves",
         meta: { requiresAuth: true },
         component: FeedingCurves,
+      },
+      {
+        path: "feeding-curve-form/:id?",
+        name: "feeding-curve-form",
+        meta: { requiresAuth: true },
+        component: FeedingCurveForm,
       },
     ],
   },

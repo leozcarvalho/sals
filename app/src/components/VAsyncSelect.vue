@@ -89,6 +89,7 @@ const onSelect = (selectedItem) => {
   border-color: #192f4d !important;
   appearance: none;
   border-radius: 0.375rem;
+  color: #bec8d5;
 }
 
 .multiselect__tags * {
@@ -108,6 +109,7 @@ const onSelect = (selectedItem) => {
   background-color: inherit;
 }
 .multiselect__content-wrapper {
-  background-color: inherit;
+  background-color: #09111d;
+  color: #bec8d5;
 }
 </style>

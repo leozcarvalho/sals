@@ -16,6 +16,7 @@ from tests.fixtures.profile_fixture import create_profile
 from tests.fixtures.hardware_device_fixture import create_hardware_device
 from tests.fixtures.user_fixture import create_user
 from tests.fixtures.kitchen_fixture import create_kitchen
+from tests.fixtures.kitchen_tank_fixture import create_kitchen_tank
 from tests.fixtures.installation_fixture import create_installation
 from tests.fixtures.shed_fixture import create_shed
 from tests.fixtures.shed_room_fixture import create_shed_room
@@ -24,6 +25,9 @@ from tests.fixtures.stall_feeder_fixture import create_stall_feeder
 from tests.fixtures.feeder_valve_fixture import create_feeder_valve
 from tests.fixtures.product_fixture import create_product
 from tests.fixtures.product_tank_fixture import create_product_tank
+from tests.fixtures.formula_fixture import create_formula
+from tests.fixtures.feeding_curve_fixture import create_feeding_curve
+from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_detail
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -180,6 +184,40 @@ def create_product_tanks(db, user):
     create_product_tank(db, actor=user, name="Tanque Farelo de soja", description="Tanque para farelo de soja", pin_id=PINS_COUNT+3, product_id=4)
     logger.info("[SEED] Tanques de produtos criados")
 
+def create_formulas(db, user):
+    details = [
+        { "product_id": 1, "product_percentage_without_moisture": 50 },  # Água
+        { "product_id": 2, "product_percentage_without_moisture": 30 },  # Milho
+        { "product_id": 3, "product_percentage_without_moisture": 15 },  # Soja  
+        { "product_id": 4, "product_percentage_without_moisture": 5 },   # Farelo de soja
+    ]
+    create_formula(db, actor=user, name="Fórmula Exemplo", description="Fórmula de ração exemplo", water_percentage=10, stirring_time=300, details=details)
+    create_formula(db, actor=user, name="Fórmula Avançada", description="Fórmula de ração avançada", water_percentage=20, stirring_time=450, details=details)
+    create_formula(db, actor=user, name="Fórmula Premium", description="Fórmula de ração premium", water_percentage=30, stirring_time=600, details=details)
+    logger.info(f"[SEED] Fórmula criada")
+
+
+def create_kitchen_tanks(db, user):
+    create_kitchen_tank(db, actor=user, product_tank_id=1, kitchen_id=1)
+    create_kitchen_tank(db, actor=user, product_tank_id=2, kitchen_id=1)
+    create_kitchen_tank(db, actor=user, product_tank_id=3, kitchen_id=2)
+    create_kitchen_tank(db, actor=user, product_tank_id=4, kitchen_id=2)
+    logger.info(f"[SEED] Tanques de cozinha criados")
+
+def create_feeding_curves(db, user):
+    for i in range(1, 3):
+        curve = create_feeding_curve(db, actor=user, name=f"Curva {i}", description=f"Descrição da Curva de Alimentação {i}")
+        for day in range(1, 29):
+            formula_id = 1 if day <= 14 else 2 if day <= 21 else 3
+            create_feeding_curve_detail(
+                db,
+                actor=user,
+                feeding_curve_id=curve.id,
+                age_day=day,
+                formula_id=formula_id,
+                formula_mass=2.5 + (day * 0.1)  # Exemplo de variação de massa
+            )
+    logger.info("[SEED] Curvas de alimentação criadas")
 
 def seed():
     with session_scope() as db:
@@ -197,11 +235,11 @@ def seed():
             create_sheds(db, user)
             create_products(db, user)
             create_product_tanks(db, user)
-
-            db.commit()
+            create_formulas(db, user)
+            create_kitchen_tanks(db, user)
+            create_feeding_curves(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
-            db.rollback()
             logger.error(f"[SEED] Erro ao executar seed: {e}")
             raise
 

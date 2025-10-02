@@ -1,9 +1,9 @@
 import pytest
-from src.cruds.feeding_curve_detail import FeedingCurveDetRepository
-from src.schemas.feeding_curve_detail import FeedingCurveDetCreate
+from src.cruds.feeding_curve_detail import FeedingCurveDetailRepository
+from src.schemas.feeding_curve_detail import FeedingCurveDetailCreate
 
-FEEDING_CURVE_DETAIL = FeedingCurveDetCreate(
-    curve_id=1,
+FEEDING_CURVE_DETAIL = FeedingCurveDetailCreate(
+    feeding_curve_id=1,
     age_day=22,
     formula_id=1,
     formula_mass=2.500,
@@ -11,7 +11,7 @@ FEEDING_CURVE_DETAIL = FeedingCurveDetCreate(
 )
 
 def create_feeding_curve_detail(session, actor=None, **overrides):
-    repo = FeedingCurveDetRepository(session)
+    repo = FeedingCurveDetailRepository(session)
     data = FEEDING_CURVE_DETAIL.model_dump()
     data.update(overrides)
     feeding_curve_detail = repo.save(data, actor=actor)

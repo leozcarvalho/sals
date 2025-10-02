@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { required, minValue, maxValue } from "@vuelidate/validators";
+import { helpers } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
@@ -41,7 +42,7 @@ onMounted(async () => {
   await fetchTanks();
 });
 
-const rules = {
+const rules = reactive({
   name: { required },
   shaker_pin_id: { required, minValue: minValue(1) },
   pump_pin_id: { required, minValue: minValue(1) },
@@ -49,27 +50,30 @@ const rules = {
   max_bowl_weight: { required, minValue: minValue(0) },
   bowl_weight_fraction: { required, minValue: minValue(0), maxValue: maxValue(1) },
   tanks: {
-    required,
-    $each: {
-      product_tank_id: { required }
-    }
+    $each: helpers.forEach({
+      product_tank_id: {
+        required
+      }
+    })
   }
-};
+});
 
 const v$ = useVuelidate(rules, form);
 
 const handleResponse = (res) => {
   handleApiToast(res, "Cozinha salva com sucesso");
+  if (res.success) router.push({ name: "kitchens" });
 };
 
-
+const submitted = ref(false);
 const submit = async () => {
   v$.value.$touch();
+  submitted.value = true;
   if (v$.value.$invalid) return;
   if (kitchenId.value) {
     handleResponse(await kitchensApi.update(kitchenId.value, form));
   } else {
-    handleResponse(await kitchensApi.create(form));
+    handleResponse(await kitchensApi.save(form));
   }
 }
 </script>
@@ -85,7 +89,6 @@ const submit = async () => {
 
       <div class="mb-3">
         <label class="form-label">Agitador</label>
-        {{ form.shaker_pin_id }}
         <pin-select v-model="form.shaker_pin_id" :class="{ 'is-invalid': v$.shaker_pin_id.$error }" />
         <div v-if="v$.shaker_pin_id.$error" class="invalid-feedback">Campo necessário</div>
       </div>
@@ -125,23 +128,28 @@ const submit = async () => {
           <mdicon name="plus" />
         </button>
       </div>
-      <div v-if="form.tanks.length" class="my-2">
-        <div v-for="(tank, index) in form.tanks" :key="index" class="row g-2 align-items-center mb-2">
-          <div class="col-7">
-            <select v-model="tank.product_tank_id" class="form-select">
-              <option value="">Selecione um tanque</option>
-              <option v-for="option in tanksOptions" :key="option.value" :value="option.value">{{ option.label }}
-              </option>
-            </select>
-          </div>
-          <div class="col-auto d-flex justify-content-end">
-            <button type="button" class="btn btn-lg btn-danger" @click="form.tanks.splice(index, 1)">
-              <mdicon name="close" />
-            </button>
+      <div v-for="(tank, index) in form.tanks" :key="index" class="row g-2 align-items-start mb-2">
+        <div class="col-7">
+          <select v-model="tank.product_tank_id" class="form-select"
+            :class="{ 'is-invalid': v$.tanks.$each.$response.$data[index].product_tank_id.$error && submitted }">
+            <option value="">Selecione um tanque</option>
+            <option v-for="option in tanksOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <div v-if="v$.tanks.$each.$response.$data[index].product_tank_id.$error && submitted"
+            class="invalid-feedback">
+            Campo necessário
           </div>
         </div>
+
+        <div class="col-auto d-flex align-items-start">
+          <button type="button" class="btn btn-lg btn-danger" @click="form.tanks.splice(index, 1)">
+            <mdicon name="close" />
+          </button>
+        </div>
       </div>
-      <button @click="submit" class="btn btn-primary mb-4">Salvar</button>
+      <button @click="submit" class="btn btn-primary mb-4 btn-lg">Salvar</button>
     </BaseBlock>
   </div>
 </template>

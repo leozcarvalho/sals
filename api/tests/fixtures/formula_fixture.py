@@ -5,8 +5,8 @@ from src.schemas.formula import FormulaCreate
 FORMULA = FormulaCreate(
     name="Fórmula Padrão",
     description="Fórmula inicial",
-    total_water_percentage=50,
-    agitation_time=600,
+    water_percentage=50,
+    stirring_time=600,
     is_active=True
 )
 
