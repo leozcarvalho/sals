@@ -5,6 +5,7 @@ from src.schemas.hardware_connection_template import HardwareConnectionTemplateB
 HARDWARE_CONNECTION_TEMPLATE = HardwareConnectionTemplateBase(
         name="Template de Conexão",
         template_url="http://{ip}/get",
+        query_string="?valvula1={valor}&valvula2={valor2}"
     )
 
 def create_hardware_connection_template(session, actor=None, **overrides):

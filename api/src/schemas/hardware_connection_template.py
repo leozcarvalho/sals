@@ -5,6 +5,7 @@ from src.schemas.global_schemas import BaseFilter, GlobalFields
 class HardwareConnectionTemplateBase(BaseModel):
     name: str
     template_url: str
+    query_string: str
 
 class HardwareConnectionTemplateCreate(HardwareConnectionTemplateBase):
     pass

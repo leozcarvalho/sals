@@ -6,6 +6,7 @@ import { helpers } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
+import { vMaska } from "maska";
 
 const router = useRouter();
 const route = useRoute();
@@ -55,7 +56,8 @@ const rules = reactive({
     $each: helpers.forEach({
       day: { required, minValue: minValue(1) },
       formula_id: { required },
-      formula_mass: { required, minValue: minValue(0), maxValue: maxValue(100) }
+      formula_mass_per_animal: { required, minValue: minValue(0.01), maxValue: maxValue(100) },
+      animal_weight: { minValue: minValue(0) }
     })
   }
 });
@@ -69,7 +71,7 @@ const generateDetails = () => {
     form.details.push({
       age_day: day,
       formula_id: null,
-      formula_mass: 0,
+      formula_mass_per_animal: 0,
       is_active: true
     });
   }
@@ -148,15 +150,20 @@ const submit = async () => {
           </button>
         </div>
       </div>
-      <div class="row mb-3">
-        <div class="col-2"><strong>Dia</strong></div>
+      <div class="row mb-3" v-if="form.details.length > 0">
+        <div class="col-1"><strong>#</strong></div>
+        <div class="col-1"><strong>Dia</strong></div>
         <div class="col-6"><strong>Fórmula</strong></div>
-        <div class="col-4"><strong>% Fórmula</strong></div>
+        <div class="col-2"><strong>% Fórmula por animal</strong></div>
+        <div class="col-2"><strong>Peso do animal (kg)</strong></div>
       </div>
-      
+
       <div v-for="(detail, index) in form.details" :key="index" class="row g-2 align-items-start mb-2">
-        <div class="col-2">
-          <input v-model="detail.age_day" type="number" class="form-control" disabled />
+        <div class="col-1">
+          <span class="badge bg-secondary">{{ index + 1 }}</span>
+        </div>
+        <div class="col-1">
+          <input v-model="detail.age_day" type="text" class="form-control" disabled />
         </div>
         <div class="col-6">
           <select v-model="detail.formula_id" class="form-select"
@@ -171,13 +178,33 @@ const submit = async () => {
           </div>
         </div>
 
-        <!-- % Fórmula -->
-        <div class="col-4">
-          <input v-model="detail.formula_mass" type="number" step="0.01" class="form-control"
+        <div class="col-2">
+          <div class="input-group">
+            <input v-model="detail.formula_mass_per_animal" step="0.01" class="form-control" v-maska data-maska="###.##"
             placeholder="% Fórmula"
-            :class="{ 'is-invalid': v$.details.$each.$response.$data[index].formula_mass.$error && submitted }" />
-          <div v-if="v$.details.$each.$response.$data[index].formula_mass.$error && submitted" class="invalid-feedback">
+            :class="{ 'is-invalid': v$.details.$each.$response.$data[index].formula_mass_per_animal.$error && submitted }" />
+            <span class="input-group-text">%</span>
+          </div>
+          <div v-if="!v$.details.$each.$response.$data[index].formula_mass_per_animal.required && submitted"
+            class="invalid-feedback d-block">
             Campo obrigatório
+          </div>
+          <div v-else-if="!v$.details.$each.$response.$data[index].formula_mass_per_animal.maxValue && submitted"
+            class="invalid-feedback d-block">
+            Valor máximo: 100
+          </div>
+        </div>
+        <div class="col-2">
+          <div class="input-group">
+            <input v-model="detail.animal_weight" type="text" step="0.01" class="form-control"
+              v-maska data-maska="###.##"
+              placeholder="Peso"
+              :class="{ 'is-invalid': v$.details.$each.$response.$data[index].animal_weight.$error && submitted }" />
+            <span class="input-group-text">kg</span>
+          </div>
+          <div v-if="v$.details.$each.$response.$data[index].animal_weight.$error && submitted"
+            class="invalid-feedback d-block">
+            Valor inválido
           </div>
         </div>
       </div>

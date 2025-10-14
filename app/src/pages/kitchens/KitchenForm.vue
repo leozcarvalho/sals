@@ -33,7 +33,7 @@ const tanksOptions = ref([]);
 
 const fetchTanks = async () => {
   const res = await productTanksApi.getList();
-  tanksOptions.value = res.data.items.map(tank => ({ label: tank.name, value: tank.id })) || [];
+  tanksOptions.value = res.data.items.map(tank => ({ label: `${tank.name} - ${tank.product.name}`, value: tank.id })) || [];
 };
 
 onMounted(async () => {

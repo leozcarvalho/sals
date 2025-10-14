@@ -30,7 +30,8 @@ const modalForm = ref(null);
     v-model="hardwareConnectionTemplateSelected" 
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
-      { name: 'template_url', label: 'Template URL', type: 'text', rules: 'required' }
+      { name: 'template_url', label: 'Template URL', type: 'text', rules: 'required' },
+      { name: 'query_string', label: 'Query String', type: 'text' },
     ]" 
     :api="hardwareConnectionTemplatesApi" 
     @saved="onHardwareConnectionTemplateSaved" 

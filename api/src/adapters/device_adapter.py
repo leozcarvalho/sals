@@ -11,37 +11,26 @@ class DeviceService:
     Serviço genérico para comunicação com placas em LAN.
     """
 
-    def __init__(self, ip: str, timeout: float = 0.5):
+    def __init__(self, ip: str, url_template: str, query_string: str, timeout: float = 0.5):
         """
         :param ip: endereço IP da placa
         :param timeout: tempo máximo de espera em segundos (default 0.5s)
         """
         self.ip = ip
+        self.url = url_template.replace("{ip}", ip)
+        self.query_string = query_string
         self.timeout = timeout
-        self.session = requests.Session()  # mantém TCP aberto
-        logger.info(f"DeviceService iniciado para IP {self.ip} com timeout {self.timeout}s")
+        self.session = requests.Session()
 
-    def _request(self, command: str = None, params: dict = None) -> ApiResponse:
-        """
-        Envia comando AT ou parâmetros para a placa.
-        
-        - Se 'command' for fornecido sem 'params', envia como ?COMMAND
-        - Se 'params' for fornecido, envia como ?key1=val1&key2=val2
-        """
-        url = f"http://{self.ip}/get"
+
+    def send_value(self, value: str) -> Dict[str, str]:
         try:
-            if params:
-                # Ex: valvula1, valvula2
-                response = self.session.get(url, params=params, timeout=self.timeout)
-            elif command:
-                # Ex: AT, ATZ, AT_SSID
-                response = self.session.get(f"{url}?{command}", timeout=self.timeout)
-            else:
-                raise ValueError("É necessário fornecer 'command' ou 'params'")
-            logger.info(f"Enviando requisição para {response.url} com command={command} params={params}")
+            url = f"{self.url}?{self.query_string.replace('{value}', str(value))}"
+            print(url)
+            response = self.session.get(url, timeout=self.timeout)
+            print(f"RESPONSE: {response.text}")
             response.raise_for_status()
             return ApiResponse(success=True, data=response.text)
-
         except requests.Timeout:
             logger.error(f"Timeout ao conectar com dispositivo {self.ip}")
             raise exc.Timeout(f"Dispositivo {self.ip} não respondeu no tempo limite")
@@ -53,12 +42,18 @@ class DeviceService:
         """
         Healthcheck simples da placa.
         """
-        logger.debug(f"Executando healthcheck para {self.ip}")
-        return self._request("AT")
+        print(f"Executando healthcheck para {self.url}")
+        response = self.session.get(f"{self.url}?AT", timeout=self.timeout)
+        if response.text == 'OK':
+            return ApiResponse(success=True, data=response.text)
+        return ApiResponse(success=False, data=response.text)
 
     def restart(self) -> ApiResponse:
         """
         Reinicia a placa.
         """
-        logger.debug(f"Enviando comando restart para {self.ip}")
-        return self._request("ATZ")
+        print(f"Reiniciando dispositivo {self.url}")
+        response = self.session.get(f"{self.url}?ATZ", timeout=self.timeout)
+        if response.text == 'Reiniciando...':
+            return ApiResponse(success=True, data=response.text)
+        return ApiResponse(success=False, data=response.text)

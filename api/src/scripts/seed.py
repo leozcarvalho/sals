@@ -3,7 +3,7 @@ import logging
 from sqlmodel import SQLModel
 from alembic import command
 from alembic.config import Config
-
+from random import randint
 from src.core.db import session_scope, engine
 from src.domain.permissions import PermissionEnum
 from src.core.config import settings
@@ -92,40 +92,54 @@ def create_profiles(db):
 
 def create_users(db):
     admin = create_user(db, name="Usuário Admin", email="sals@admin.com")
-    eng = create_user(db, name="Usuário Engenharia", email="sals@engenharia.com", profile_id=2)
-    logger.info(f"[SEED] Usuários criados: {admin.id}, {eng.id}")
-    return eng
+    create_user(db, name="Usuário Engenharia", email="sals@engenharia.com", profile_id=2)
+    logger.info(f"[SEED] Usuários criados")
+    return admin
 
+
+def create_hardware_point_types(db, user):
+    create_hardware_point_type(db, actor=user)
+    create_hardware_point_type(db, actor=user)
+    create_hardware_point_type(db, actor=user, points_quantity=16, kind="bit")
+    logger.info("[SEED] Hardware Point Types criados")
 
 def create_hardware_kinds(db, user):
-    hw_kind = create_hardware_kind(db, user)
-    balanca_kind = create_hardware_kind(db, user, kind="Entrada balança")
-    logger.info(f"[SEED] Hardware Kinds criados: {hw_kind.id}, {balanca_kind.id}")
-    return hw_kind, balanca_kind
+    create_hardware_kind(db, user)
+    create_hardware_kind(db, user, kind="Entrada balança")
 
+def create_hardware_connection_templates(db, user):
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="rele={value}")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão Avançado", template_url="http://{ip}/get", query_string="peso")
 
-def create_hardware_devices(db, user, hw_kind, balanca_kind, point_type, template):
-    device = create_hardware_device(
+def create_hardware_devices(db, user):
+    create_hardware_device(
         db,
         actor=user,
-        hardware_kind_id=hw_kind.id,
-        point_type_id=point_type.id,
-        connection_template_id=template.id,
+        hardware_kind_id=1,
+        point_type_id=1,
+        connection_template_id=1,
     )
-    balanca = create_hardware_device(
+    create_hardware_device(
         db,
         actor=user,
-        hardware_kind_id=balanca_kind.id,
-        point_type_id=point_type.id,
-        connection_template_id=template.id,
+        hardware_kind_id=2,
+        point_type_id=2,
+        connection_template_id=3,
     )
-    logger.info(f"[SEED] Hardware Devices criados: {device.id}, {balanca.id}")
-    return device, balanca
-
+    create_hardware_device(
+        db,
+        actor=user,
+        name="Placa de relé",
+        hardware_kind_id=1,
+        point_type_id=3,
+        connection_template_id=2,
+    )
 
 def create_installations(db, user):
-    create_installation(db, actor=user, name="Instalação Central", ip_address="192.168.60.100")
-    create_installation(db, actor=user, name="Instalação Secundária", ip_address="177.122.01.100")
+    create_installation(db, actor=user, name="VA32", ip_address="192.168.60.100", device_id=1)
+    create_installation(db, actor=user, name="Pesagem", ip_address="192.168.60.254", device_id=2)
+    create_installation(db, actor=user, name="RE16", ip_address="192.168.60.252", device_id=3)
     logger.info("[SEED] Instalações criadas")
 
 
@@ -139,30 +153,30 @@ def create_kitchens(db, user):
 
 def create_stall_feeders(db, room_stall_id, user):
     global PINS_COUNT
-    for i in range(1, 4):
-        feeder = create_stall_feeder(db, actor=user, name=f"Comedouro {i}", room_stall_id=room_stall_id, max_weight=1000.0)
+    for i in range(1, randint(2, 6)):
+        feeder = create_stall_feeder(db, actor=user, name=f"C{i}", room_stall_id=room_stall_id, max_weight=1000.0)
         if PINS_COUNT < 25:
             create_feeder_valve(db, actor=user, device_pin_id=PINS_COUNT, stall_feeder_id=feeder.id)
             PINS_COUNT += 1
     logger.info("[SEED] Comedouros de baia criados")
 
 def create_room_stalls(db, shed_room_id, user):
-    for i in range(1, 5):
-        stall = create_room_stall(db, actor=user, name=f"Baia {i}", shed_room_id=shed_room_id)
+    for i in range(1, randint(2, 6)):
+        stall = create_room_stall(db, actor=user, name=f"B{i}", shed_room_id=shed_room_id)
         create_stall_feeders(db, stall.id, user)
     logger.info("[SEED] Baias de sala criadas")
 
 def create_shed_rooms(db, shed_id, user):
     global PINS_COUNT
-    for i in range(1, 5):
-        room = create_shed_room(db, actor=user, name=f"Sala {i}", shed_id=shed_id, entrance_pin_id=PINS_COUNT)
+    for i in range(1, randint(2, 6)):
+        room = create_shed_room(db, actor=user, name=f"S{i}", shed_id=shed_id, entrance_pin_id=PINS_COUNT)
         PINS_COUNT += 1
         create_room_stalls(db, room.id, user)
     logger.info("[SEED] Salas de galpão criadas")
 
 def create_sheds(db, user):
     for i in range(1, 5):
-        shed = create_shed(db, actor=user, name=f"Galpão {i}")
+        shed = create_shed(db, actor=user, name=f"G{i}")
         create_shed_rooms(db, shed.id, user)
     logger.info("[SEED] Galpões criados")
 
@@ -175,13 +189,11 @@ def create_products(db, user):
 
 
 def create_product_tanks(db, user):
-    # Cria tanques para cada produto cadastrado
-    # Supondo que IDs dos produtos são 1=Água, 2=Milho, 3=Soja, 4=Farelo de soja
     global PINS_COUNT
-    create_product_tank(db, actor=user, name="Tanque Água", description="Tanque para água", pin_id=PINS_COUNT, product_id=1)
-    create_product_tank(db, actor=user, name="Tanque Milho", description="Tanque para milho", pin_id=PINS_COUNT+1, product_id=2)
-    create_product_tank(db, actor=user, name="Tanque Soja", description="Tanque para soja", pin_id=PINS_COUNT+2, product_id=3)
-    create_product_tank(db, actor=user, name="Tanque Farelo de soja", description="Tanque para farelo de soja", pin_id=PINS_COUNT+3, product_id=4)
+    create_product_tank(db, actor=user, name="T01", description="Tanque para água", pin_id=PINS_COUNT, product_id=1)
+    create_product_tank(db, actor=user, name="T02", description="Tanque para milho", pin_id=PINS_COUNT+1, product_id=2)
+    create_product_tank(db, actor=user, name="T03", description="Tanque para soja", pin_id=PINS_COUNT+2, product_id=3)
+    create_product_tank(db, actor=user, name="T04", description="Tanque para farelo de soja", pin_id=PINS_COUNT+3, product_id=4)
     logger.info("[SEED] Tanques de produtos criados")
 
 def create_formulas(db, user):
@@ -215,7 +227,8 @@ def create_feeding_curves(db, user):
                 feeding_curve_id=curve.id,
                 age_day=day,
                 formula_id=formula_id,
-                formula_mass=2.5 + (day * 0.1)  # Exemplo de variação de massa
+                formula_mass_per_animal=2.5 + (day * 0.1),  # Exemplo de variação de massa
+                animal_weight=0.5 + (day * 0.2),  # Exemplo de variação de peso
             )
     logger.info("[SEED] Curvas de alimentação criadas")
 
@@ -224,12 +237,10 @@ def seed():
         try:
             create_profiles(db)
             user = create_users(db)
-            hw_kind, balanca_kind = create_hardware_kinds(db, user)
-            point_type = create_hardware_point_type(db, user)
-            logger.info(f"[SEED] Hardware Point Type criado: {point_type.id}")
-            template = create_hardware_connection_template(db, user)
-            logger.info(f"[SEED] Hardware Connection Template criado: {template.id}")
-            devices = create_hardware_devices(db, user, hw_kind, balanca_kind, point_type, template)
+            create_hardware_kinds(db, user)
+            create_hardware_point_types(db, user)
+            create_hardware_connection_templates(db, user)
+            create_hardware_devices(db, user)
             create_installations(db, user)
             create_kitchens(db, user)
             create_sheds(db, user)

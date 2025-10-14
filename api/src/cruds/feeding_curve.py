@@ -29,7 +29,8 @@ class FeedingCurveRepository(Repository):
                 feeding_curve_id=feeding_curve_id,
                 age_day=detail['age_day'],
                 formula_id=detail['formula_id'],
-                formula_mass=detail['formula_mass'],
-                is_active=detail['is_active']
+                formula_mass_per_animal=detail['formula_mass_per_animal'],
+                is_active=detail['is_active'],
+                animal_weight=detail['animal_weight']
             )
             self.detail_repository.save(values, actor)

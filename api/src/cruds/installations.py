@@ -24,13 +24,17 @@ class InstallationRepository(Repository):
     # ---------- DeviceService ----------
 
     @classmethod
-    def _get_device_service(cls, ip: str) -> DeviceService:
+    def _get_device_service(cls, installation: Installation) -> DeviceService:
         """
-        Retorna um DeviceService para o IP. Cria se não existir.
+        Retorna um DeviceService para a instalação. Cria se não existir.
         """
-        if ip not in cls._device_services:
-            cls._device_services[ip] = DeviceService(ip=ip)
-        return cls._device_services[ip]
+        if installation.ip_address not in cls._device_services:
+            cls._device_services[installation.ip_address] = DeviceService(
+                ip=installation.ip_address,
+                url_template=installation.device.connection_template.template_url,
+                query_string=installation.device.connection_template.query_string
+            )
+        return cls._device_services[installation.ip_address]
 
     @classmethod
     def close_all_device_sessions(cls):
@@ -87,13 +91,13 @@ class InstallationRepository(Repository):
 
     def health_check(self, id: int, actor: UserBase):
         installation = self.check_exists(id)
-        device_service = self._get_device_service(installation.ip_address)
+        device_service = self._get_device_service(installation)
         response = device_service.healthcheck()
         return self._handle_device_response(response, id, actor)
 
     def restart_device(self, id: int, actor: UserBase):
         installation = self.check_exists(id)
-        device_service = self._get_device_service(installation.ip_address)
+        device_service = self._get_device_service(installation)
         response = device_service.restart()
         self.device_pin_repo.deactivate_all_pins(installation.id, actor)
         return self._handle_device_response(response, id, actor)
@@ -102,8 +106,6 @@ class InstallationRepository(Repository):
         installation = self.check_exists(id)
         self.device_pin_repo.toggle_pin(pin_id, actor)
         installation = self.get(id, actor)
-        device_service = self._get_device_service(installation.ip_address)
-        response = device_service._request(
-            params=urlencode({'valvula1': installation.decimal_value, 'valvula2': 0})
-        )
+        device_service = self._get_device_service(installation)
+        response = device_service.send_value(installation.decimal_value)
         return self._handle_device_response(response, id, actor)

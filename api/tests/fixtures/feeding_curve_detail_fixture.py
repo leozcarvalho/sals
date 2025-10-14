@@ -6,7 +6,8 @@ FEEDING_CURVE_DETAIL = FeedingCurveDetailCreate(
     feeding_curve_id=1,
     age_day=22,
     formula_id=1,
-    formula_mass=2.500,
+    formula_mass_per_animal=2.500,
+    animal_weight=150.0,
     is_active=True
 )
 

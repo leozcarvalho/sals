@@ -142,6 +142,11 @@ const submit = async () => {
           <mdicon name="plus" />
         </button>
       </div>
+      <div class="row mb-3" v-if="form.details.length > 0">
+        <div class="col-6"><strong>Produto</strong></div>
+        <div class="col-4"><strong>% Produto (sem umidade)</strong></div>
+        <div class="col-2"><strong></strong></div>
+      </div>
 
       <div v-for="(detail, index) in form.details" :key="index" class="row g-2 align-items-start mb-2">
         <!-- Produto -->
