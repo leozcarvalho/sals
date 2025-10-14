@@ -50,7 +50,9 @@ case "$1" in
     ;;
   coverage-html)
     echo "📊 Gerando relatório HTML de coverage..."
+    coverage erase
     coverage run -m pytest "$2"
+    coverage combine      # ⬅ adiciona combine sempre
     coverage html
     echo "Relatório HTML gerado em htmlcov/index.html"
     ;;

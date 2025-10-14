@@ -6,6 +6,7 @@ from .hardware_connection_template import ConnectionTemplate
 from .hardware_device import Device
 from .hardware_kind import HardwareKind
 from .hardware_point_types import PointType
+from .kitchen_tanks import KitchenTank
 from .kitchen import Kitchen
 from .installations import Installation
 from .shed import Shed
@@ -29,6 +30,7 @@ __all__ = [
     "Device",
     "HardwareKind",
     "PointType",
+    "KitchenTank",
     "Kitchen",
     "Installation",
     "Shed",

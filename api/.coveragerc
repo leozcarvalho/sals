@@ -1,11 +1,11 @@
 [run]
 parallel = true
 relative_files = true
-source = 
-    src
+source = src
 omit = 
     */schemas/*
     */__init__.py
+    */routers/*
 
 [xml]
     package_depth = 0

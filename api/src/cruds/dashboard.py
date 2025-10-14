@@ -28,7 +28,8 @@ class DashboardRepository:
                 room_data = {
                     "id": room.id,
                     "name": room.name,
-                    "entrance_pin_name": room.entrance_pin.name if room.entrance_pin else None,
+                    "entrance_pin_name": room.entrance_pin.name,
+                    "entrance_pin_active": room.entrance_pin.is_active,
                     "stalls": []
                 }
 
