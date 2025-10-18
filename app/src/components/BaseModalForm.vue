@@ -263,6 +263,7 @@ const openModal = (isNew = false) => {
   v$.value.$reset();
   let modal = new bootstrap.Modal(document.getElementById("modal-form"));
   modal.show();
+  emit(isNew ? "create" : "edit", form);
 };
 
 defineExpose({

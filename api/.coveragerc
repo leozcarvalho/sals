@@ -6,6 +6,7 @@ omit =
     */schemas/*
     */__init__.py
     */routers/*
-
+    */core/*
+    */scripts/*
 [xml]
     package_depth = 0

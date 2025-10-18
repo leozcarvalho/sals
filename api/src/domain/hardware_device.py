@@ -9,7 +9,6 @@ class Device(Base, table=True):
     connection_template_id: int = Field(foreign_key="connection_templates.id", nullable=False)
     hardware_kind_id: int = Field(foreign_key="hardware_kinds.id", nullable=False)
     point_type_id: int = Field(foreign_key="point_types.id", nullable=False)
-    svg_template: Optional[str] = Field(default=None)
 
     connection_template: Optional["ConnectionTemplate"] = Relationship(back_populates="devices")
     hardware_kind: Optional["HardwareKind"] = Relationship(back_populates="devices")

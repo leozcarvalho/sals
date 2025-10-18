@@ -16,6 +16,7 @@ export const baseMenu = [
     sub: [
       { name: "Usuários", to: "users", icon: "account-group", action: "manage_user" },
       { name: "Perfis", to: "profiles", icon: "account", action: "manage_profile" },
+      { name: "SVGS", to: "svgs", icon: "vector-square", action: "manage_svg" },
       { name: "Cozinhas", to: "kitchens", icon: "chef-hat", action: "manage_kitchen" },
       { name: "Galpões", to: "sheds", icon: "warehouse", action: "manage_shed" },
       { name: "Produtos", to: "products", icon: "package-variant", action: "manage_product" },

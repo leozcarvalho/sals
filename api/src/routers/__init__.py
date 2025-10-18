@@ -19,6 +19,7 @@ from .product_tank import router_product_tanks
 from .formula import router_formulas
 from .feeding_curve import router_feeding_curves
 from .dashboard import router_dashboard
+from .svg import router_svgs
 
 routers = [
     auth_router,
@@ -42,4 +43,5 @@ routers = [
     router_formulas.router,
     router_feeding_curves.router,
     router_dashboard,
+    router_svgs.router,
 ]

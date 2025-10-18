@@ -76,13 +76,6 @@ onMounted(async () => {
       >
         <mdicon name="tune-vertical-variant" />
       </button>
-      <button 
-        class="btn btn-lg btn-primary text-white" 
-        @click="router.push({ name: 'installation-pin-config', query: { id: row.id } })"
-        title="Configurar Pinos"
-      >
-        <mdicon name="cog-outline" />
-      </button>
     </template>
   </BaseList>
 </template>

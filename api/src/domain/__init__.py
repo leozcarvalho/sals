@@ -20,6 +20,7 @@ from .formula import Formula
 from .formula_detail import FormulaDetail
 from .feeding_curve import FeedingCurve
 from .feeding_curve_detail import FeedingCurveDetail
+from .svg import SVG
 
 __all__ = [
     "Profile",
@@ -44,6 +45,7 @@ __all__ = [
     "FormulaDetail",
     "FeedingCurve",
     "FeedingCurveDetail",
+    "SVG",
 ]
 
 for model_name in __all__:

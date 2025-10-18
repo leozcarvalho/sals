@@ -7,7 +7,6 @@ HARDWARE_DEVICE = HardwareDeviceCreate(
     connection_template_id=1,
     hardware_kind_id=1,
     point_type_id=1,
-    svg_template=None
 )
 
 def create_hardware_device(

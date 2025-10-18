@@ -113,6 +113,9 @@ def create_hardware_connection_templates(db, user):
     create_hardware_connection_template(db, actor=user, name="Template de Conexão Avançado", template_url="http://{ip}/get", query_string="peso")
 
 def create_hardware_devices(db, user):
+    #svg em /assets
+    with open(Path(__file__).parent.parent.parent / "assets" / "example.svg", "r") as f:
+        svg_example = f.read()
     create_hardware_device(
         db,
         actor=user,

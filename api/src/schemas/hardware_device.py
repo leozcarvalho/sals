@@ -10,7 +10,6 @@ class HardwareDeviceBase(BaseModel):
     connection_template_id: int
     hardware_kind_id: int
     point_type_id: int
-    svg_template: Optional[str] = None
 
 class HardwareDeviceCreate(HardwareDeviceBase):
     pass

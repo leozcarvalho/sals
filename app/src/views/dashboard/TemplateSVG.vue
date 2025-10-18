@@ -59,7 +59,6 @@ const startDrag = (e) => {
 
 const onDrag = (e) => {
   if (!isDragging.value) return;
-  e.preventDefault(); // 🔒 impede que o navegador "arraste" a página
   const dx = e.clientX - start.value.x;
   const dy = e.clientY - start.value.y;
   svgContainer.value.scrollLeft = scroll.value.left - dx;
@@ -95,7 +94,7 @@ const endDrag = (e) => {
           <g transform="matrix(0.736619 0 0 1 -98.0574 -65.5104)">
             <text x="148.5" y="105" class="fil1 fnt0">{{ room.entrance_pin_name }}</text>
           </g>
-          <rect class="fil2" transform="matrix(0.686594 -0.932088 0.735643 0.998674 16.1292 47.3146)" width="6.5647"
+          <rect :class="room.entrance_pin_active ? 'fil2' : 'fil5'" transform="matrix(0.686594 -0.932088 0.735643 0.998674 16.1292 47.3146)" width="6.5647"
             height="6.127" />
           <line class="fil3 str1" x1="24.6819" y1="47.3146" x2="42" y2="47.3146" />
           <g v-for="(stall, index) in room.stalls" :key="index" :transform="`translate(${xSpace * index}, 0)`">

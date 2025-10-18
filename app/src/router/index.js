@@ -54,6 +54,9 @@ const FormulaForm = () => import("@/pages/formulas/FormulaForm.vue");
 const FeedingCurves = () => import("@/pages/feeding-curves/FeedingCurves.vue");
 const FeedingCurveForm = () => import("@/pages/feeding-curves/FeedingCurveForm.vue");
 
+const SvgList = () => import("@/pages/svgs/SvgList.vue");
+const SvgConfig = () => import("@/pages/svgs/SvgConfig.vue");
+
 // Set all routes
 const routes = [
   {
@@ -96,6 +99,18 @@ const routes = [
         name: "profiles",
         meta: { requiresAuth: true },
         component: Profiles,
+      },
+      {
+        path: "svgs",
+        name: "svgs",
+        meta: { requiresAuth: true },
+        component: SvgList,
+      },
+      {
+        path: "svg-config/:id?",
+        name: "svg-config",
+        meta: { requiresAuth: true },
+        component: SvgConfig,
       },
       {
         path: "kitchens",
