@@ -14,8 +14,6 @@ const Users = () => import("@/pages/users/Users.vue");
 
 // Auth
 const AuthSignIn = () => import("@/views/auth/SignInView.vue");
-const AuthReminder = () => import("@/views/auth/ReminderView.vue");
-const AuthCreatePassword = () => import("@/views/auth/CreatePasswordView.vue");
 
 // Errors
 const Error400 = () => import("@/views/errors/400View.vue");
@@ -34,7 +32,6 @@ const HardwareDevices = () => import("@/pages/hardware-device/HardwareDevice.vue
 
 const Installations = () => import("@/pages/installations/Installations.vue");
 const Installation = () => import("@/pages/installations/Installation.vue");
-const InstallationPinsConfig = () => import("@/pages/installations/InstallationPinsConfig.vue");
 const SettingsRoutines = () => import("@/pages/settings/Routines.vue");
 
 const Profiles = () => import("@/pages/profiles/Profiles.vue");
@@ -215,12 +212,6 @@ const routes = [
         meta: { requiresAuth: true },
         component: Installation,
       },
-      {
-        name: "installation-pin-config",
-        path: "/installation/pins",
-        meta: { requiresAuth: true },
-        component: InstallationPinsConfig,
-      }
     ]
   },
   {
@@ -232,32 +223,6 @@ const routes = [
         name: "settings-routines",
         meta: { requiresAuth: true },
         component: SettingsRoutines,
-      },
-    ],
-  },
-
-
-  /*
-  |
-  |--------------------------------------------------------------------------
-  | Auth Routes
-  |--------------------------------------------------------------------------
-  |
-  */
-  {
-    path: "/auth",
-    component: LayoutSimple,
-    children: [
-      {
-        path: "reminder",
-        name: "auth-reminder",
-        meta: { requiresAuth: false },
-        component: AuthReminder,
-      },
-      {
-        path: "create-password",
-        name: "auth-create-password",
-        component: AuthCreatePassword,
       },
     ],
   },

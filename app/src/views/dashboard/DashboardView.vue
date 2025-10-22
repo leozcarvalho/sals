@@ -35,7 +35,7 @@ onMounted(async () => {
 <template>
   <BaseBackground>
     <div class="content content-full">
-      <div class="button-group mb-4">
+      <div class="button-group mb-3">
         <button
           v-for="item in data"
           :key="item.id"
@@ -45,13 +45,13 @@ onMounted(async () => {
         >
           {{ item.name }}
         </button>
-      <div v-if="selectedData.svg_id">
+    </div>
+    <div v-if="selectedData.svg_id">
         <SVGPanel
           ref="SVGPanelRef"
           :svgId="selectedData.svg_id"
         />
       </div>
-    </div>
   </div>
 
   </BaseBackground>
