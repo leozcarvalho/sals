@@ -18,13 +18,18 @@ const svgId = ref(route.params.id);
 const selectedRegion = ref(null);
 const selectedOption = ref(null);
 
-const variablesOptions = ref([]);
 const associateOptions = ref([]);
 const loadOptions = async () => {
   if (!svgId.value) return;
   const res = await svgsApi.options(svgId.value);
-  associateOptions.value = res.data.options || [];
-  variablesOptions.value = res.data.variables || [];
+  associateOptions.value = res.data || [];
+};
+
+const variablesOptions = ref([]);
+const loadVariables = async () => {
+  if (!svgId.value) return;
+  const res = await svgsApi.variables(svgId.value);
+  variablesOptions.value = res.data || [];
 };
 
 const setStroke = (el, active = false) => {
@@ -102,6 +107,7 @@ const resetSelection = () => {
 onMounted(async () => {
   await refresh();
   await loadOptions();
+  await loadVariables();
   nextTick(() => {
     enableRegionSelection();
   });

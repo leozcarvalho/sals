@@ -158,7 +158,6 @@ const onDoubleTap = (() => {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  background: #f8f9fa;
 }
 
 .svg-wrapper::-webkit-scrollbar {

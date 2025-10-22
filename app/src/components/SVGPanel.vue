@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick, defineExpose } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, defineExpose } from "vue";
 import { ApiClient } from "../services/genericApi";
 import { SVGClient } from "../services/svg";
 import { DevicePinsClient } from "../services/devicePins";
@@ -13,11 +13,9 @@ const svgsApi = new SVGClient();
 const devicePinsApi = new DevicePinsClient();
 
 const associateOptions = ref([]);
-const variablesOptions = ref([]);
 const loadOptions = async (svgId) => {
   const res = await svgsApi.options(svgId);
-  associateOptions.value = res.data.options || [];
-  variablesOptions.value = res.data.variables || [];
+  associateOptions.value = res.data || [];
 };
 
 const togglePin = async (pinId) => {
@@ -36,35 +34,24 @@ const fillSvg = () => {
   const regions = svgEl.querySelectorAll("[data-type]");
   regions.forEach(region => {
     const type = region.getAttribute("data-type");
-
     if (type === "pin") {
       const pinId = region.getAttribute("data-value");
       if (!pinId) return;
-
       const pin = associateOptions.value.find(p => p.value.toString() === pinId.toString());
       if (!pin) return;
-
       region.style.fill = pin.is_active ? "#00ff00" : "#ff0000";
       region.style.cursor = "pointer";
       region.ondblclick = () => togglePin(pinId);
-    }
-
-    if (type === "text") {
-      const variableName = region.getAttribute("data-value");
-      if (!variableName) return;
-      const variable = variablesOptions.value.find(v => v.key === variableName);
-      if (!variable) return;
-      region.textContent = variable.value || "";
     }
   });
 };
 
 const svgData = ref(null);
 const fetchSvg = async () => {
- const res = await svgsApi.get(props.svgId);
+ const res = await svgsApi.get(props.svgId, true);
   svgData.value = res.data || {};
   if (svgData.value) {
-    await loadOptions(svgData.value.id); // <-- adicione o await aqui
+    await loadOptions(svgData.value.id);
   }
 }
 
@@ -73,6 +60,16 @@ const refresh = async () => {
   await nextTick();
   fillSvg();
 };
+
+let refreshInterval = null
+onMounted(async () => {
+  await refresh();
+  refreshInterval = setInterval(refresh, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(refreshInterval);
+});
 
 defineExpose({
   refresh,

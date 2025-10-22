@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from src.domain.svg import SVG
 from src.cruds.repo import Repository
 from sqlalchemy import select, case
@@ -10,9 +10,9 @@ class SvgRepository(Repository):
     def __init__(self, session: Session):
         super().__init__(SVG, session)
     
-    def replace_variables(self, content: str, variables: dict):
-        for key, value in variables.items():
-            content = content.replace(key, value)
+    def replace_variables(self, content: str, variables: list):
+        for var in variables:
+            content = content.replace(var["key"], var["value"])
         return content
     
     def get_owner_svg_id(self, owner_type: str, owner_id: int):
@@ -20,6 +20,26 @@ class SvgRepository(Repository):
         if not svg:
             return None
         return svg.id
+    
+    def svg_with_variables(self, svg_id: int, replace_variables: bool = False):
+        svg = self.check_exists(svg_id)
+        variables = self.get_variables(svg_id)
+        if replace_variables:
+            svg.content = self.replace_variables(svg.content, variables)
+        return svg
+    
+    @staticmethod
+    def map_pin_option(pin, label_prefix=""):
+        return {
+            "label": f"{label_prefix}{pin.name}" if label_prefix else pin.name,
+            "value": getattr(pin, "id", getattr(pin, "pin_id", None)),
+            "is_active": pin.is_active,
+        }
+
+    @staticmethod
+    def map_variable(label, key, value):
+        return {"label": label, "key": key, "value": value}
+
 
     def get_list(self, skip = 0, limit = None, filters = None, order_by = ..., actor=None):
         query = (
@@ -70,65 +90,65 @@ class SvgRepository(Repository):
 
     def get_options(self, svg_id: int):
         svg = self.check_exists(svg_id)
-        options = {'variables': [], 'options': []}
+        options = []
         if svg.owner_type == "kitchens":
             owner = self.db_session.get(Kitchen, svg.owner_id)
-            options['options'].extend([
-                {
-                    "label": f'Misturador - {owner.shaker_pin.name}',
-                    "value": owner.shaker_pin_id,
-                    "is_active": owner.shaker_pin.is_active
-                },
-                {
-                    "label": f'Bomba - {owner.pump_pin.name}',
-                    "value": owner.pump_pin_id,
-                    "is_active": owner.pump_pin.is_active
-                },
-                {
-                    "label": f'Balança - {owner.scale_pin.name}',
-                    "value": owner.scale_pin_id,
-                    "is_active": owner.scale_pin.is_active
-                },
+            options.extend([
+                self.map_pin_option(owner.shaker_pin, f'Misturador - '),
+                self.map_pin_option(owner.pump_pin, f'Bomba - '),
+                self.map_pin_option(owner.scale_pin, f'Balança - '),
             ])
             for tank in owner.tanks:
-                options['options'].append({
-                    "label": f'Tanque {tank.tank.product.name} - {tank.tank.device_pin.name}',
-                    "value": tank.tank.pin_id,
-                    "is_active": tank.tank.device_pin.is_active
-                })
-            
-                options['variables'].extend([
-                    {
-                        "label": f"Nome do Tanque ({tank.tank.name})",
-                        "key": f"tn_{tank.id}",
-                        "value": tank.tank.name
-                    },
-                    {
-                        "label": f"Nome do Produto ({tank.tank.product.name})",
-                        "key": f"pn_{tank.id}",
-                        "value": tank.tank.product.name
-                    },
-                ])
+                options.append(self.map_pin_option(tank.tank.device_pin, f'Tanque {tank.tank.product.name} - {tank.tank.device_pin.name}'))
             return options
-        
+
         if svg.owner_type == "sheds":
             shed = self.db_session.get(Shed, svg.owner_id)
             feeders = self.db_session.query(FeederValve).join(StallFeeder).join(RoomStall).join(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
             for feeder in feeders:
-                options['options'].append({
-                    "label": f'Válvula de Alimentação - {feeder.device_pin.name}',
-                    "value": feeder.device_pin_id,
-                    "is_active": feeder.device_pin.is_active
-                })
+                options.append(self.map_pin_option(feeder.device_pin, "Válvula de Alimentação - "))
+            rooms = self.db_session.query(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
+            for room in rooms:
+                options.append(self.map_pin_option(room.entrance_pin, f'Bit de Entrada ({room.name}) - '))
             return options
-        
+
         if svg.owner_type == "installations":
             pins = self.db_session.query(DevicePin).filter(DevicePin.installation_id == svg.owner_id).all()
-            for pin in pins:
-                options["options"].append({
-                    "label": f'Bit {pin.name}',
-                    "value": pin.id,
-                    "is_active": pin.is_active
-                })
-            return options
+            return [self.map_pin_option(pin, "Bit ") for pin in pins]
         return options
+
+
+    def get_variables(self, svg_id: int):
+        svg = self.check_exists(svg_id)
+        variables = []
+
+        if svg.owner_type == "kitchens":
+            owner = self.db_session.get(Kitchen, svg.owner_id)
+            if not owner:
+                return []
+            for tank in owner.tanks:
+                variables.extend([
+                    self.map_variable(f"Nome do Tanque ({tank.tank.name})", f"TN{tank.id}", tank.tank.name),
+                    self.map_variable(f"Nome do Produto ({tank.tank.name} - {tank.tank.product.name})", f"PN{tank.id}", tank.tank.product.name),
+                ])
+
+        if svg.owner_type == "sheds":
+            shed = self.db_session.query(Shed).options(joinedload(Shed.rooms)).filter(Shed.id == svg.owner_id).first()
+            if not shed:
+                return []
+
+            # Comedouros
+            feeders = self.db_session.query(StallFeeder).join(RoomStall).join(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
+            for feeder in feeders:
+                variables.append(self.map_variable(f"Nome do Comedouro ({feeder.name})", f"R{feeder.id}", feeder.name))
+
+            # Salas
+            for room in shed.rooms:
+                variables.append(self.map_variable(f"Nome da Sala ({room.name})", f"S{room.id}", room.name))
+
+            # Baias
+            stalls = self.db_session.query(RoomStall).join(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
+            for stall in stalls:
+                variables.append(self.map_variable(f"Nome da Baia ({stall.name})", f"B{stall.id}", stall.name))
+
+        return variables

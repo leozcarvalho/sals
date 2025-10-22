@@ -5,9 +5,27 @@ class SVGClient extends ApiClient {
     super("/svgs");
   }
 
+  async get(id, replaceVariables=false) {
+    try {
+      const response = await this.api.get(`${this.path}/${id}?replace_variables=${replaceVariables}`);
+      return response.data;
+    } catch (error) {
+      return error.response;
+    }
+  }
+
   async options(id) {
     try {
       const response = await this.api.get(`${this.path}/${id}/options`);
+      return response.data;
+    } catch (error) {
+      return error.response;
+    }
+  }
+
+  async variables(id) {
+    try {
+      const response = await this.api.get(`${this.path}/${id}/variables`);
       return response.data;
     } catch (error) {
       return error.response;
