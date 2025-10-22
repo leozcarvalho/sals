@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.formula import FormulaRepository
 from src.schemas.formula import FormulaCreate
 

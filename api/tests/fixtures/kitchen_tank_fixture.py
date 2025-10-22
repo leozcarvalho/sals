@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.kitchen_tanks import KitchenTankRepository
 from src.schemas.kitchen_tanks import KitchenTankCreate
 

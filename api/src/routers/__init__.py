@@ -20,6 +20,7 @@ from .formula import router_formulas
 from .feeding_curve import router_feeding_curves
 from .dashboard import router_dashboard
 from .svg import router_svgs
+from .svg_region import router_svg_region
 
 routers = [
     auth_router,
@@ -44,4 +45,5 @@ routers = [
     router_feeding_curves.router,
     router_dashboard,
     router_svgs.router,
+    router_svg_region.router,
 ]

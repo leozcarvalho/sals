@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.room_stall import RoomStallRepository
 from src.schemas.room_stall import RoomStallCreate
 

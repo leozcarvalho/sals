@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.product import ProductRepository
 from src.schemas.product import ProductCreate
 

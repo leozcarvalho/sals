@@ -20,7 +20,7 @@ const cols = reactive([
 const ownerOptions = [
   { label: "Galpão", value: "sheds" },
   { label: "Cozinha", value: "kitchens" },
-  { label: "Placa", value: "hardware-devices" },
+  { label: "Instalação", value: "installations" },
 ];
 
 

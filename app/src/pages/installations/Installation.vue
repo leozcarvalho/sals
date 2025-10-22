@@ -2,13 +2,15 @@
 import { ref, onMounted, computed, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { InstallationClient } from "../../services/installationsApi";
+import { SVGClient } from "../../services/svg";
+import SVGPanel from "../../components/SVGPanel.vue";
 import { handleApiToast } from "../../components/toast";
 import { formatDateBrl } from "@/helpers/formatters";
 import Loader from "@/components/Loader.vue";
-const svgContent = ref("");
 
 const route = useRoute();
 const installationApi = new InstallationClient();
+const svgApi = new SVGClient();
 
 const loader = ref(false);
 const installation = ref(null);
@@ -43,31 +45,27 @@ const restartDevice = async () => {
   loader.value.loaderOff();
 };
 
+const svgId = ref(null);
+const loadSvg = async () => {
+  const res = await svgApi.getOwnerSvgId("installations", installation.value.id);
+  svgId.value = res.data?.svg_id || null;
+  if (svgId.value) {
+    await nextTick();
+    if (SVGPanelRef.value) {
+      await SVGPanelRef.value.refresh();
+    }
+  }
+};
+
+const SVGPanelRef = ref(null);
 const refresh = async () => {
   loader.value.loaderOn();
   if (!deviceId.value) return;
   const response = await installationApi.get(deviceId.value);
   installation.value = response.data;
-  svgContent.value = installation.value?.device?.svg_template || "";
-  await nextTick();
-  fillPins();
+  await loadSvg();
   loader.value.loaderOff();
 };
-
-function fillPins() {
-  const svgEl = document.querySelector('#uploaded-svg');
-  if (!svgEl) return;
-
-  installation.value.pins.forEach(pin => {
-    const el = svgEl.querySelector(`[id="${pin.svg_region_id}"]`);
-    if (el) {
-      el.style.fill = pin.is_active ? pin.activation_color || "green" : "red";
-      el.style.cursor = "pointer";
-      el.onclick = () => togglePin(pin);
-    }
-  });
-}
-
 
 onMounted(async () => {
   await refresh();
@@ -80,8 +78,8 @@ onMounted(async () => {
     <h2>Placa: {{ installation?.name }}</h2>
     <p>IP: {{ installation?.ip_address }}</p>
 
-    <div class="text-center">
-      <div v-if="svgContent" v-html="svgContent" id="uploaded-svg"></div>
+    <div class="text-center" v-if="svgId">
+      <SVGPanel ref="SVGPanelRef" :svgId="svgId" />
     </div>
     <!-- Status do dispositivo com botões -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -102,10 +100,8 @@ onMounted(async () => {
         </button>
       </div>
     </div>
-
-    <!-- Pinos -->
     <div class="pins-layout mt-4">
-      <h4>Pinos</h4>
+      <h4>Válvulas</h4>
       <div class="row">
         <div v-for="pin in installation?.pins" :key="pin.id" class="col-6 col-md-2 mb-3 text-center position-relative">
           <button class="btn w-100 position-relative" :class="pin.is_active ? 'btn-success' : 'btn-danger'"

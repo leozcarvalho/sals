@@ -1,19 +1,34 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { ApiClient } from "../../services/genericApi";
+import SVGPanel from "../../components/SVGPanel.vue";
+
 const dashboardApi = new ApiClient("/dashboard/svg-data");
 
 const data = ref([]);
 const selectedData = ref({});
-
-onMounted(async () => {
+const refresh = async () => {
   try {
     const res = await dashboardApi.getList();
     data.value = res.data || [];
-    selectedData.value = data.value[0] || {};
+    if (data.value.length > 0) {
+      changeData(data.value[0]);
+    }
   } catch (err) {
     console.error("Erro ao carregar dados do dashboard:", err);
   }
+}
+
+const SVGPanelRef = ref(null);
+const changeData = async (item) => {
+  selectedData.value = item;
+  await nextTick();
+  if (SVGPanelRef.value) {
+    await SVGPanelRef.value.refresh();
+  }
+};
+onMounted(async () => {
+  await refresh();
 });
 </script>
 
@@ -26,12 +41,15 @@ onMounted(async () => {
           :key="item.id"
           class="btn btn-primary btn-lg me-2"
           :class="{ 'btn-success': selectedData === item }"
-          @click="selectedData = item"
+          @click="changeData(item)"
         >
           {{ item.name }}
         </button>
-      <div>
-        {{ selectedData }}
+      <div v-if="selectedData.svg_id">
+        <SVGPanel
+          ref="SVGPanelRef"
+          :svgId="selectedData.svg_id"
+        />
       </div>
     </div>
   </div>

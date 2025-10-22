@@ -56,7 +56,7 @@ const rules = reactive({
     $each: helpers.forEach({
       day: { required, minValue: minValue(1) },
       formula_id: { required },
-      formula_mass_per_animal: { required, minValue: minValue(0.01), maxValue: maxValue(100) },
+      formula_mass_per_animal: { required, minValue: minValue(1) },
       animal_weight: { minValue: minValue(0) }
     })
   }
@@ -154,7 +154,7 @@ const submit = async () => {
         <div class="col-1"><strong>#</strong></div>
         <div class="col-1"><strong>Dia</strong></div>
         <div class="col-6"><strong>Fórmula</strong></div>
-        <div class="col-2"><strong>% Fórmula por animal</strong></div>
+        <div class="col-2"><strong>Massa da fórmula (Kg)</strong></div>
         <div class="col-2"><strong>Peso do animal (kg)</strong></div>
       </div>
 
@@ -181,23 +181,23 @@ const submit = async () => {
         <div class="col-2">
           <div class="input-group">
             <input v-model="detail.formula_mass_per_animal" step="0.01" class="form-control" v-maska data-maska="###.##"
-            placeholder="% Fórmula"
+            placeholder="Massa"
             :class="{ 'is-invalid': v$.details.$each.$response.$data[index].formula_mass_per_animal.$error && submitted }" />
-            <span class="input-group-text">%</span>
+            <span class="input-group-text">Kg</span>
           </div>
           <div v-if="!v$.details.$each.$response.$data[index].formula_mass_per_animal.required && submitted"
             class="invalid-feedback d-block">
             Campo obrigatório
           </div>
-          <div v-else-if="!v$.details.$each.$response.$data[index].formula_mass_per_animal.maxValue && submitted"
+          <div v-else-if="!v$.details.$each.$response.$data[index].formula_mass_per_animal.minValue && submitted"
             class="invalid-feedback d-block">
-            Valor máximo: 100
+            Valor mínimo: 1
           </div>
         </div>
         <div class="col-2">
           <div class="input-group">
             <input v-model="detail.animal_weight" type="text" step="0.01" class="form-control"
-              v-maska data-maska="###.##"
+              v-maska data-maska="###.#"
               placeholder="Peso"
               :class="{ 'is-invalid': v$.details.$each.$response.$data[index].animal_weight.$error && submitted }" />
             <span class="input-group-text">kg</span>

@@ -28,3 +28,10 @@ def get_grouped_not_used_device_pins(
     service: DevicePinRepository = Depends(get_device_pin_service)
 ):
     return ApiResponse(success=True, data=service.get_grouped_not_used_device_pins(), error=None)
+
+@router_device_pins.router.patch("/{device_pin_id}/toggle")
+def toggle_device_pin(
+    device_pin_id: int,
+    service: DevicePinRepository = Depends(get_device_pin_service)
+):
+    return ApiResponse(success=True, data=service.toggle_pin(device_pin_id), error=None)

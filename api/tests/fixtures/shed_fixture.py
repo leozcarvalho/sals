@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.shed import ShedRepository
 from src.schemas.shed import ShedCreate
 

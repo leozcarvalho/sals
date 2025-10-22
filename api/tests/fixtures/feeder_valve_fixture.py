@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.feeder_valves import FeederValveRepository
 from src.schemas.feeder_valves import FeederValveCreate
 

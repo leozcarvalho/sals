@@ -12,3 +12,7 @@ class ProductTank(Base, table=True):
 
     device_pin: Optional["DevicePin"] = Relationship(back_populates="product_tanks")
     product: Optional["Product"] = Relationship(back_populates="tanks")
+    kitchen_tanks: Optional[list["KitchenTank"]] = Relationship(
+        back_populates="tank",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )

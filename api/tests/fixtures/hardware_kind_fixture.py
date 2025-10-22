@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.hardware_kind import HardwareKindRepository
 from src.schemas.hardware_kind import HardwareKindBase
 

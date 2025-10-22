@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.product_tank import ProductTankRepository
 from src.schemas.product_tank import ProductTankCreate
 

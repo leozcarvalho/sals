@@ -24,6 +24,7 @@ class DeviceService:
 
 
     def send_value(self, value: str) -> Dict[str, str]:
+        return ApiResponse(success=True, data="teste")
         try:
             url = f"{self.url}?{self.query_string.replace('{value}', str(value))}"
             print(url)

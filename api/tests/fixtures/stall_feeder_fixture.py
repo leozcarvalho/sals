@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.stall_feeder import StallFeederRepository
 from src.schemas.stall_feeder import StallFeederCreate
 

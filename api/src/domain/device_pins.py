@@ -11,21 +11,23 @@ class DevicePin(Base, table=True):
 
     # Identificação do pino
     number: int = Field(nullable=False)  # ex: 1, 2, 3...
-    name: Optional[str] = Field(default=None, max_length=50)  # apelido opcional
+    name: str = Field(nullable=False, max_length=50)
 
     # Estado do pino
     is_active: bool = Field(default=False, nullable=False)  # ligado/desligado
     mode: Optional[str] = Field(default=None, max_length=20)  # opcional
-    svg_region_id: Optional[str] = Field(default=None, max_length=100)
-    activation_color: Optional[str] = Field(default=None, max_length=20)  # ex: "#FF0000"
 
     installation: Optional["Installation"] = Relationship(
         back_populates="pins",
-        sa_relationship_kwargs={"lazy": "selectin"}  # evita cartesian product
+        sa_relationship_kwargs={"lazy": "selectin"}
     )
 
-    # Relação com tanques de produto
     product_tanks: Optional[List["ProductTank"]] = Relationship(
+        back_populates="device_pin",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
+    feeder_valves: Optional[List["FeederValve"]] = Relationship(
         back_populates="device_pin",
         sa_relationship_kwargs={"lazy": "selectin"}
     )

@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.feeding_curve import FeedingCurveRepository
 from src.schemas.feeding_curve import FeedingCurveCreate
 

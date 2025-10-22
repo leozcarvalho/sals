@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.profile import ProfileRepository
 from src.domain.profile import Profile
 from src.domain.permissions import PermissionEnum

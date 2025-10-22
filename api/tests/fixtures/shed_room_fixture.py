@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.shed_room import ShedRoomRepository
 from src.schemas.shed_room import ShedRoomCreate
 

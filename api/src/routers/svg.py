@@ -1,6 +1,7 @@
 from fastapi import Depends
 from src.routers.base_router import BaseRouter
 from src.schemas.svg import SVGRead, SVGCreate, SVGUpdate, SVGFilter
+from src.schemas.api_response import ApiResponse
 from src.cruds.svg import SvgRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
@@ -20,3 +21,15 @@ router_svgs = BaseRouter(
     tags=["SVGs"],
     default_permission=PermissionEnum.MANAGE_SVG,
 )
+
+@router_svgs.router.get("/{svg_id}/options")
+def get_svg(svg_id: int, service: SvgRepository = Depends(get_svg_service), current_user = Depends(get_current_user)):
+    router_svgs._check_permission(current_user, "read")
+    data = service.get_options(svg_id)
+    return ApiResponse(success=True, data=data, error=None)
+
+@router_svgs.router.get("/owner/{owner_type}/{owner_id}")
+def get_svg_by_owner(owner_type: str, owner_id: int, service: SvgRepository = Depends(get_svg_service), current_user = Depends(get_current_user)):
+    router_svgs._check_permission(current_user, "read")
+    svg_id = service.get_owner_svg_id(owner_type, owner_id)
+    return ApiResponse(success=True, data={"svg_id": svg_id}, error=None)

@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.installations import InstallationRepository
 from src.schemas.installations import InstallationBase
 

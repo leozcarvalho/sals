@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.kitchen import KitchenRepository
 from src.schemas.kicthen import KitchenCreate
 

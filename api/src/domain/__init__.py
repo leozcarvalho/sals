@@ -21,6 +21,7 @@ from .formula_detail import FormulaDetail
 from .feeding_curve import FeedingCurve
 from .feeding_curve_detail import FeedingCurveDetail
 from .svg import SVG
+from .svg_region import SVGRegion
 
 __all__ = [
     "Profile",
@@ -46,6 +47,7 @@ __all__ = [
     "FeedingCurve",
     "FeedingCurveDetail",
     "SVG",
+    "SVGRegion",
 ]
 
 for model_name in __all__:

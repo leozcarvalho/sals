@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class SVGBase(BaseModel):
@@ -19,4 +19,6 @@ class SVGRead(SVGBase, GlobalFields):
     owner_name: Optional[str] = None
 
 class SVGFilter(BaseFilter):
-    pass
+    name: Optional[str] = None
+    owner_type: Optional[str] = None
+    owner_id: Optional[int] = None

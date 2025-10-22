@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.hardware_device import HardwareDeviceRepository
 from src.schemas.hardware_device import HardwareDeviceCreate
 

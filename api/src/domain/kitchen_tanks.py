@@ -9,3 +9,4 @@ class KitchenTank(Base, table=True):
     kitchen_id: int = Field(foreign_key="kitchens.id", nullable=False)
 
     kitchen: Optional["Kitchen"] = Relationship(back_populates="tanks")
+    tank: Optional["ProductTank"] = Relationship(back_populates="kitchen_tanks")

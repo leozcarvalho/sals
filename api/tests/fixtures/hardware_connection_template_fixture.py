@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.hardware_connection_template import HardwareConnectionTemplateRepository
 from src.schemas.hardware_connection_template import HardwareConnectionTemplateBase
 

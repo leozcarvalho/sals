@@ -1,25 +1,35 @@
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
 import { useRoute } from "vue-router";
-import { ApiClient } from "../../services/genericApi";
+import { SVGClient } from "../../services/svg";
+//import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import Loader from "@/components/Loader.vue";
 import SVGView from "../../components/SVGView.vue";
 
 const route = useRoute();
-const svgsApi = new ApiClient("/svgs");
+const svgsApi = new SVGClient();
+//const svgRegionApi = new ApiClient("/svg-regions");
 
 const loader = ref(false);
 const svg = ref(null);
 const svgView = ref(null);
 const svgId = ref(route.params.id);
-const selectedPin = ref(null);
-const selectedRegion = ref(null); // última região clicada no SVG
+const selectedRegion = ref(null);
+const selectedOption = ref(null);
 
-/** Helpers */
+const variablesOptions = ref([]);
+const associateOptions = ref([]);
+const loadOptions = async () => {
+  if (!svgId.value) return;
+  const res = await svgsApi.options(svgId.value);
+  associateOptions.value = res.data.options || [];
+  variablesOptions.value = res.data.variables || [];
+};
+
 const setStroke = (el, active = false) => {
   el.style.stroke = active ? "yellow" : null;
-  el.style.strokeWidth = active ? "2px" : null;
+  el.style.strokeWidth = active ? "0.5px" : null;
 };
 
 const refresh = async () => {
@@ -27,22 +37,41 @@ const refresh = async () => {
   loader.value.loaderOn();
   const response = await svgsApi.get(svgId.value);
   svg.value = response.data;
-  //nextTick(fillPins);
   loader.value.loaderOff();
 };
 
 const associateRegion = async () => {
   if (!selectedRegion.value) return;
   loader.value.loaderOn();
-  selectedPin.value.svg_region_id = selectedRegion.value.id;
-  handleApiToast(res, `Pino ${selectedPin.value.name} associado à região com sucesso`);
+  selectedRegion.value.setAttribute("data-type", selectedRegion.value.kind);
+  selectedRegion.value.setAttribute("data-value", selectedOption.value || "");
+  if (selectedRegion.value.kind === "text") selectedRegion.value.textContent = selectedOption.value || "";
+
+  // --- 🔹 Remove visualização temporária do stroke antes de salvar ---
+  const originalStroke = selectedRegion.value.style.stroke;
+  const originalStrokeWidth = selectedRegion.value.style.strokeWidth;
+  setStroke(selectedRegion.value, false);
+
+  // atualiza conteúdo do SVG completo
+  const svgEl = document.querySelector("#uploaded-svg");
+  if (svgEl) {
+    svg.value.content = svgEl.outerHTML;
+    const res = await svgsApi.update(svgId.value, svg.value);
+    if (res.success) {
+      handleApiToast(res, `Região atualizada e salva com sucesso`);
+      await refresh();
+    }
+  }
+
+  // 🔹 Restaura o contorno visual (apenas visual, não salvo)
+  selectedRegion.value.style.stroke = originalStroke;
+  selectedRegion.value.style.strokeWidth = originalStrokeWidth;
+
   resetSelection();
-  await refresh();
   loader.value.loaderOff();
 };
 
-/** SVG */
-function enableRegionSelection() {
+const enableRegionSelection = () => {
   const svgEl = document.querySelector('#uploaded-svg');
   if (!svgEl) return;
 
@@ -50,124 +79,92 @@ function enableRegionSelection() {
     if (e.target.tagName.toLowerCase() === "svg") return;
 
     if (selectedRegion.value) setStroke(selectedRegion.value, false);
-    console.log("selected region", e.target.outerHTML);
     selectedRegion.value = e.target;
+
+    if (e.target.tagName.toLowerCase() === "text") selectedRegion.value.kind = "text";
+    else selectedRegion.value.kind = "pin";
+
     setStroke(e.target, true);
 
-    document.querySelector("#associate-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-}
-
-function fillPins() {
-  const svgEl = document.querySelector('#uploaded-svg');
-  if (!svgEl || !installation.value) return;
-
-  installation.value.pins.forEach(pin => {
-    const el = svgEl.querySelector(`[id="${pin.svg_region_id}"]`);
-    const btn = document.querySelector(`#pin-btn-${pin.id}`);
-
-    if (el) {
-      // define a cor do SVG
-      el.style.fill = pin.activation_color || (pin.svg_region_id ? '#4CAF50' : '#E74C3C');
-      el.style.cursor = "pointer";
-
-      // --- Hover na região do SVG ---
-      el.onmouseenter = () => {
-        setStroke(el, true);
-        if (btn) btn.classList.add("btn-outline-warning");
-      };
-      el.onmouseleave = () => {
-        setStroke(el, false);
-        if (btn) btn.classList.remove("btn-outline-warning");
-      };
-    }
-
-    if (btn && el) {
-      // --- Hover no botão ---
-      btn.onmouseenter = () => setStroke(el, true);
-      btn.onmouseleave = () => setStroke(el, false);
+    const modalEl = document.getElementById('modal-associate');
+    if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
     }
   });
 }
 
 const resetSelection = () => {
   if (selectedRegion.value) setStroke(selectedRegion.value, false);
-  selectedPin.value = null;
   selectedRegion.value = null;
 };
 
 onMounted(async () => {
   await refresh();
+  await loadOptions();
   nextTick(() => {
-    //fillPins();
     enableRegionSelection();
   });
 });
 
-const pinStyle = (pin) => {
-  if (selectedRegion.value && pin.svg_region_id) {
-    return { backgroundColor: "#6c757d" }; // cinza no modo associação
-  }
-
-  // Se tiver activation_color cadastrado, usa ele
-  if (pin.activation_color && pin.svg_region_id) {
-    return { backgroundColor: pin.activation_color };
-  }
-
-  // fallback: verde se associado, vermelho se não
-  return { backgroundColor: pin.svg_region_id ? "#4CAF50" : "#E74C3C" };
-};
-
-function getRegionPreviewHtml(element, width = 200, height = 100) {
+const getRegionPreviewHtml = (element, width = 200, height = 100) => {
   if (!element) return "";
-
-  // calcula bbox do elemento para ajustar o viewBox
   const bbox = element.getBBox();
-  const padding = 5; // opcional, deixa espaço em volta
-
+  const padding = 5;
   const viewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`;
 
+  // 🔹 Clona o elemento para evitar modificar o original
+  const clone = element.cloneNode(true);
+  clone.style.stroke = "none";
+  clone.style.strokeWidth = "0";
+
   return `<svg width="${width}" height="${height}" viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
-            ${element.outerHTML}
+            ${clone.outerHTML}
           </svg>`;
-}
+};
 </script>
 
 <template>
-  <div class="modal fade" id="modal-confirm" tabindex="-1">
+  <div class="modal fade" id="modal-associate" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">Confirmar Ação</div>
+        <div class="modal-header">Associar Região</div>
         <div class="modal-body">
-          Associar {{ selectedPin?.name }} à região selecionada?
+          <div class="bg-white border p-3 container text-center">
+            <div v-html="getRegionPreviewHtml(selectedRegion)"></div>
+          </div>
+          <div class="mt-3">
+            <label for="associate-option" class="form-label">Associar à:</label>
+            <select id="associate-option" class="form-select" v-model="selectedOption" v-if="selectedRegion?.kind === 'text'">
+              <option value="" disabled>Selecione uma opção</option>
+              <option v-for="option in variablesOptions" :key="option.key" :value="option.key">
+                {{ option.label }}
+              </option>
+            </select>
+            <select id="associate-option" class="form-select" v-model="selectedOption" v-else>
+              <option value="" disabled>Selecione uma opção</option>
+              <option v-for="option in associateOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal" @click="resetSelection">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">
             Cancelar
           </button>
-          <button class="btn btn-danger" data-bs-dismiss="modal" @click="associatePin">
+          <button class="btn btn-danger" data-bs-dismiss="modal" @click="associateRegion">
             Confirmar
           </button>
         </div>
       </div>
     </div>
   </div>
-
   <Loader ref="loader" />
-
-  <div class="device-page container mt-5 text-center">
+  <div class="container mt-5 text-center">
     <h2>Configurar SVG</h2>
     <SVGView ref="svgView" :svg="svg?.content" />
   </div>
-  <div class="container mt-4" id="associate-section">
-    <div v-if="selectedRegion">
-      <h3>Associar Região</h3>
-      <div class="bg-light border p-3 container text-center">
-        <div v-html="getRegionPreviewHtml(selectedRegion)"></div>
-      </div>
-    </div>
-  </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

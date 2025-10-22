@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.hardware_point_types import HardwarePointTypeRepository
 from src.schemas.hardware_point_types import HardwarePointTypeCreate
 

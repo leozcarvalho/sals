@@ -28,6 +28,7 @@ from tests.fixtures.product_tank_fixture import create_product_tank
 from tests.fixtures.formula_fixture import create_formula
 from tests.fixtures.feeding_curve_fixture import create_feeding_curve
 from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_detail
+from tests.fixtures.svg_fixture import create_svg
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ def create_users(db):
 
 def create_hardware_point_types(db, user):
     create_hardware_point_type(db, actor=user)
-    create_hardware_point_type(db, actor=user)
+    create_hardware_point_type(db, actor=user, points_quantity=1, kind="bit")
     create_hardware_point_type(db, actor=user, points_quantity=16, kind="bit")
     logger.info("[SEED] Hardware Point Types criados")
 
@@ -113,9 +114,6 @@ def create_hardware_connection_templates(db, user):
     create_hardware_connection_template(db, actor=user, name="Template de Conexão Avançado", template_url="http://{ip}/get", query_string="peso")
 
 def create_hardware_devices(db, user):
-    #svg em /assets
-    with open(Path(__file__).parent.parent.parent / "assets" / "example.svg", "r") as f:
-        svg_example = f.read()
     create_hardware_device(
         db,
         actor=user,
@@ -149,8 +147,8 @@ def create_installations(db, user):
 def create_kitchens(db, user):
     global PINS_COUNT
     create_kitchen(db, actor=user, name="CZ01", shaker_pin_id=1, pump_pin_id=2, scale_pin_id=3)
-    create_kitchen(db, actor=user, name="CZ02", shaker_pin_id=4, pump_pin_id=5, scale_pin_id=6)
-    PINS_COUNT = 7
+    #create_kitchen(db, actor=user, name="CZ02", shaker_pin_id=4, pump_pin_id=5, scale_pin_id=6)
+    PINS_COUNT = 4
     logger.info("[SEED] Cozinhas criadas")
 
 
@@ -187,7 +185,7 @@ def create_products(db, user):
     create_product(db, actor=user, name="Água", description="Água natural", moisture_percentage=0, kind="liquid", density=1000, is_active=True)
     create_product(db, actor=user, name="Milho", description="Milho em grão", moisture_percentage=12, kind="solid", density=600, is_active=True)
     create_product(db, actor=user, name="Soja", description="Soja em grão", moisture_percentage=0, kind="solid", density=800, is_active=True)
-    create_product(db, actor=user, name="Farelo de soja", description="Farelo de soja", moisture_percentage=10, kind="solid", density=500, is_active=True)
+    create_product(db, actor=user, name="Sorgo", description="Sorgo em grão", moisture_percentage=10, kind="solid", density=500, is_active=True)
     logger.info("[SEED] Produtos criados")
 
 
@@ -196,7 +194,7 @@ def create_product_tanks(db, user):
     create_product_tank(db, actor=user, name="T01", description="Tanque para água", pin_id=PINS_COUNT, product_id=1)
     create_product_tank(db, actor=user, name="T02", description="Tanque para milho", pin_id=PINS_COUNT+1, product_id=2)
     create_product_tank(db, actor=user, name="T03", description="Tanque para soja", pin_id=PINS_COUNT+2, product_id=3)
-    create_product_tank(db, actor=user, name="T04", description="Tanque para farelo de soja", pin_id=PINS_COUNT+3, product_id=4)
+    create_product_tank(db, actor=user, name="T04", description="Tanque para sorgo", pin_id=PINS_COUNT+3, product_id=4)
     logger.info("[SEED] Tanques de produtos criados")
 
 def create_formulas(db, user):
@@ -215,9 +213,22 @@ def create_formulas(db, user):
 def create_kitchen_tanks(db, user):
     create_kitchen_tank(db, actor=user, product_tank_id=1, kitchen_id=1)
     create_kitchen_tank(db, actor=user, product_tank_id=2, kitchen_id=1)
-    create_kitchen_tank(db, actor=user, product_tank_id=3, kitchen_id=2)
-    create_kitchen_tank(db, actor=user, product_tank_id=4, kitchen_id=2)
+    create_kitchen_tank(db, actor=user, product_tank_id=3, kitchen_id=1)
+    create_kitchen_tank(db, actor=user, product_tank_id=4, kitchen_id=1)
     logger.info(f"[SEED] Tanques de cozinha criados")
+
+def create_svgs(db, user):
+    #svg em /assets
+    with open(Path(__file__).parent.parent.parent / "assets" / "CZ1.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Cozinha", owner_type="kitchens", owner_id=1, content=svg_example)
+    with open(Path(__file__).parent.parent.parent / "assets" / "G1.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Galpão", owner_type="sheds", owner_id=1, content=svg_example)
+    with open(Path(__file__).parent.parent.parent / "assets" / "placa.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Placa 32 bits", owner_type="installations", owner_id=1, content=svg_example)
+    logger.info(f"[SEED] SVGs criados")
 
 def create_feeding_curves(db, user):
     for i in range(1, 3):
@@ -252,6 +263,7 @@ def seed():
             create_formulas(db, user)
             create_kitchen_tanks(db, user)
             create_feeding_curves(db, user)
+            create_svgs(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
             logger.error(f"[SEED] Erro ao executar seed: {e}")

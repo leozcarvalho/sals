@@ -1,4 +1,3 @@
-import pytest
 from src.cruds.formula_detail import FormulaDetailRepository
 from src.schemas.formula_detail import FormulaDetailCreate
 
