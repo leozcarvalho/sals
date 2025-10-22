@@ -21,32 +21,6 @@ export default defineConfig({
         short_name: 'SALS',
         description: 'SALS - Sistema de Automação para alimentação de suínos',
         theme_color: '#FF9900',
-        /**
-        icons: [
-          {
-            src: 'android-icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'android-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'android-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'android-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          }
-        ]
-         */
       }
     })
   ],
@@ -58,6 +32,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ["fast-deep-equal"],
   },
+  base: './',      // ← importante para produção estática
   server: {
     host: true,
   },
