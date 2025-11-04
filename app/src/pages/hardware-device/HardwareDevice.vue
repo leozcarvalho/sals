@@ -64,7 +64,7 @@ const showSvgPreviewModal = (svg) => {
     { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
     { name: 'connection_template_id', label: 'Template', type: 'select', options: connectionTemplatesOptions, rules: 'required' },
     { name: 'hardware_kind_id', label: 'Tipo', type: 'select', options: hardwareKindsOptions, rules: 'required' },
-    { name: 'point_type_id', label: 'Point Type', type: 'select', options: hardwarePointTypesOptions, rules: 'required' },
+    { name: 'point_type_id', label: 'Tipo de Pino', type: 'select', options: hardwarePointTypesOptions, rules: 'required' },
     { name: 'svg_template', label: 'SVG Template', slot: 'svg_template' }
   ]" :api="hardwareDevicesApi" @saved="onHardwareDeviceSaved" @close="hardwareDeviceSelected = null">
     <template #svg_template="{ model }">

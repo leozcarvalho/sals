@@ -28,14 +28,14 @@ class KitchenRepository(Repository):
         self.__check_is_duplicated(values)
         tanks = values.pop("tanks", []) or []
         kitchen = super().save(values, actor)
-        self.__update_tanks(kitchen.id, tanks, actor)
+        if tanks: self.__update_tanks(kitchen.id, tanks, actor)
         return kitchen
 
     def update(self, id: int, values: dict, actor=None):
         self.__check_is_duplicated(values)
         tanks = values.pop("tanks", []) or []
         kitchen = super().update(id, values, actor)
-        self.__update_tanks(kitchen.id, tanks, actor)
+        if tanks: self.__update_tanks(kitchen.id, tanks, actor)
         return kitchen
 
     def __update_tanks(self, kitchen_id: int, tanks: List[KitchenTankCreate], actor=None):

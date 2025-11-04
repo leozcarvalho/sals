@@ -14,8 +14,9 @@ def test_create_product(product_repository):
 
 def test_update_product(session, product_repository):
     product = create_product(session)
-    updated_product = product_repository.update(product.id, {"name": "Água Atualizada"})
-    assert updated_product.name == "Água Atualizada"
+    with pytest.raises(exc.InvalidData) as exc_info:
+        product_repository.update(product.id, {"name": "Água Modificada"})
+        assert 'Água não pode ser modificada' == str(exc_info.value)
 
 def test_delete_product(session, product_repository):
     product = create_product(session, name="Produto Teste")
@@ -27,4 +28,4 @@ def teste_agua_nao_pode_ser_deletada(session, product_repository):
     product = create_product(session, name="Água")
     with pytest.raises(exc.InvalidData) as exc_info:
         product_repository.delete(product.id)
-    assert str(exc_info.value) == "Água não pode ser excluída"
+    assert 'Água não pode ser modificada' == str(exc_info.value)

@@ -20,6 +20,7 @@ class InstallationUpdate(InstallationBase):
     pass
 
 class Installation(GlobalFields, InstallationBase):
+    hardware_kind: str
     device: HardwareDevice
     pins: List[DevicePin] = []
     binary_value: Optional[str] = None

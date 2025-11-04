@@ -3,7 +3,7 @@ from src.domain.svg import SVG
 from src.cruds.repo import Repository
 from sqlalchemy import select, case
 from src.domain import Kitchen, Shed, DevicePin, Installation, ShedRoom, RoomStall, StallFeeder, FeederValve
-from src.schemas.svg import SVGCreate
+from src.schemas.svg import SVGRead
 from src.domain import exceptions as exc
 
 class SvgRepository(Repository):
@@ -20,18 +20,32 @@ class SvgRepository(Repository):
         if not svg:
             return None
         return svg.id
-    
+
     def svg_with_variables(self, svg_id: int, replace_variables: bool = False):
         svg = self.check_exists(svg_id)
         variables = self.get_variables(svg_id)
+
+        # Necessário para não alterar o conteúdo original do SVG no banco
+        content = svg.content
         if replace_variables:
-            svg.content = self.replace_variables(svg.content, variables)
-        return svg
-    
+            content = self.replace_variables(svg.content, variables)
+
+        return SVGRead(
+            id=svg.id,
+            name=svg.name,
+            owner_type=svg.owner_type,
+            owner_id=svg.owner_id,
+            content=content,
+            created_at=svg.created_at,
+            updated_at=svg.updated_at,
+            created_by=svg.created_by,
+            updated_by=svg.updated_by,
+        )
+
     @staticmethod
     def map_pin_option(pin, label_prefix=""):
         return {
-            "label": f"{label_prefix}{pin.name}" if label_prefix else pin.name,
+            "label": pin.name or pin.arbitrary_name,
             "value": getattr(pin, "id", getattr(pin, "pin_id", None)),
             "is_active": pin.is_active,
         }
@@ -151,4 +165,13 @@ class SvgRepository(Repository):
             for stall in stalls:
                 variables.append(self.map_variable(f"Nome da Baia ({stall.name})", f"B{stall.id}", stall.name))
 
+        
+        if svg.owner_type == "installations":
+            installation = self.db_session.get(Installation, svg.owner_id)
+            if not installation:
+                return []
+            variables.append(self.map_variable("Endereço IP", "IP", installation.ip_address))
+            if installation.hardware_kind == "input":
+                variables.append(self.map_variable("Valor lido", "VAL", installation.last_value))
+        
         return variables

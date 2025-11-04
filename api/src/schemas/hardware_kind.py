@@ -3,7 +3,8 @@ from typing import Optional
 from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class HardwareKindBase(BaseModel):
-    kind: str  # saída digital, balança, etc
+    name: str
+    kind: str
 
 
 class HardwareKindCreate(HardwareKindBase):

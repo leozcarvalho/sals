@@ -15,7 +15,6 @@ class DevicePin(Base, table=True):
 
     # Estado do pino
     is_active: bool = Field(default=False, nullable=False)  # ligado/desligado
-    mode: Optional[str] = Field(default=None, max_length=20)  # opcional
 
     installation: Optional["Installation"] = Relationship(
         back_populates="pins",
@@ -31,3 +30,7 @@ class DevicePin(Base, table=True):
         back_populates="device_pin",
         sa_relationship_kwargs={"lazy": "selectin"}
     )
+
+    @property
+    def arbitrary_name(self) -> str:
+        return f"D{self.installation_id}P{self.number}"

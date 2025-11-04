@@ -105,8 +105,8 @@ def create_hardware_point_types(db, user):
     logger.info("[SEED] Hardware Point Types criados")
 
 def create_hardware_kinds(db, user):
-    create_hardware_kind(db, user)
-    create_hardware_kind(db, user, kind="Entrada balança")
+    create_hardware_kind(db, user, name='Saída', kind="output")
+    create_hardware_kind(db, user, name='Entrada', kind="input")
 
 def create_hardware_connection_templates(db, user):
     create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
@@ -139,7 +139,7 @@ def create_hardware_devices(db, user):
 
 def create_installations(db, user):
     create_installation(db, actor=user, name="VA32", ip_address="192.168.60.100", device_id=1)
-    create_installation(db, actor=user, name="Pesagem", ip_address="192.168.60.254", device_id=2)
+    create_installation(db, actor=user, name="Pesagem", ip_address="192.168.60.250", device_id=2)
     create_installation(db, actor=user, name="RE16", ip_address="192.168.60.252", device_id=3)
     logger.info("[SEED] Instalações criadas")
 
@@ -228,6 +228,9 @@ def create_svgs(db, user):
     with open(Path(__file__).parent.parent.parent / "assets" / "placa.svg", "r") as f:
         svg_example = f.read()
     create_svg(db, actor=user, name="SVG Placa 32 bits", owner_type="installations", owner_id=1, content=svg_example)
+    with open(Path(__file__).parent.parent.parent / "assets" / "balanca.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Balança", owner_type="installations", owner_id=2, content=svg_example)
     logger.info(f"[SEED] SVGs criados")
 
 def create_feeding_curves(db, user):

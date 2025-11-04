@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, nextTick, defineExpose } from "vue";
 
 const props = defineProps({
   svg: { type: String, default: "" },
@@ -26,6 +26,28 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => props.svg,
+  async (newVal) => {
+    svgContent.value = newVal || "";
+    await nextTick();
+    injectSvg();
+  },
+  { immediate: true }
+);
+
+const injectSvg = () => {
+  const container = svgContainer.value?.querySelector(".svg-inner");
+  if (!container || !svgContent.value) return;
+  container.innerHTML = svgContent.value;
+
+  const svgEl = container.querySelector("svg");
+  if (svgEl) {
+    svgEl.id = "uploaded-svg";
+    svgEl.style.height = "auto";
+  }
+}
+
 async function loadFromSrc(url) {
   try {
     const res = await fetch(url);
@@ -40,6 +62,8 @@ async function loadFromSrc(url) {
 onMounted(async () => {
   if (!svgContent.value && props.autoFetch && props.src) {
     await loadFromSrc(props.src);
+  } else {
+    injectSvg();
   }
 });
 
@@ -140,7 +164,6 @@ const onDoubleTap = (() => {
     <div
       id="uploaded-svg"
       class="svg-inner"
-      v-html="svgContent"
       :style="{
         transform: `scale(${scale})`,
         transformOrigin: '0 0',
@@ -151,8 +174,6 @@ const onDoubleTap = (() => {
 
 <style scoped>
 .svg-wrapper {
-  width: 100%;
-  height: 100vh;
   overflow: auto;
   touch-action: none; /* necessário para gestos customizados */
   -webkit-overflow-scrolling: touch;

@@ -32,6 +32,8 @@ const HardwareDevices = () => import("@/pages/hardware-device/HardwareDevice.vue
 
 const Installations = () => import("@/pages/installations/Installations.vue");
 const Installation = () => import("@/pages/installations/Installation.vue");
+const InstallationValves = () => import("@/pages/installations/InstallationValves.vue");
+
 const SettingsRoutines = () => import("@/pages/settings/Routines.vue");
 
 const Profiles = () => import("@/pages/profiles/Profiles.vue");
@@ -212,6 +214,12 @@ const routes = [
         meta: { requiresAuth: true },
         component: Installation,
       },
+      {
+        name: "installation-valves",
+        path: "/installation-valves/:id?",
+        meta: { requiresAuth: true },
+        component: InstallationValves,
+      }
     ]
   },
   {

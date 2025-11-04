@@ -2,7 +2,8 @@ from src.cruds.hardware_kind import HardwareKindRepository
 from src.schemas.hardware_kind import HardwareKindBase
 
 HARDWARE_KIND = HardwareKindBase(
-    kind="Saída Digital",
+    name="Entrada",
+    kind="output",
 )
 
 def create_hardware_kind(session, actor=None, **overrides):

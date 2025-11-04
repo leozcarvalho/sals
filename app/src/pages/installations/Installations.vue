@@ -76,6 +76,13 @@ onMounted(async () => {
       >
         <mdicon name="tune-vertical-variant" />
       </button>
+      <button 
+        class="btn btn-lg btn-primary text-white" 
+        @click="router.push({ name: 'installation-valves', params: { id: row.id } })"
+        title="Editar válvulas"
+      >
+        <mdicon name="cog" />
+      </button>
     </template>
   </BaseList>
 </template>

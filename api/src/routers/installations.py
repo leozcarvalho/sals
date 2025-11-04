@@ -1,8 +1,10 @@
-from fastapi import Depends
+from fastapi import Depends, Body
 from src.routers.dependencies import get_current_user
+from typing import List
 
 from src.core.db import get_session
 from src.schemas.installations import Installation, InstallationCreate, InstallationUpdate, InstallationFilter
+from src.schemas.device_pins import DevicePinBulkUpdate
 from src.schemas.api_response import ApiResponse
 from src.schemas.users import UserBase
 from src.cruds.installations import InstallationRepository
@@ -24,17 +26,36 @@ router_installations = BaseRouter(
     default_permission=PermissionEnum.MANAGE_INSTALLATION,
 )
 
-@router_installations.router.post("/{installation_id}/health-check")
-def health_check(installation_id: int, service: InstallationRepository = Depends(get_installation_service), current_user: UserBase = Depends(get_current_user)):
-    service.health_check(installation_id, current_user)
-    return ApiResponse(success=True)
+@router_installations.router.post("/{installation_id}/action/{action}")
+def exec_installation_action(
+    installation_id: int,
+    action: str,
+    payload: dict = Body(default={}),
+    service: InstallationRepository = Depends(get_installation_service),
+    current_user: UserBase = Depends(get_current_user),
+):
+    """
+    Executa uma ação genérica em uma instalação.
+    Exemplo de uso:
+      POST /installations/1/action/healthcheck
+      POST /installations/1/action/restart
+      POST /installations/1/action/tare
+      POST /installations/1/action/calibrate { "weight": 10.0 }
+      POST /installations/1/action/send_value { "value": "0101" }
+    """
+    result = service.exec_action(installation_id, action, current_user, **payload)
+    return result
 
-@router_installations.router.post("/{installation_id}/restart")
-def restart_device(installation_id: int, service: InstallationRepository = Depends(get_installation_service), current_user: UserBase = Depends(get_current_user)):
-    service.restart_device(installation_id, current_user)
-    return ApiResponse(success=True)
 
-@router_installations.router.post("/{installation_id}/toggle-pin/{pin_number}")
-def toggle_pin(installation_id: int, pin_number: int, service: InstallationRepository = Depends(get_installation_service), current_user: UserBase = Depends(get_current_user)):
-    service.toggle_pin(installation_id, pin_number, current_user)
-    return ApiResponse(success=True)
+@router_installations.router.put("/{installation_id}/update-device-pins")
+def update_device_pins(
+    installation_id: int,
+    device_pins: List[DevicePinBulkUpdate],
+    service: InstallationRepository = Depends(get_installation_service),
+    current_user: UserBase = Depends(get_current_user),
+):
+    """
+    Atualiza os pinos de dispositivo de uma instalação.
+    """
+    result = service.update_device_pins(installation_id, device_pins, current_user)
+    return ApiResponse(success=True, data=result, error=None)

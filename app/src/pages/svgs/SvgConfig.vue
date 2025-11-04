@@ -86,7 +86,8 @@ const enableRegionSelection = () => {
     if (selectedRegion.value) setStroke(selectedRegion.value, false);
     selectedRegion.value = e.target;
 
-    if (e.target.tagName.toLowerCase() === "text") selectedRegion.value.kind = "text";
+    const textTags = ["text", "tspan", "textpath", "title", "desc"];
+    if (textTags.includes(e.target.tagName.toLowerCase())) selectedRegion.value.kind = "text";
     else selectedRegion.value.kind = "pin";
 
     setStroke(e.target, true);

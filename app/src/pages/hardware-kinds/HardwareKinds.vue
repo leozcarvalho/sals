@@ -3,7 +3,6 @@ import { reactive, ref } from "vue";
 import BaseList from "../../components/BaseList.vue";
 import { ApiClient } from "../../services/genericApi";
 import BaseModalForm from "../../components/BaseModalForm.vue";
-import { required } from "@vuelidate/validators";
 
 const hardwareKindsApi = new ApiClient("/hardware-kinds");
 
@@ -11,6 +10,7 @@ const baseList = ref(null);
 
 const cols = reactive([
   { name: "#", field: "id", sort: "" },
+  { name: "Nome", field: "name", sort: "" },
   { name: "Tipo", field: "kind", sort: "" },
 ]);
 
@@ -29,7 +29,8 @@ const modalForm = ref(null);
     ref="modalForm" 
     v-model="hardwareKindSelected" 
     :fields="[
-      { name: 'kind', label: 'Tipo', type: 'text', rules: 'required' }
+      { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
+      { name: 'kind', label: 'Tipo', type: 'select', options: [{ label: 'Saída', value: 'output' }, { label: 'Entrada', value: 'input' }], rules: 'required' }
     ]" 
     :api="hardwareKindsApi" 
     @saved="onHardwareKindSaved" 

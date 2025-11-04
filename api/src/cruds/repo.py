@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, asc, desc, text, true
 from src.domain import exceptions as exc
@@ -147,6 +148,7 @@ class Repository:
         obj = self.check_exists(id)
         if actor:
             values['updated_by'] = str(actor.id)
+            values['updated_at'] = datetime.now(timezone.utc)
         if obj:
             for key, value in values.items():
                 setattr(obj, key, value)

@@ -3,7 +3,6 @@ parallel = true
 relative_files = true
 source = src
 omit = 
-    */schemas/*
     */__init__.py
     */routers/*
     */core/*

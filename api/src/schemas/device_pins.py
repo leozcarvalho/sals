@@ -4,7 +4,6 @@ from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class DevicePinBase(BaseModel):
     name: str
-    mode: Optional[str] = "output"  # "input" ou "output"
     is_active: Optional[bool] = False
 
 class DevicePinCreate(DevicePinBase):
@@ -14,10 +13,15 @@ class DevicePinCreate(DevicePinBase):
 class DevicePinUpdate(DevicePinBase):
     pass
 
+class DevicePinBulkUpdate(BaseModel):
+    id: int
+    name: str
+
 class DevicePin(DevicePinCreate, GlobalFields):
     is_active: bool
     in_use: Optional[bool] = False
     installation_name: Optional[str] = None
+    arbitrary_name: Optional[str] = None
 
 
 class DevicePinFilter(BaseFilter):

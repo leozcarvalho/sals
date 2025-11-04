@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from urllib.parse import urlencode
+from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -9,7 +9,7 @@ from src.cruds.hardware_device import HardwareDeviceRepository
 from src.cruds.device_pins import DevicePinRepository
 from src.adapters.device_adapter import DeviceService
 from src.schemas.users import UserBase
-from src.schemas.device_pins import DevicePinCreate
+from src.schemas.device_pins import DevicePinCreate, DevicePinBulkUpdate
 from src.domain import exceptions as exc
 
 
@@ -64,6 +64,12 @@ class InstallationRepository(Repository):
         installation = super().save(values, actor)
         self.create_pins(installation.id, installation.device_id, actor)
         return installation
+    
+    def update_device_pins(self, installation_id: int, device_pins: List[DevicePinBulkUpdate], actor=None):
+        self.check_exists(installation_id)
+        for pin_data in device_pins:
+            self.device_pin_repo.update(pin_data.id, pin_data.model_dump(exclude={"id"}), actor)
+        return True
 
     # ---------- Device Status ----------
 
@@ -85,27 +91,31 @@ class InstallationRepository(Repository):
             self.set_online_device(id, actor)
             return True
         self.set_offline_device(id, actor)
-        raise exc.NotFound("Dispositivo offline ou inacessível.")
 
-    # ---------- Device Operations ----------
+    def _handle_response(self, response, id: int, method: str, actor: UserBase):
+        self._handle_device_response(response, id, actor)
+        match method:
+            case "restart":
+                self.device_pin_repo.deactivate_all_pins(id, actor)
 
-    def health_check(self, id: int, actor: UserBase):
+    def exec_action(self, id: int, action: str, actor= None, **kwargs):
+        """
+        Executa uma ação genérica em uma instalação.
+        
+        :param id: ID da instalação
+        :param action: nome do método a ser executado no DeviceService
+                       ex: 'healthcheck', 'tare', 'restart', 'calibrate', 'send_value', 'read_value'
+        :param actor: usuário que executa a ação
+        :param kwargs: parâmetros adicionais para o método (ex: weight, value)
+        """
         installation = self.check_exists(id)
         device_service = self._get_device_service(installation)
-        response = device_service.healthcheck()
-        return self._handle_device_response(response, id, actor)
-
-    def restart_device(self, id: int, actor: UserBase):
-        installation = self.check_exists(id)
-        device_service = self._get_device_service(installation)
-        response = device_service.restart()
-        self.device_pin_repo.deactivate_all_pins(installation.id, actor)
-        return self._handle_device_response(response, id, actor)
-
-    def toggle_pin(self, id: int, pin_id: int, actor: UserBase):
-        installation = self.check_exists(id)
-        self.device_pin_repo.toggle_pin(pin_id, actor)
-        installation = self.get(id, actor)
-        device_service = self._get_device_service(installation)
-        response = device_service.send_value(installation.decimal_value)
-        return self._handle_device_response(response, id, actor)
+        method = getattr(device_service, action, None)
+        if not method:
+            raise exc.NotFound(f"Ação '{action}' não encontrada no DeviceService")
+        try:
+            response = method(**kwargs) if kwargs else method()
+        except Exception as e:
+            raise exc.ConnectionError(f"Falha ao executar '{action}' no dispositivo {installation.ip_address}: {e}")
+        self._handle_response(response, id, action, actor)
+        return response

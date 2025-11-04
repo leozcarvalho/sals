@@ -10,6 +10,7 @@ class Installation(Base, table=True):
     name: str = Field(nullable=False, max_length=255)
     last_seen: Optional[str] = Field(default=None)
     is_online: bool = Field(default=False, nullable=False)
+    last_value: Optional[str] = Field(default="0")
     device_id: int = Field(foreign_key="devices.id", nullable=False)
     healthcheck_priority_id: int = Field(foreign_key="healthcheck_priorities.id", nullable=True)
 
@@ -34,3 +35,7 @@ class Installation(Base, table=True):
     @property
     def decimal_value(self) -> int:
         return int(self.binary_value, 2)
+    
+    @property
+    def hardware_kind(self) -> "HardwareKind":
+        return self.device.hardware_kind.kind

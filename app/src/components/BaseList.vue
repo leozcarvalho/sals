@@ -5,6 +5,9 @@ import { useRouter } from "vue-router";
 import { handleApiToast } from "../components/toast";
 import { Dataset, DatasetItem } from "vue-dataset";
 import { can } from "../helpers/userSession";
+import Loader from "@/components/Loader.vue";
+
+const loader = ref(false);
 
 const props = defineProps({
   api: { type: Object, required: true },
@@ -36,9 +39,11 @@ const router = useRouter();
 
 // Funções
 const refresh = async () => {
+  loader.value.loaderOn();
   const res = await props.api.getList(props.filter);
   items.value = res.data.items || res.data.data?.items || [];
   totalRows.value = res.data.count || res.data.data?.count || 0;
+  loader.value.loaderOff();
 };
 
 defineExpose({
@@ -94,6 +99,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <Loader ref="loader" />
   <div class="content" v-if="props.permission === null || can(props.permission)">
     <BaseBlock :title="title" content-full>
       <!-- Ações -->

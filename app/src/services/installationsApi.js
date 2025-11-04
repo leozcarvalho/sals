@@ -5,27 +5,18 @@ class InstallationClient extends ApiClient {
     super("/installations");
   }
 
-  async healthCheck(id) {
+  async execAction(id, action, payload = {}) {
     try {
-      const response = await this.api.post(`${this.path}/${id}/health-check`);
+      const response = await this.api.post(`${this.path}/${id}/action/${action}`, payload);
       return response.data;
     } catch (error) {
       return error.response;
     }
   }
 
-  async restart(id) {
+  async updateDevicePins(installationId, data) {
     try {
-      const response = await this.api.post(`${this.path}/${id}/restart`);
-      return response.data;
-    } catch (error) {
-      return error.response;
-    }
-  }
-
-  async togglePin(id, pinNumber) {
-    try {
-      const response = await this.api.post(`${this.path}/${id}/toggle-pin/${pinNumber}`);
+      const response = await this.api.put(`${this.path}/${installationId}/update-device-pins`, data);
       return response.data;
     } catch (error) {
       return error.response;
