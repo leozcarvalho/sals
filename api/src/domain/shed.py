@@ -8,3 +8,4 @@ class Shed(Base, table=True):
     name: str = Field(nullable=False, max_length=100)
 
     rooms: List["ShedRoom"] = Relationship(back_populates="shed")
+    batch: "Batch" = Relationship(back_populates="shed")

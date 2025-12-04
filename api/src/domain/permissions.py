@@ -25,6 +25,8 @@ class PermissionEnum(str, Enum):
     MANAGE_FORMULA = "manage_formula"
     MANAGE_FEEDING_CURVE = "manage_feeding_curve"
     MANAGE_SVG = "manage_svg"
+    MANAGE_BATCH = "manage_batch"
+    MANAGE_MOVIMENT_KIND = "manage_moviment_kind"
 
     @property
     def label(self) -> str:
@@ -53,5 +55,7 @@ class PermissionEnum(str, Enum):
             "manage_formula": "Gerenciar Fórmulas",
             "manage_feeding_curve": "Gerenciar Curvas de Alimentação",
             "manage_svg": "Gerenciar SVGs",
+            "manage_batch": "Gerenciar Lotes",
+            "manage_moviment_kind": "Gerenciar Tipos de Movimentação",
         }
         return labels[self.value]

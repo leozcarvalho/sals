@@ -1,6 +1,6 @@
 from fastapi import Depends
 from src.routers.base_router import BaseRouter
-from src.schemas.feeding_curve import FeedingCurveRead, FeedingCurveCreate, FeedingCurveUpdate, FeedingCurveFilter
+from src.schemas.feeding_curve import FeedingCurve, FeedingCurveCreate, FeedingCurveUpdate, FeedingCurveFilter
 from src.cruds.feeding_curve import FeedingCurveRepository
 from src.core.db import get_session
 from src.routers.dependencies import get_current_user
@@ -11,7 +11,7 @@ def get_feeding_curve_service(session = Depends(get_session)):
 
 router_feeding_curves = BaseRouter(
     prefix="/feeding-curves",
-    read_schema=FeedingCurveRead,
+    read_schema=FeedingCurve,
     create_schema=FeedingCurveCreate,
     update_schema=FeedingCurveUpdate,
     filter_schema=FeedingCurveFilter,

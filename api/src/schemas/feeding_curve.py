@@ -14,7 +14,7 @@ class FeedingCurveCreate(FeedingCurveBase):
 
 class FeedingCurveUpdate(FeedingCurveBase):
     pass
-class FeedingCurveRead(FeedingCurveBase, GlobalFields):
+class FeedingCurve(FeedingCurveBase, GlobalFields):
     pass
 
 class FeedingCurveFilter(BaseFilter):

@@ -22,6 +22,9 @@ from .feeding_curve import FeedingCurve
 from .feeding_curve_detail import FeedingCurveDetail
 from .svg import SVG
 from .svg_region import SVGRegion
+from .batch import Batch
+from .moviment_kinds import MovimentKind
+from .moviment import Moviment
 
 __all__ = [
     "Profile",
@@ -48,6 +51,9 @@ __all__ = [
     "FeedingCurveDetail",
     "SVG",
     "SVGRegion",
+    "Batch",
+    "MovimentKind",
+    "Moviment",
 ]
 
 for model_name in __all__:

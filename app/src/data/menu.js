@@ -23,6 +23,8 @@ export const baseMenu = [
       { name: "Tanques de Produto", to: "product-tanks", icon: "tank", action: "manage_product_tank" },
       { name: "Fórmulas", to: "formulas", icon: "flask", action: "manage_formula" },
       { name: "Curvas de Alimentação", to: "feeding-curves", icon: "chart-line", action: "manage_feeding_curve" },
+      { name: "Lotes", to: "batches", icon: "cube", action: "manage_batch" },
+      { name: "Tipos de Movimentação", to: "moviment-kinds", icon: "swap-horizontal", action: "manage_moviment_kind" },
     ],
   },
   {

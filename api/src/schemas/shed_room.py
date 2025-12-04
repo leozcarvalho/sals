@@ -21,3 +21,4 @@ class ShedRoom(ShedRoomBase, GlobalFields):
 class ShedRoomFilter(BaseFilter):
     name: Optional[str] = None
     shed_id: Optional[int] = None
+    #filtro pra saber se ta no lote

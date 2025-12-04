@@ -56,6 +56,11 @@ const FeedingCurveForm = () => import("@/pages/feeding-curves/FeedingCurveForm.v
 const SvgList = () => import("@/pages/svgs/SvgList.vue");
 const SvgConfig = () => import("@/pages/svgs/SvgConfig.vue");
 
+const Batches = () => import("@/pages/batches/Batches.vue");
+const BatchForm = () => import("@/pages/batches/BatchForm.vue");
+
+const MovimentKinds = () => import("@/pages/moviment-kinds/MovimentKinds.vue");
+
 // Set all routes
 const routes = [
   {
@@ -170,6 +175,24 @@ const routes = [
         name: "feeding-curve-form",
         meta: { requiresAuth: true },
         component: FeedingCurveForm,
+      },
+      {
+        path: "batches",
+        name: "batches",
+        meta: { requiresAuth: true },
+        component: Batches,
+      },
+      {
+        path: "batch-form/:id?",
+        name: "batch-form",
+        meta: { requiresAuth: true },
+        component: BatchForm,
+      },
+      {
+        path: "moviment-kinds",
+        name: "moviment-kinds",
+        meta: { requiresAuth: true },
+        component: MovimentKinds,
       },
     ],
   },

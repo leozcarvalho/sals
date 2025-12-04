@@ -5,6 +5,7 @@ from src.schemas.global_schemas import BaseFilter, GlobalFields
 class RoomStallBase(BaseModel):
     name: str
     shed_room_id: int
+    animals_quantity: Optional[int] = 0
 
 class RoomStallCreate(RoomStallBase):
     pass

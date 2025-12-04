@@ -21,6 +21,8 @@ from .feeding_curve import router_feeding_curves
 from .dashboard import router_dashboard
 from .svg import router_svgs
 from .svg_region import router_svg_region
+from .batch import router_batches
+from .moviment_kinds import router_moviment_kinds
 
 routers = [
     auth_router,
@@ -46,4 +48,6 @@ routers = [
     router_dashboard,
     router_svgs.router,
     router_svg_region.router,
+    router_batches.router,
+    router_moviment_kinds.router,
 ]

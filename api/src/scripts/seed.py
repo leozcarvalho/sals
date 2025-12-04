@@ -28,6 +28,8 @@ from tests.fixtures.product_tank_fixture import create_product_tank
 from tests.fixtures.formula_fixture import create_formula
 from tests.fixtures.feeding_curve_fixture import create_feeding_curve
 from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_detail
+from tests.fixtures.batch_fixture import create_batch
+from tests.fixtures.moviment_kinds_fixture import create_moviment_kind
 from tests.fixtures.svg_fixture import create_svg
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -249,6 +251,17 @@ def create_feeding_curves(db, user):
             )
     logger.info("[SEED] Curvas de alimentação criadas")
 
+def create_moviment_kinds(db, user):
+    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA_LOTE")
+    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA_OUTRO_LOTE")
+    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA_COMPRA_POSTERIOR")
+    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_LOTE")
+    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_VENDA_AVULSA")
+    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_OUTRO_LOTE")
+    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_MORTE")
+    create_moviment_kind(db, actor=user, kind="TRANSFERENCIA", code="MOVE_DETRO_LOTE")
+    logger.info("[SEED] Tipos de movimentação criados")
+
 def seed():
     with session_scope() as db:
         try:
@@ -267,6 +280,7 @@ def seed():
             create_kitchen_tanks(db, user)
             create_feeding_curves(db, user)
             create_svgs(db, user)
+            create_moviment_kinds(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
             logger.error(f"[SEED] Erro ao executar seed: {e}")
