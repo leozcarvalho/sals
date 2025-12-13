@@ -2,6 +2,9 @@ from typing import List, Optional
 from sqlmodel import Field, Relationship
 from src.domain.base import Base
 
+'''
+Não movimentar valor negativo
+'''
 
 class Moviment(Base, table=True):
     __tablename__ = "moviments"

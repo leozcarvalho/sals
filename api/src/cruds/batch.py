@@ -9,12 +9,14 @@ class BatchRepository(Repository):
         super().__init__(Batch, session)
         self.moviment_repo = MovimentRepository(session)
 
+    def exec_batch_moviment(self, batch_id: int, moviment_data: dict, actor=None):
+        moviment_data['batch_id'] = batch_id
+        return self.moviment_repo.save(moviment_data, actor)
+
     def __update_moviments(self, batch_id: int, moviments_data, actor=None):
-        moviments_to_save = [ m for m in moviments_data if not m.get('id') ]
-        for moviment_data in moviments_to_save:
-            moviment_data['batch_id'] = batch_id
-            self.moviment_repo.save(moviment_data, actor)
-    
+        for moviment_data in moviments_data:
+            self.exec_batch_moviment(batch_id, moviment_data, actor)
+
     def save(self, values, actor=None):
         moviments = values.pop('moviments', None) or []
         batch = super().save(values, actor)
@@ -23,5 +25,4 @@ class BatchRepository(Repository):
 
     def update(self, id, values, actor=None):
         moviments = values.pop('moviments', None) or []
-        self.__update_moviments(id, moviments, actor)
         return super().update(id, values, actor)
