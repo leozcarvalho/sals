@@ -1,0 +1,1 @@
+const i=a=>{const t=new Date(a);return t.setHours(t.getHours()-3),t.toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"})};export{i as f};
