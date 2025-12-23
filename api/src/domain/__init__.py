@@ -10,9 +10,9 @@ from .kitchen_tanks import KitchenTank
 from .kitchen import Kitchen
 from .installations import Installation
 from .shed import Shed
-from .shed_room import ShedRoom
-from .room_stall import RoomStall
-from .stall_feeder import StallFeeder
+from .sala import Sala
+from .baia import Baia
+from .comedouro import Comedouro
 from .healthcheck_priority import HealthcheckPriority
 from .product import Product
 from .product_tank import ProductTank
@@ -39,9 +39,9 @@ __all__ = [
     "Kitchen",
     "Installation",
     "Shed",
-    "ShedRoom",
-    "RoomStall",
-    "StallFeeder",
+    "Sala",
+    "Baia",
+    "Comedouro",
     "HealthcheckPriority",
     "Product",
     "ProductTank",

@@ -12,6 +12,11 @@ def test_create_hardware_kind(session):
     assert hw_kind.id is not None
     assert hw_kind.name == "Sensor Teste"
 
+def test_create_hardware_kind_unique_name(session, hardware_kind_repository):
+    create_hardware_kind(session, name="Sensor Teste")
+    with pytest.raises(exc.Conflict):
+       create_hardware_kind(session, name="Sensor Teste")
+
 def test_update_hardware_kind(session, hardware_kind_repository, actor):
     hw_kind = create_hardware_kind(session)
     update_data = {"name": "Sensor Atualizado"}

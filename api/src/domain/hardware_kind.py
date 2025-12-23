@@ -10,6 +10,6 @@ class HardwareKindEnum(str, Enum):
 class HardwareKind(Base, table=True):
     __tablename__ = "hardware_kinds"
 
-    name: str = Field(nullable=False, max_length=255)
+    name: str = Field(nullable=False, max_length=255, unique=True)
     kind: HardwareKindEnum = Field(nullable=False)
     devices: List["Device"] = Relationship(back_populates="hardware_kind")

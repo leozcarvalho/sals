@@ -16,6 +16,13 @@ class Repository:
 
     def get(self, id: int, actor=None):
         return self.db_session.get(self.model, id)
+    
+    def get_unique_fields(self) -> List[str]:
+        unique_fields = []
+        for column in self.model.__table__.columns:
+            if column.unique:
+                unique_fields.append(column.name)
+        return unique_fields
 
     def check_exists(self, id: int, actor=None):
         db_item = self.get(id)
@@ -132,8 +139,17 @@ class Repository:
             return and_(*conditions)
 
 
+    def check_unique_constraints(self, values: dict, id: int = None):
+        unique_fields = self.get_unique_fields()
+        for field in unique_fields:
+            if field in values:
+                existing = self.db_session.query(self.model).filter(getattr(self.model, field) == values[field]).first()
+                if existing and existing.id != id:
+                    raise exc.Conflict(f" '{values[field]}' já existe.")
+    
     def save(self, values: dict, actor=None):
         try:
+            self.check_unique_constraints(values)
             if actor:
                 values['created_by'] = str(actor.id)
                 values['updated_by'] = str(actor.id)
@@ -146,6 +162,7 @@ class Repository:
 
     def update(self, id: int, values: dict, actor=None):
         obj = self.check_exists(id)
+        self.check_unique_constraints(values, id)
         if actor:
             values['updated_by'] = str(actor.id)
             values['updated_at'] = datetime.now(timezone.utc)

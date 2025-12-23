@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.domain.svg import SVG
 from src.cruds.repo import Repository
 from sqlalchemy import select, case
-from src.domain import Kitchen, Shed, DevicePin, Installation, ShedRoom, RoomStall, StallFeeder, FeederValve
+from src.domain import Kitchen, Shed, DevicePin, Installation, Sala, Baia, Comedouro, FeederValve
 from src.schemas.svg import SVGRead
 from src.domain import exceptions as exc
 
@@ -118,12 +118,12 @@ class SvgRepository(Repository):
 
         if svg.owner_type == "sheds":
             shed = self.db_session.get(Shed, svg.owner_id)
-            feeders = self.db_session.query(FeederValve).join(StallFeeder).join(RoomStall).join(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
-            for feeder in feeders:
-                options.append(self.map_pin_option(feeder.device_pin, "Válvula de Alimentação - "))
-            rooms = self.db_session.query(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
-            for room in rooms:
-                options.append(self.map_pin_option(room.entrance_pin, f'Bit de Entrada ({room.name}) - '))
+            comedouros = self.db_session.query(FeederValve).join(Comedouro).join(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
+            for comedouro in comedouros:
+                options.append(self.map_pin_option(comedouro.device_pin, "Válvula de Alimentação - "))
+            salas = self.db_session.query(Sala).filter(Sala.shed_id == shed.id).all()
+            for sala in salas:
+                options.append(self.map_pin_option(sala.entrance_pin, f'Bit de Entrada ({sala.name}) - '))
             return options
 
         if svg.owner_type == "installations":
@@ -147,25 +147,21 @@ class SvgRepository(Repository):
                 ])
 
         if svg.owner_type == "sheds":
-            shed = self.db_session.query(Shed).options(joinedload(Shed.rooms)).filter(Shed.id == svg.owner_id).first()
+            shed = self.db_session.query(Shed).options(joinedload(Shed.salas)).filter(Shed.id == svg.owner_id).first()
             if not shed:
                 return []
 
-            # Comedouros
-            feeders = self.db_session.query(StallFeeder).join(RoomStall).join(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
-            for feeder in feeders:
-                variables.append(self.map_variable(f"Nome do Comedouro ({feeder.name})", f"R{feeder.id}", feeder.name))
+            comedouros = self.db_session.query(Comedouro).join(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
+            for comedouro in comedouros:
+                variables.append(self.map_variable(f"Nome do Comedouro ({comedouro.name})", f"R{comedouro.id}", comedouro.name))
 
-            # Salas
-            for room in shed.rooms:
-                variables.append(self.map_variable(f"Nome da Sala ({room.name})", f"S{room.id}", room.name))
+            for sala in shed.salas:
+                variables.append(self.map_variable(f"Nome da Sala ({sala.name})", f"S{sala.id}", sala.name))
 
-            # Baias
-            stalls = self.db_session.query(RoomStall).join(ShedRoom).filter(ShedRoom.shed_id == shed.id).all()
-            for stall in stalls:
-                variables.append(self.map_variable(f"Nome da Baia ({stall.name})", f"B{stall.id}", stall.name))
+            baias = self.db_session.query(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
+            for baia in baias:
+                variables.append(self.map_variable(f"Nome da Baia ({baia.name})", f"B{baia.id}", baia.name))
 
-        
         if svg.owner_type == "installations":
             installation = self.db_session.get(Installation, svg.owner_id)
             if not installation:

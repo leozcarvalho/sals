@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 from src.cruds.repo import Repository
-from src.domain import Batch, MovimentKind, ShedRoom
+from src.domain import Batch
 from src.cruds.moviment import MovimentRepository
-from src.schemas.moviment import MovimentCreate
 
 class BatchRepository(Repository):
     def __init__(self, session: Session):

@@ -18,13 +18,19 @@ from tests.fixtures.user_fixture import create_user
 from tests.fixtures.kitchen_fixture import create_kitchen
 from tests.fixtures.kitchen_tank_fixture import create_kitchen_tank
 from tests.fixtures.installation_fixture import create_installation
+from tests.fixtures.shed_fixture import create_shed
+from tests.fixtures.sala_fixture import create_sala
+from tests.fixtures.baia_fixture import create_baia
+from tests.fixtures.comedouro_fixture import create_comedouro
 from tests.fixtures.feeder_valve_fixture import create_feeder_valve
 from tests.fixtures.product_fixture import create_product
 from tests.fixtures.product_tank_fixture import create_product_tank
 from tests.fixtures.formula_fixture import create_formula
 from tests.fixtures.feeding_curve_fixture import create_feeding_curve
 from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_detail
+from tests.fixtures.batch_fixture import create_batch
 from tests.fixtures.moviment_kinds_fixture import create_moviment_kind
+from tests.fixtures.svg_fixture import create_svg
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -105,9 +111,9 @@ def create_hardware_kinds(db, user):
     create_hardware_kind(db, user, name='Entrada', kind="input")
 
 def create_hardware_connection_templates(db, user):
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão (VA32)", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão Relé", template_url="http://{ip}/get", query_string="rele={value}")
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão Balança", template_url="http://{ip}/get", query_string="peso")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="rele={value}")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão Avançado", template_url="http://{ip}/get", query_string="peso")
 
 def create_hardware_devices(db, user):
     create_hardware_device(
@@ -140,6 +146,42 @@ def create_installations(db, user):
     logger.info("[SEED] Instalações criadas")
 
 
+def create_kitchens(db, user):
+    global PINS_COUNT
+    create_kitchen(db, actor=user, name="CZ01", shaker_pin_id=1, pump_pin_id=2, scale_pin_id=3)
+    #create_kitchen(db, actor=user, name="CZ02", shaker_pin_id=4, pump_pin_id=5, scale_pin_id=6)
+    PINS_COUNT = 4
+    logger.info("[SEED] Cozinhas criadas")
+
+
+def create_comedouros(db, baia_id, user):
+    global PINS_COUNT
+    for i in range(1, randint(2, 6)):
+        comedouro = create_comedouro(db, actor=user, name=f"C{i}", baia_id=baia_id, max_weight=1000.0)
+        if PINS_COUNT < 25:
+            create_feeder_valve(db, actor=user, device_pin_id=PINS_COUNT, comedouro_id=comedouro.id)
+            PINS_COUNT += 1
+    logger.info("[SEED] Comedouros de baia criados")
+
+def create_baias(db, sala_id, user):
+    for i in range(1, randint(2, 6)):
+        baia = create_baia(db, actor=user, name=f"B{i}", sala_id=sala_id)
+        create_comedouros(db, baia.id, user)
+    logger.info("[SEED] Baias de sala criadas")
+
+def create_salas(db, shed_id, user):
+    global PINS_COUNT
+    for i in range(1, randint(2, 6)):
+        sala = create_sala(db, actor=user, name=f"S{i}", shed_id=shed_id, entrance_pin_id=PINS_COUNT)
+        PINS_COUNT += 1
+        create_baias(db, sala.id, user)
+    logger.info("[SEED] Salas de galpão criadas")
+
+def create_sheds(db, user):
+    for i in range(1, 5):
+        shed = create_shed(db, actor=user, name=f"G{i}")
+        create_salas(db, shed.id, user)
+    logger.info("[SEED] Galpões criados")
 
 def create_products(db, user):
     create_product(db, actor=user, name="Água", description="Água natural", moisture_percentage=0, kind="liquid", density=1000, is_active=True)
@@ -177,6 +219,21 @@ def create_kitchen_tanks(db, user):
     create_kitchen_tank(db, actor=user, product_tank_id=4, kitchen_id=1)
     logger.info(f"[SEED] Tanques de cozinha criados")
 
+def create_svgs(db, user):
+    #svg em /assets
+    with open(Path(__file__).parent.parent.parent / "assets" / "CZ1.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Cozinha", owner_type="kitchens", owner_id=1, content=svg_example)
+    with open(Path(__file__).parent.parent.parent / "assets" / "G1.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Galpão", owner_type="sheds", owner_id=1, content=svg_example)
+    with open(Path(__file__).parent.parent.parent / "assets" / "placa.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Placa 32 bits", owner_type="installations", owner_id=1, content=svg_example)
+    with open(Path(__file__).parent.parent.parent / "assets" / "balanca.svg", "r") as f:
+        svg_example = f.read()
+    create_svg(db, actor=user, name="SVG Balança", owner_type="installations", owner_id=2, content=svg_example)
+    logger.info(f"[SEED] SVGs criados")
 
 def create_feeding_curves(db, user):
     for i in range(1, 3):
@@ -215,7 +272,15 @@ def seed():
             create_hardware_connection_templates(db, user)
             create_hardware_devices(db, user)
             create_installations(db, user)
+            create_kitchens(db, user)
+            create_sheds(db, user)
             create_products(db, user)
+            create_product_tanks(db, user)
+            create_formulas(db, user)
+            create_kitchen_tanks(db, user)
+            create_feeding_curves(db, user)
+            create_svgs(db, user)
+            create_moviment_kinds(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
             logger.error(f"[SEED] Erro ao executar seed: {e}")

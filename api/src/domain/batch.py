@@ -14,10 +14,10 @@ class Batch(Base, table=True):
     is_active: bool = Field(nullable=False, default=True)
     feeding_curve_id: int = Field(foreign_key="feeding_curves.id", nullable=False)
     shed_id: int = Field(foreign_key="sheds.id", nullable=False)
-    shed_room_id: int = Field(foreign_key="shed_rooms.id", nullable=False)
+    sala_id: int = Field(foreign_key="salas.id", nullable=False)
 
     shed: "Shed" = Relationship(back_populates="batch")
-    shed_room: "ShedRoom" = Relationship(back_populates="batch")
+    sala: "Sala" = Relationship(back_populates="batch")
     feeding_curve: "FeedingCurve" = Relationship(back_populates="batch")
 
     moviments: List["Moviment"] = Relationship(back_populates="batch")

@@ -3,7 +3,7 @@ from src.cruds.repo import Repository
 from src.domain import Kitchen, FeederValve
 from sqlalchemy import or_, exists, select, case
 from src.domain import exceptions as exc
-from src.domain import (DevicePin, ShedRoom, Installation, ProductTank)
+from src.domain import (DevicePin, Sala, Installation, ProductTank)
 from src.schemas.device_pins import DevicePin as DevicePinSchema
 
 class DevicePinRepository(Repository):
@@ -62,7 +62,7 @@ class DevicePinRepository(Repository):
         )
         feeder_subq = select(FeederValve.id).where(FeederValve.device_pin_id == DevicePin.id)
 
-        room_subq = select(ShedRoom.id).where(ShedRoom.entrance_pin_id == DevicePin.id)
+        room_subq = select(Sala.id).where(Sala.entrance_pin_id == DevicePin.id)
 
         product_tank_subq = select(ProductTank.id).where(ProductTank.pin_id == DevicePin.id)
 
@@ -108,7 +108,7 @@ class DevicePinRepository(Repository):
         """
 
         # Room
-        room = self.db_session.query(ShedRoom).filter(ShedRoom.entrance_pin_id == pin_id).first()
+        room = self.db_session.query(Sala).filter(Sala.entrance_pin_id == pin_id).first()
         if room:
             return f"entrada da sala {room.name}"
 

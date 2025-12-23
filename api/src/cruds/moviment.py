@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from src.domain import Moviment, MovimentKind, RoomStall
+from src.domain import Moviment, MovimentKind, Baia
 from src.cruds.repo import Repository
 from src.domain import exceptions as exc
 
@@ -23,16 +23,16 @@ class MovimentRepository(Repository):
             moviment_kind = self.db_session.get(MovimentKind, moviment.moviment_kind_id)
             match moviment_kind.kind:
                 case "ENTRADA":
-                    stall = self.db_session.get(RoomStall, moviment.stall_origin_id)
+                    stall = self.db_session.get(Baia, moviment.stall_origin_id)
                     stall.animals_quantity += moviment.quantity
                 case "SAIDA":
-                    stall = self.db_session.get(RoomStall, moviment.stall_origin_id)
+                    stall = self.db_session.get(Baia, moviment.stall_origin_id)
                     if stall.animals_quantity - moviment.quantity < 0:
                         raise exc.InvalidData("Não é possível movimentar para um valor negativo.")
                     stall.animals_quantity -= moviment.quantity
                 case "TRANSFERENCIA":
-                    stall_origin = self.db_session.get(RoomStall, moviment.stall_origin_id)
-                    stall_destination = self.db_session.get(RoomStall, moviment.stall_destination_id)
+                    stall_origin = self.db_session.get(Baia, moviment.stall_origin_id)
+                    stall_destination = self.db_session.get(Baia, moviment.stall_destination_id)
                     if stall_origin.animals_quantity - moviment.quantity < 0:
                         raise exc.InvalidData("Não é possível movimentar para um valor negativo.")
                     stall_origin.animals_quantity -= moviment.quantity

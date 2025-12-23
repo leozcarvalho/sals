@@ -11,8 +11,8 @@ class Moviment(Base, table=True):
 
     batch_id: int = Field(foreign_key="batches.id", nullable=False)
     moviment_kind_id: int = Field(foreign_key="moviment_kinds.id", nullable=False)
-    stall_origin_id: Optional[int] = Field(foreign_key="room_stalls.id", nullable=True)
-    stall_destination_id: Optional[int] = Field(foreign_key="room_stalls.id", nullable=True)
+    baia_origin_id: Optional[int] = Field(foreign_key="baias.id", nullable=True)
+    baia_destination_id: Optional[int] = Field(foreign_key="baias.id", nullable=True)
     quantity: int = Field(nullable=True)
     description: Optional[str] = Field(nullable=True)
 

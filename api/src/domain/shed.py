@@ -7,5 +7,5 @@ class Shed(Base, table=True):
 
     name: str = Field(nullable=False, max_length=100)
 
-    rooms: List["ShedRoom"] = Relationship(back_populates="shed")
+    salas: List["Sala"] = Relationship(back_populates="shed", sa_relationship_kwargs={"lazy": "selectin"})
     batch: "Batch" = Relationship(back_populates="shed")

@@ -2,8 +2,8 @@ import pytest
 from src.domain import exceptions as exc
 from tests.fixtures.svg_fixture import create_svg, SVG
 from tests.fixtures.shed_fixture import create_shed
-from tests.fixtures.shed_room_fixture import create_shed_room
-from tests.fixtures.room_stall_fixture import create_room_stall
+from tests.fixtures.sala_fixture import create_sala
+from tests.fixtures.baia_fixture import create_baia
 from tests.fixtures.installation_full_fixture import create_installations
 from tests.fixtures.product_fixture import create_product
 from tests.fixtures.product_tank_fixture import create_product_tank
@@ -19,8 +19,8 @@ def svg_repository(session) -> SvgRepository:
 
 def test_get_shed_variables(svg_repository, session):
     shed = create_shed(session)
-    shed_room = create_shed_room(session, shed_id=shed.id)
-    create_room_stall(session, room_id=shed_room.id)
+    sala = create_sala(session, shed_id=shed.id)
+    create_baia(session, room_id=sala.id)
     svg = create_svg(session, owner_type="sheds", owner_id=shed.id, content="""<svg>{{VAL}}</svg>""")
     variables = svg_repository.get_variables(svg.id)
     assert len(variables) == 2

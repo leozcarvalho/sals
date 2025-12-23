@@ -8,7 +8,7 @@ BATCH = BatchCreate(
     is_active=True,
     feeding_curve_id=1,
     shed_id=1,
-    shed_room_id=1,
+    sala_id=1,
 )
 
 def create_batch(session, actor=None, **overrides):

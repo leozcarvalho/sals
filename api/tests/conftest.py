@@ -9,20 +9,34 @@ from tests.fixtures.user_fixture import USER
 
 @pytest.fixture(scope="session")
 def engine():
-    engine = create_engine("sqlite:///:memory:", echo=False, future=True)
+    engine = create_engine(
+        "sqlite:///:memory:",
+        echo=False,
+        future=True,
+        connect_args={"check_same_thread": False},
+    )
     SQLModel.metadata.create_all(engine)
     yield engine
     SQLModel.metadata.drop_all(engine)
 
 @pytest.fixture
 def session(engine):
-    SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    db = SessionLocal()
+    connection = engine.connect()
+    transaction = connection.begin()
+
+    SessionLocal = sessionmaker(
+        bind=connection,
+        autoflush=False,
+        autocommit=False,
+    )
+    session = SessionLocal()
+
     try:
-        yield db
+        yield session
     finally:
-        db.rollback()
-        db.close()
+        session.close()
+        transaction.rollback()
+        connection.close()
 
 @pytest.fixture
 def actor(session):

@@ -3,7 +3,7 @@ from src.schemas.feeder_valves import FeederValveCreate
 
 FEEDER_VALVE = FeederValveCreate(
     device_pin_id=1,
-    stall_feeder_id=1
+    comedouro_id=1
 )
 
 def create_feeder_valve(session, actor=None, **overrides):

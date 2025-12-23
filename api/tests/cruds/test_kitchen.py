@@ -10,7 +10,6 @@ from src.domain import exceptions as exc
 def kitchen_repository(session) -> KitchenRepository:
     return KitchenRepository(session)
 
-
 def test_create_kitchen(session, kitchen_repository, create_installations):
     installation = create_installations
     product = create_product(session, name="Produto Teste")

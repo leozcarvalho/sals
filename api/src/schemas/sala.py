@@ -1,24 +1,26 @@
 from pydantic.main import BaseModel
-from typing import Optional
+from typing import Optional, List
 from src.schemas.global_schemas import BaseFilter, GlobalFields
 from src.schemas.device_pins import DevicePin
+from src.schemas.baia import Baia
 
-class ShedRoomBase(BaseModel):
+
+class SalaBase(BaseModel):
     name: str
     shed_id: int
     entrance_pin_id: Optional[int] = None
 
-class ShedRoomCreate(ShedRoomBase):
+class SalaCreate(SalaBase):
     pass
 
-class ShedRoomUpdate(ShedRoomBase):
+class SalaUpdate(SalaBase):
     pass
 
-class ShedRoom(ShedRoomBase, GlobalFields):
+class Sala(SalaBase, GlobalFields):
     entrance_pin: Optional[DevicePin] = None
+    baias: Optional[List[Baia]] = None
 
-
-class ShedRoomFilter(BaseFilter):
+class SalaFilter(BaseFilter):
     name: Optional[str] = None
     shed_id: Optional[int] = None
     #filtro pra saber se ta no lote

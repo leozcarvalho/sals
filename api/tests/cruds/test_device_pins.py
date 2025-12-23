@@ -6,9 +6,9 @@ from tests.fixtures.product_fixture import create_product
 from tests.fixtures.product_tank_fixture import create_product_tank
 from tests.fixtures.kitchen_fixture import create_kitchen
 from tests.fixtures.shed_fixture import create_shed
-from tests.fixtures.shed_room_fixture import create_shed_room
-from tests.fixtures.room_stall_fixture import create_room_stall
-from tests.fixtures.stall_feeder_fixture import create_stall_feeder
+from tests.fixtures.sala_fixture import create_sala
+from tests.fixtures.baia_fixture import create_baia
+from tests.fixtures.comedouro_fixture import create_comedouro
 from tests.fixtures.feeder_valve_fixture import create_feeder_valve
 
 def test_get_pins_binary_and_decimal(session, create_installations):
@@ -80,16 +80,16 @@ def test_get_pin_usage_and_is_valid_pin(session, create_installations):
     usage_k = repo.get_pin_usage(pin_kitchen.id)
     assert usage_k is not None and "misturador" in usage_k
 
-    # shed room entrance usage
     shed = create_shed(session, name="Shed Teste")
-    room = create_shed_room(session, shed_id=shed.id, entrance_pin_id=pin_room.id, name="Room Teste")
+    # sala entrance usage
+    sala = create_sala(session, shed_id=shed.id, entrance_pin_id=pin_room.id, name="Sala Teste")
     usage_r = repo.get_pin_usage(pin_room.id)
     assert usage_r is not None and "entrada da sala" in usage_r
 
     # feeder valve usage
-    stall = create_room_stall(session, shed_room_id=room.id, name="Stall Teste")
-    feeder = create_stall_feeder(session, room_stall_id=stall.id, name="Feeder Teste")
-    fv = create_feeder_valve(session, device_pin_id=pin_feeder.id, stall_feeder_id=feeder.id)
+    baia = create_baia(session, sala_id=sala.id, name="Baia Teste")
+    feeder = create_comedouro(session, baia_id=baia.id, name="Feeder Teste")
+    fv = create_feeder_valve(session, device_pin_id=pin_feeder.id, comedouro_id=feeder.id)
     usage_f = repo.get_pin_usage(pin_feeder.id)
     assert usage_f is not None and "válvula" in usage_f
 

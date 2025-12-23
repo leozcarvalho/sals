@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from src.domain.base import Base
-
+from src.domain.feeder_valves import FeederValve
 
 class DevicePin(Base, table=True):
     __tablename__ = "device_pins"
