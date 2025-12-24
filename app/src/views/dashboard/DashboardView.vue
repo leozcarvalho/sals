@@ -60,6 +60,5 @@ onMounted(() => {
         />
       </div>
   </div>
-
   </BaseBackground>
 </template>

@@ -234,13 +234,15 @@ const rules = computed(() => {
 
 const v$ = useVuelidate(rules, form);
 
+const loader = ref(null);
+
 // =============== Ações ===============
 const submit = async () => {
-  isLoading.value = true;
+  loader.value.loaderOn();
   v$.value.$touch();
   const valid = await v$.value.$validate();
   if (!valid) {
-    isLoading.value = false;
+    loader.value.loaderOff();
     return;
   }
   let res;
@@ -255,7 +257,7 @@ const submit = async () => {
     emit("saved", res.data ?? form);
     closeModal()
   }
-  isLoading.value = false;
+  loader.value.loaderOff();
 };
 
 const openModal = (isNew = false) => {
@@ -276,14 +278,13 @@ const closeModal = () => {
   const modalEl = document.getElementById("modal-form");
   const modal = bootstrap.Modal.getInstance(modalEl);
   if (modal) modal.hide();
-
   emit("close");
 };
 
 </script>
 
 <template>
-  <Loader :loading="isLoading" />
+  <Loader ref="loader" />
   <div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-popin modal-lg" role="document">
       <div class="modal-content">

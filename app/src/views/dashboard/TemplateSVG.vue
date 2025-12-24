@@ -97,13 +97,13 @@ const endDrag = (e) => {
           <rect :class="room.entrance_pin_active ? 'fil2' : 'fil5'" transform="matrix(0.686594 -0.932088 0.735643 0.998674 16.1292 47.3146)" width="6.5647"
             height="6.127" />
           <line class="fil3 str1" x1="24.6819" y1="47.3146" x2="42" y2="47.3146" />
-          <g v-for="(stall, index) in room.stalls" :key="index" :transform="`translate(${xSpace * index}, 0)`">
+          <g v-for="(baia, index) in room.baias" :key="index" :transform="`translate(${xSpace * index}, 0)`">
             <line v-if="index > 0" class="fil3 str1" x1="0" y1="47.3146" x2="50" y2="47.3146" />
             <line class="fil3 str1" x1="42.5" y1="63.6316" x2="42.5" y2="47.3146" />
             <rect class="fil2" transform="matrix(0.686594 -0.932088 0.735643 0.998674 38.2038 69.7505)" width="6.5647"
               height="6.127" />
             <g transform="matrix(2.64845E-14 -1 0.736619 2.64845E-14 -27.5315 238.769)">
-              <text x="148.5" y="105" class="fil1 fnt0">{{ stall.name }}</text>
+              <text x="148.5" y="105" class="fil1 fnt0">{{ baia.name }}</text>
             </g>
             <line class="fil3 str1" x1="42.5" y1="92.1864" x2="42.5" y2="75.8694" />
             <rect class="fil4" transform="matrix(2.73022E-14 -1.39947 1.60357 5.76552E-14 35.9911 116.662)"

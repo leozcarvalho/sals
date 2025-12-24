@@ -6,11 +6,6 @@ export const baseMenu = [
     icon: "si si-speedometer",
   },
   {
-    name: "Instalações",
-    to: "installations",
-    icon: "fa fa-microchip",
-  },
-  {
     name: "Cadastros",
     icon: "format-list-checkbox",
     sub: [
@@ -35,6 +30,7 @@ export const baseMenu = [
       { name: "Conexões", to: "hardware-connections", icon: "ethernet", action: "manage_hardware_connection_template" },
       { name: "Pontos", to: "hardware-point-types", icon: "lightbulb", action: "manage_hardware_point_type" },
       { name: "Tipos de Hardware", to: "hardware-kinds", icon: "tools", action: "manage_hardware_kind" },
+      { name: "Placas Instaladas", to: "installations", icon: "fa fa-microchip", action: "manage_installation" },
     ]
   },
   {

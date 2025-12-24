@@ -1,4 +1,4 @@
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
 from sqlalchemy import Numeric, Column
 from typing import Optional
 from decimal import Decimal

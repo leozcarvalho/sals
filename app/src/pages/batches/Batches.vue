@@ -13,7 +13,7 @@ const cols = reactive([
   { name: "Dia Inicial", field: "initial_day" },
   { name: "Curva", field: "feeding_curve_id", formatter: (value, row) => row.feeding_curve.name  },
   { name: "Galpão", field: "shed_id", formatter: (value, row) => row.shed.name  },
-  { name: "Sala", field: "shed_room_id", formatter: (value, row) => row.shed_room.name  },
+  { name: "Sala", field: "sala_id", formatter: (value, row) => row.sala.name  },
   { name: "Ativo", field: "is_active", type: "boolean", formatter: (value) => (value ? "Sim" : "Não")  },
 ]);
 </script>

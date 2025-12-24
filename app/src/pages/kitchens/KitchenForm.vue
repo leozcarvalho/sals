@@ -7,6 +7,7 @@ import useVuelidate from "@vuelidate/core";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import PinSelect from "../../components/PinSelect.vue";
+import NumericInput from "../../components/NumericInput.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -48,7 +49,7 @@ const rules = reactive({
   pump_pin_id: { required, minValue: minValue(1) },
   scale_pin_id: { required, minValue: minValue(1) },
   max_bowl_weight: { required, minValue: minValue(0) },
-  bowl_weight_fraction: { required, minValue: minValue(0), maxValue: maxValue(1) },
+  bowl_weight_fraction: { required },
   tanks: {
     $each: helpers.forEach({
       product_tank_id: {
@@ -113,13 +114,18 @@ const submit = async () => {
           Campo obrigatório e ≥ 0
         </div>
       </div>
-
       <div class="mb-3">
         <label class="form-label">Fração de peso da cuba</label>
-        <input v-model="form.bowl_weight_fraction" type="number" step="0.01" class="form-control"
-          :class="{ 'is-invalid': v$.bowl_weight_fraction.$error }" />
+        <NumericInput
+          v-model="form.bowl_weight_fraction"
+          type="integer"
+          :min="0"
+          :max="100"
+          :step="0.01"
+          :class="{ 'is-invalid': v$.bowl_weight_fraction.$error }"
+        />
         <div v-if="v$.bowl_weight_fraction.$error" class="invalid-feedback">
-          Campo obrigatório (0 ≤ valor ≤ 1)
+          Campo obrigatório (0 ≤ valor ≤ 100)
         </div>
       </div>
       <div class="flex">

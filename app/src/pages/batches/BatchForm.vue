@@ -17,13 +17,13 @@ const batchesApi = new BatchClient();
 const shedsApi = new ApiClient("/sheds");
 const feedingCurvesApi = new ApiClient("/feeding-curves");
 const movimentKindsApi = new ApiClient("/moviment-kinds");
-const stallsApi = new ApiClient("/room-stalls");
-const roomApi = new ApiClient("/shed-rooms");
+const baiasApi = new ApiClient("/baias");
+const salaApi = new ApiClient("/salas");
 
 const batchId = ref(null);
 
 const shedsOptions = ref([]);
-const shedRoomsOptions = ref([]);
+const SalasOptions = ref([]);
 const feedingCurvesOptions = ref([]);
 const feedingCurveDays = ref([]);
 const movimentKindOptions = ref([]);
@@ -35,9 +35,9 @@ const form = reactive({
   is_active: true,
   feeding_curve_id: null,
   shed_id: null,
-  shed_room_id: null,
+  sala_id: null,
   moviments: [],
-  shed_room: {},
+  sala: {},
 });
 
 const fetchBatch = async () => {
@@ -45,7 +45,7 @@ const fetchBatch = async () => {
   Object.assign(form, res.data);
   if (form.shed_id) await fetchRooms(form.shed_id);
   if (form.feeding_curve_id) await setFeedingCurveDays(form.feeding_curve_id);
-  if (form.shed_room_id) await fetchStallOptions(form.shed_room_id);
+  if (form.sala_id) await fetchStallOptions(form.sala_id);
 };
 
 const fetchSheds = async () => {
@@ -55,8 +55,8 @@ const fetchSheds = async () => {
 };
 
 const fetchRooms = async (shedId) => {
-  const res = await roomApi.getList({ shed_id: shedId, is_in_batch: false });
-  shedRoomsOptions.value = res.data.items.map((r) => ({ label: r.name, value: r.id })) || [];
+  const res = await salaApi.getList({ shed_id: shedId, is_in_batch: false });
+  SalasOptions.value = res.data.items.map((r) => ({ label: r.name, value: r.id })) || [];
 };
 
 const fetchFeedingCurves = async () => {
@@ -78,25 +78,25 @@ const fetchMovimentKinds = async () => {
 };
 
 const onRoomChange = async () => {
-  if (!form.shed_room_id) return;
-  await fetchStallOptions(form.shed_room_id);
+  if (!form.sala_id) return;
+  await fetchBaiasOptions(form.sala_id);
   if (!batchId.value) generateMoviments();
 };
 
-const stallOptions = ref([]);
+const baiasOptions = ref([]);
 
-const fetchStallOptions = async (roomId) => {
+const fetchBaiasOptions = async (roomId) => {
   if (!roomId) return;
-  const res = await stallsApi.getList({ shed_room_id: roomId });
-  stallOptions.value = res.data.items.map((s) => ({ label: s.name, value: s.id, qnt: s.animals_quantity })) || [];
+  const res = await baiasApi.getList({ sala_id: roomId });
+  baiasOptions.value = res.data.items.map((s) => ({ label: s.name, value: s.id, qnt: s.animals_quantity })) || [];
 };
 
 const generateMoviments = () => {
-  form.moviments = stallOptions.value.map((stall) => ({
+  form.moviments = baiasOptions.value.map((baia) => ({
     moviment_kind_code: "ENTRADA_LOTE",
     moviment_kind_id:
       movimentKindOptions.value.find((x) => x.label === "ENTRADA_LOTE")?.value || null,
-    stall_origin_id: stall.value,
+    stall_origin_id: baia.value,
     stall_destination_id: null,
     quantity: 0,
     description: "",
@@ -128,7 +128,7 @@ const rules = reactive({
   initial_day: { required, minValue: minValue(1) },
   feeding_curve_id: { required },
   shed_id: { required },
-  shed_room_id: { required },
+  sala_id: { required },
   moviments: {
     $each: helpers.forEach({
       quantity: { required, minValue: minValue(0) },
@@ -255,14 +255,14 @@ const execMoviment = async () => {
         <div class="mb-3 col-6">
           <label class="form-label">Sala</label>
           <div v-if="batchId">
-            <input :value="form.shed_room.name" class="form-control" disabled />
+            <input :value="form.sala.name" class="form-control" disabled />
           </div>
-          <select v-model="form.shed_room_id" class="form-select" v-else
-            :class="{ 'is-invalid': v$.shed_room_id.$error && submitted }" @change="onRoomChange" :disabled="batchId">
+          <select v-model="form.sala_id" class="form-select" v-else
+            :class="{ 'is-invalid': v$.sala_id.$error && submitted }" @change="onRoomChange" :disabled="batchId">
             <option value="">Selecione</option>
-            <option v-for="opt in shedRoomsOptions" :key="opt.value" :value="opt.value"> {{ opt.label }} </option>
+            <option v-for="opt in SalasOptions" :key="opt.value" :value="opt.value"> {{ opt.label }} </option>
           </select>
-          <div v-if="v$.shed_room_id.$error && submitted" class="invalid-feedback"> Campo obrigatório </div>
+          <div v-if="v$.sala_id.$error && submitted" class="invalid-feedback"> Campo obrigatório </div>
         </div>
 
         <div class="mb-3 col-6">
@@ -318,17 +318,17 @@ const execMoviment = async () => {
             </div>
 
             <div class="col-2">
-              <select v-model="mov.stall_origin_id" class="form-select" :disabled="!mov.isNew">
+              <select v-model="mov.baia_origin_id" class="form-select" :disabled="!mov.isNew">
                 <option value="">Origem</option>
-                <option v-for="stall in stallOptions" :key="stall.value" :value="stall.value"> {{ stall.label }}
+                <option v-for="baia in baiasOptions" :key="baia.value" :value="baia.value"> {{ baia.label }}
                 </option>
               </select>
             </div>
 
             <div class="col-2">
-              <select v-model="mov.stall_destination_id" class="form-select" :disabled="!mov.isNew">
+              <select v-model="mov.baia_destination_id" class="form-select" :disabled="!mov.isNew">
                 <option value="">Destino</option>
-                <option v-for="stall in stallOptions" :key="stall.value" :value="stall.value"> {{ stall.label }}
+                <option v-for="baia in baiasOptions" :key="baia.value" :value="baia.value"> {{ baia.label }}
                 </option>
               </select>
             </div>
@@ -375,11 +375,11 @@ const execMoviment = async () => {
               <!-- Origem -->
               <div class="mb-3" v-if="['ENTRADA', 'TRANSFERENCIA'].includes(movimentKindAction)">
                 <label>Baia Origem</label>
-                <select v-model="newMoviment.stall_origin_id" class="form-select"
-                  :class="{ 'is-invalid': vMoviment$.stall_origin_id.$error }">
+                <select v-model="newMoviment.baia_origin_id" class="form-select"
+                  :class="{ 'is-invalid': vMoviment$.baia_origin_id.$error }">
                   <option value="">Selecione</option>
-                  <option v-for="stall in stallOptions" :key="stall.value" :value="stall.value">
-                    {{ stall.label }} ({{ stall.qnt }} animais)
+                  <option v-for="baia in baiasOptions" :key="baia.value" :value="baia.value">
+                    {{ baia.label }} ({{ baia.qnt }} animais)
                   </option>
                 </select>
                 <div v-if="vMoviment$.stall_origin_id.$error" class="invalid-feedback"> Campo obrigatório </div>
@@ -388,14 +388,14 @@ const execMoviment = async () => {
               <!-- Destino -->
               <div class="mb-3" v-if="['SAIDA', 'TRANSFERENCIA'].includes(movimentKindAction)">
                 <label>Baia Destino</label>
-                <select v-model="newMoviment.stall_destination_id" class="form-select"
-                  :class="{ 'is-invalid': vMoviment$.stall_destination_id.$error }">
+                <select v-model="newMoviment.baia_destination_id" class="form-select"
+                  :class="{ 'is-invalid': vMoviment$.baia_destination_id.$error }">
                   <option value="">Selecione</option>
-                  <option v-for="stall in stallOptions" :key="stall.value" :value="stall.value">
-                    {{ stall.label }} ({{ stall.qnt }} animais)
+                  <option v-for="baia in baiasOptions" :key="baia.value" :value="baia.value">
+                    {{ baia.label }} ({{ baia.qnt }} animais)
                   </option>
                 </select>
-                <div v-if="vMoviment$.stall_destination_id.$error" class="invalid-feedback"> Campo obrigatório </div>
+                <div v-if="vMoviment$.baia_destination_id.$error" class="invalid-feedback"> Campo obrigatório </div>
               </div>
 
               <div class="mb-3">
