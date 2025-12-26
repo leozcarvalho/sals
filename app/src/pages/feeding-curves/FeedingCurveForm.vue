@@ -7,6 +7,7 @@ import useVuelidate from "@vuelidate/core";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import { vMaska } from "maska";
+import NumericInput from "../../components/NumericInput.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -72,6 +73,7 @@ const generateDetails = () => {
       age_day: day,
       formula_id: null,
       formula_mass_per_animal: 0,
+      animal_weight: 0,
       is_active: true
     });
   }
@@ -180,9 +182,14 @@ const submit = async () => {
 
         <div class="col-2">
           <div class="input-group">
-            <input v-model="detail.formula_mass_per_animal" step="0.01" class="form-control" v-maska data-maska="###.##"
-            placeholder="Massa"
-            :class="{ 'is-invalid': v$.details.$each.$response.$data[index].formula_mass_per_animal.$error && submitted }" />
+            <NumericInput
+              v-model="detail.formula_mass_per_animal"
+              type="decimal"
+              :min="0"
+              :max="100"
+              :step="0.01"
+              :class="{ 'is-invalid': v$.details.$each.$response.$data[index].formula_mass_per_animal.$error && submitted }"
+            />
             <span class="input-group-text">Kg</span>
           </div>
           <div v-if="!v$.details.$each.$response.$data[index].formula_mass_per_animal.required && submitted"
@@ -196,10 +203,14 @@ const submit = async () => {
         </div>
         <div class="col-2">
           <div class="input-group">
-            <input v-model="detail.animal_weight" type="text" step="0.01" class="form-control"
-              v-maska data-maska="###.#"
-              placeholder="Peso"
-              :class="{ 'is-invalid': v$.details.$each.$response.$data[index].animal_weight.$error && submitted }" />
+            <NumericInput
+              v-model="detail.animal_weight"
+              type="decimal"
+              :min="0"
+              :max="100"
+              :step="0.01"
+              :class="{ 'is-invalid': v$.details.$each.$response.$data[index].animal_weight.$error && submitted }"
+            />
             <span class="input-group-text">kg</span>
           </div>
           <div v-if="v$.details.$each.$response.$data[index].animal_weight.$error && submitted"
