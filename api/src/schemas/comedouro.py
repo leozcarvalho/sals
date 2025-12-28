@@ -1,7 +1,6 @@
 from pydantic.main import BaseModel
 from typing import Optional, List
 from src.schemas.global_schemas import BaseFilter, GlobalFields
-from src.schemas.device_pins import DevicePin
 
 class ComedouroBase(BaseModel):
     name: str

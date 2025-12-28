@@ -111,8 +111,8 @@ def create_hardware_kinds(db, user):
     create_hardware_kind(db, user, name='Entrada', kind="input")
 
 def create_hardware_connection_templates(db, user):
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão", template_url="http://{ip}/get", query_string="rele={value}")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão 1", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
+    create_hardware_connection_template(db, actor=user, name="Template de Conexão 2", template_url="http://{ip}/get", query_string="rele={value}")
     create_hardware_connection_template(db, actor=user, name="Template de Conexão Avançado", template_url="http://{ip}/get", query_string="peso")
 
 def create_hardware_devices(db, user):

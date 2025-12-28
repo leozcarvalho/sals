@@ -1,0 +1,1 @@
+import{p as i}from"./index.89030e27.js";const c=i(),a=(r,o)=>{r=="success"&&c.success(o),(r=="failed"||r=="error")&&c.error(o),r=="warning"&&c.warning(o)},f=(r,o="Opera\xE7\xE3o realizada com sucesso")=>{var s;if(r.success)a("success",o);else{const t=r.error||((s=r==null?void 0:r.data)==null?void 0:s.error)||"Erro inesperado";a("error",t)}};export{f as h};

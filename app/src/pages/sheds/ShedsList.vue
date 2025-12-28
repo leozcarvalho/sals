@@ -1,18 +1,29 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import BaseList from "../../components/BaseList.vue";
 import { ApiClient } from "../../services/genericApi";
 import BaseModalForm from "../../components/BaseModalForm.vue";
-import PinSelect from "../../components/PinSelect.vue";
 
 // API Sheds
 const shedsApi = new ApiClient("/sheds");
+const kitchensApi = new ApiClient("/kitchens");
 
 const baseList = ref(null);
+
+const kitchenOptions = ref([]);
+const fetchKitchens = async () => {
+  const res = await kitchensApi.getList();
+  kitchenOptions.value = res.data.items.map(kitchen => ({ label: kitchen.name, value: kitchen.id })) || [];
+};
+
+onMounted(() => {
+  fetchKitchens();
+});
 
 const cols = reactive([
   { name: "#", field: "id" },
   { name: "Nome", field: "name" },
+  { name: "Cozinha", field: "kitchen", formatter: (value, row) => row.kitchen.name  }
 ]);
 
 const shedSelected = ref(null);
@@ -31,6 +42,7 @@ const modalForm = ref(null);
     v-model="shedSelected"
     :fields="[
       { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
+      { name: 'kitchen_id', label: 'Cozinha', type: 'select', options: kitchenOptions, rules: 'required' },
     ]"
     :api="shedsApi"
     @saved="onshedSaved"

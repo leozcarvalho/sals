@@ -30,3 +30,4 @@ class Kitchen(Base, table=True):
         back_populates="kitchen",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
+    sheds: List["Shed"] = Relationship(back_populates="kitchen")

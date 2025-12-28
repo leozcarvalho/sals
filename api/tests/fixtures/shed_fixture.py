@@ -3,6 +3,7 @@ from src.schemas.shed import ShedCreate
 
 SHED = ShedCreate(
     name="Galpão Principal",
+    kitchen_id=1,
 )
 
 def create_shed(session, actor=None, **overrides):
