@@ -5,6 +5,7 @@ import BaseModalForm from "../../components/BaseModalForm.vue";
 import { ApiClient } from "../../services/genericApi";
 import { handleApiToast } from "../../components/toast";
 import PinSelect from "../../components/PinSelect.vue";
+import NumericInput from "../../components/NumericInput.vue";
 
 const route = useRoute();
 
@@ -87,6 +88,12 @@ const deleteItem = async () => {
   }
 };
 
+const numericProps = {
+  type: 'decimal',
+  step: '0.01',
+  max: '100'
+}
+
 const formConfig = ref({
   sala: {
     api: salasApi,
@@ -100,6 +107,12 @@ const formConfig = ref({
     api: baiasApi,
     fields: [
       { name: "name", label: "Nome", type: "text", rules: "required" },
+      { name: "t1", label: "T1", component: NumericInput, props: numericProps, rules: "required" },
+      { name: "t2", label: "T2", component: NumericInput, props: numericProps, rules: "required" },
+      { name: "t3", label: "T3", component: NumericInput, props: numericProps, rules: "required" },
+      { name: "t4", label: "T4", component: NumericInput, props: numericProps, rules: "required" },
+      { name: "t5", label: "T5", component: NumericInput, props: numericProps, rules: "required" },
+      { name: "t6", label: "T6", component: NumericInput, props: numericProps, rules: "required" },
     ],
     extraPayload: () => ({ sala_id: modalData.parentId }),
   },
