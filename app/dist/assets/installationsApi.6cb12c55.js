@@ -1,1 +1,0 @@
-import{A as a}from"./index.89030e27.js";class o extends a{constructor(){super("/installations")}async execAction(s,e,t={}){try{return(await this.api.post(`${this.path}/${s}/action/${e}`,t)).data}catch(r){return r.response}}async updateDevicePins(s,e){try{return(await this.api.put(`${this.path}/${s}/update-device-pins`,e)).data}catch(t){return t.response}}}export{o as I};
