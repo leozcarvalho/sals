@@ -25,6 +25,10 @@ from tests.fixtures.formula_fixture import create_formula
 from tests.fixtures.feeding_curve_fixture import create_feeding_curve
 from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_detail
 from tests.fixtures.moviment_kinds_fixture import create_moviment_kind
+from tests.fixtures.shed_fixture import create_shed
+from src.cruds.trato import TratoRepository
+from src.schemas.trato import TratoCreate
+
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -112,6 +116,7 @@ def create_hardware_connection_templates(db, user):
 def create_hardware_devices(db, user):
     create_hardware_device(
         db,
+        name="VA32",
         actor=user,
         hardware_kind_id=1,
         point_type_id=1,
@@ -119,6 +124,7 @@ def create_hardware_devices(db, user):
     )
     create_hardware_device(
         db,
+        name="Balança Industrial",
         actor=user,
         hardware_kind_id=2,
         point_type_id=2,
@@ -126,8 +132,8 @@ def create_hardware_devices(db, user):
     )
     create_hardware_device(
         db,
-        actor=user,
         name="Placa de relé",
+        actor=user,
         hardware_kind_id=1,
         point_type_id=3,
         connection_template_id=2,
@@ -170,14 +176,6 @@ def create_formulas(db, user):
     logger.info(f"[SEED] Fórmula criada")
 
 
-def create_kitchen_tanks(db, user):
-    create_kitchen_tank(db, actor=user, product_tank_id=1, kitchen_id=1)
-    create_kitchen_tank(db, actor=user, product_tank_id=2, kitchen_id=1)
-    create_kitchen_tank(db, actor=user, product_tank_id=3, kitchen_id=1)
-    create_kitchen_tank(db, actor=user, product_tank_id=4, kitchen_id=1)
-    logger.info(f"[SEED] Tanques de cozinha criados")
-
-
 def create_feeding_curves(db, user):
     for i in range(1, 3):
         curve = create_feeding_curve(db, actor=user, name=f"Curva {i}", description=f"Descrição da Curva de Alimentação {i}")
@@ -205,6 +203,23 @@ def create_moviment_kinds(db, user):
     create_moviment_kind(db, actor=user, kind="TRANSFERENCIA", code="MOVE_DETRO_LOTE")
     logger.info("[SEED] Tipos de movimentação criados")
 
+def create_sheds(db, user):
+    create_shed(db, actor=user, name="G1", kitchen_id=1)
+    create_shed(db, actor=user, name="G2", kitchen_id=1)
+    logger.info("[SEED] Galpões criados")
+
+def create_tratos(db, user):
+    trato_repo = TratoRepository(db)
+    trato_repo.bulk_save([
+        TratoCreate(name="T1", hour=6, percent=20),
+        TratoCreate(name="T2", hour=12, percent=20),
+        TratoCreate(name="T3", hour=18, percent=20),
+        TratoCreate(name="T4", hour=22, percent=20),
+        TratoCreate(name="T5", hour=22, percent=20),
+        TratoCreate(name="T6", hour=22, percent=0),
+    ], actor=user)
+    logger.info("[SEED] Tratos criados")
+
 def seed():
     with session_scope() as db:
         try:
@@ -216,6 +231,9 @@ def seed():
             create_hardware_devices(db, user)
             create_installations(db, user)
             create_products(db, user)
+            create_kitchen(db, user)
+            create_sheds(db, user)
+            create_tratos(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
             logger.error(f"[SEED] Erro ao executar seed: {e}")

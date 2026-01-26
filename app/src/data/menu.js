@@ -39,6 +39,7 @@ export const baseMenu = [
     sub: [
       { name: "Rotinas", to: "settings-routines", icon: "tune", action: "manage_healthcheck_priority" },
       //{ name: "Logs", to: "settings-logs", icon: "file-document-box-multiple", action: "view_log" },
+      { name: "Tratos", to: "settings-tratos", icon: "clock", action: "manage_trato" },
     ],
   }
 ];

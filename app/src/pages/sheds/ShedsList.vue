@@ -55,6 +55,7 @@ const modalForm = ref(null);
     :cols="cols"
     @create="modalForm.openModal(true)"
     @edit="shedSelected = $event; modalForm.openModal()"
+    delete-confirm-message="Tem certeza que deseja excluir este galpão (Também serão excluídos salas, baias, comedouros e lotes)?"
   >
     <template #row-actions="{ row }">
       <button class="btn btn-lg btn-primary text-white" @click="$router.push({ name: 'shed', query: { id: row.id } })">

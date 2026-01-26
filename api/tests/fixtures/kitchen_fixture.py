@@ -2,12 +2,12 @@ from src.cruds.kitchen import KitchenRepository
 from src.schemas.kicthen import KitchenCreate
 
 KITCHEN = KitchenCreate(
-    name="Test Kitchen",
+    name="CZ1",
     shaker_pin_id=1,
     pump_pin_id=2,
     scale_pin_id=3,
-    max_bowl_weight=5000.0,
-    bowl_weight_fraction=90.0,
+    max_bowl_weight=2000,
+    bowl_weight_fraction=95,
 )
 
 def create_kitchen(session, actor=None, **overrides):

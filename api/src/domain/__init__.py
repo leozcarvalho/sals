@@ -25,6 +25,7 @@ from .svg_region import SVGRegion
 from .batch import Batch
 from .moviment_kinds import MovimentKind
 from .moviment import Moviment
+from .trato import Trato
 
 __all__ = [
     "Profile",
@@ -54,6 +55,7 @@ __all__ = [
     "Batch",
     "MovimentKind",
     "Moviment",
+    "Trato",
 ]
 
 for model_name in __all__:

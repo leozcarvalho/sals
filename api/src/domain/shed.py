@@ -8,6 +8,6 @@ class Shed(Base, table=True):
     name: str = Field(nullable=False, max_length=100)
     kitchen_id: int = Field(foreign_key="kitchens.id", nullable=False)
 
-    salas: List["Sala"] = Relationship(back_populates="shed", sa_relationship_kwargs={"lazy": "selectin"})
-    batch: "Batch" = Relationship(back_populates="shed")
+    salas: List["Sala"] = Relationship(back_populates="shed", sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"})
+    batch: "Batch" = Relationship(back_populates="shed", sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"})
     kitchen: "Kitchen" = Relationship(back_populates="sheds")

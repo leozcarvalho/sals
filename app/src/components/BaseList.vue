@@ -22,6 +22,7 @@ const props = defineProps({
   filter: { type: Object, default: {} },
   canPaginate: { type: Boolean, default: false },
   permission: { type: String, default: null },
+  deleteConfirmMessage: { type: String, default: "Deseja realmente excluir este item?" },
 });
 
 // Emit
@@ -82,8 +83,10 @@ const onSort = (i) => {
 };
 
 const deleteItem = async () => {
+  loader.value.loaderOn();
   if (!idOnDeleting.value) return;
   const res = await props.api.delete(idOnDeleting.value);
+  loader.value.loaderOff();
   handleApiToast(res, "Item excluído com sucesso");
   refresh();
 };
@@ -170,13 +173,13 @@ onMounted(() => {
     </BaseBlock>
 
     <div class="modal fade" id="modal-delete" tabindex="-1">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">Confirmar Ação</div>
-          <div class="modal-body">Deseja realmente excluir este item?</div>
+          <div class="modal-body">{{ deleteConfirmMessage }}</div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-danger" data-bs-dismiss="modal" @click="deleteItem">Confirmar</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">CANCELAR</button>
+            <button class="btn btn-danger" data-bs-dismiss="modal" @click="deleteItem">SIM EXCLUIR</button>
           </div>
         </div>
       </div>

@@ -60,6 +60,7 @@ const Batches = () => import("@/pages/batches/Batches.vue");
 const BatchForm = () => import("@/pages/batches/BatchForm.vue");
 
 const MovimentKinds = () => import("@/pages/moviment-kinds/MovimentKinds.vue");
+const Tratos = () => import("@/pages/settings/Tratos.vue");
 
 // Set all routes
 const routes = [
@@ -255,6 +256,12 @@ const routes = [
         meta: { requiresAuth: true },
         component: SettingsRoutines,
       },
+      {
+        path: "/tratos",
+        name: "settings-tratos",
+        meta: { requiresAuth: true },
+        component: Tratos,
+      }
     ],
   },
 

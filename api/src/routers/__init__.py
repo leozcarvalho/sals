@@ -23,6 +23,7 @@ from .svg import router_svgs
 from .svg_region import router_svg_region
 from .batch import router_batches
 from .moviment_kinds import router_moviment_kinds
+from .trato import router_trato
 
 routers = [
     auth_router,
@@ -50,4 +51,5 @@ routers = [
     router_svg_region.router,
     router_batches.router,
     router_moviment_kinds.router,
+    router_trato.router,
 ]

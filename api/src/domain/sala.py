@@ -10,6 +10,6 @@ class Sala(Base, table=True):
     entrance_pin_id: int = Field(foreign_key="device_pins.id", nullable=True)
 
     shed: "Shed" = Relationship(back_populates="salas")
-    baias: List["Baia"] = Relationship(back_populates="sala", sa_relationship_kwargs={"lazy": "selectin"})
+    baias: List["Baia"] = Relationship(back_populates="sala", sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"})
     entrance_pin: Optional["DevicePin"] = Relationship()
-    batch: "Batch" = Relationship(back_populates="sala")
+    batch: "Batch" = Relationship(back_populates="sala", sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"})

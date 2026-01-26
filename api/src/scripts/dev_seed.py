@@ -31,6 +31,8 @@ from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_det
 from tests.fixtures.batch_fixture import create_batch
 from tests.fixtures.moviment_kinds_fixture import create_moviment_kind
 from tests.fixtures.svg_fixture import create_svg
+from tests.fixtures.trato_fixture import TratoCreate
+from src.cruds.trato import TratoRepository
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -118,6 +120,7 @@ def create_hardware_connection_templates(db, user):
 def create_hardware_devices(db, user):
     create_hardware_device(
         db,
+        name="Dispositivo 1",
         actor=user,
         hardware_kind_id=1,
         point_type_id=1,
@@ -125,6 +128,7 @@ def create_hardware_devices(db, user):
     )
     create_hardware_device(
         db,
+        name="Dispositivo 2",
         actor=user,
         hardware_kind_id=2,
         point_type_id=2,
@@ -262,6 +266,19 @@ def create_moviment_kinds(db, user):
     create_moviment_kind(db, actor=user, kind="TRANSFERENCIA", code="MOVE_DETRO_LOTE")
     logger.info("[SEED] Tipos de movimentação criados")
 
+def create_tratos(db, user):
+    trato_repo = TratoRepository(db)
+    trato_repo.bulk_save([
+        TratoCreate(name="T1", hour=6, percent=20),
+        TratoCreate(name="T2", hour=12, percent=20),
+        TratoCreate(name="T3", hour=18, percent=20),
+        TratoCreate(name="T4", hour=22, percent=20),
+        TratoCreate(name="T5", hour=22, percent=20),
+        TratoCreate(name="T6", hour=22, percent=0),
+    ], actor=user)
+    logger.info("[SEED] Tratos criados")
+
+
 def seed():
     with session_scope() as db:
         try:
@@ -281,6 +298,7 @@ def seed():
             create_feeding_curves(db, user)
             create_svgs(db, user)
             create_moviment_kinds(db, user)
+            create_tratos(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
             logger.error(f"[SEED] Erro ao executar seed: {e}")
