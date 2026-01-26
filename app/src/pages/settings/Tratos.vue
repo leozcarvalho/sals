@@ -33,6 +33,17 @@ const saveTratos = async () => {
   <Loader ref="loader" />
   <div class="content">
     <BaseBlock title="Tratos" content-full>
+      <div class="row mb-3">
+        <div class="col-1">
+          <label class="form-label">Trato</label>
+        </div>
+        <div class="col-2">
+          <label class="form-label">Hora</label>
+        </div>
+        <div class="col-2">
+          <label class="form-label">Porcentagem</label>
+        </div>
+      </div>
       <div v-for="trato in tratos" :key="trato.id" class="row mb-3">
         <div class="col-1">
           <input v-model="trato.name" class="form-control" disabled />
