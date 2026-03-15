@@ -45,7 +45,7 @@ const fetchBatch = async () => {
   Object.assign(form, res.data);
   if (form.shed_id) await fetchRooms(form.shed_id);
   if (form.feeding_curve_id) await setFeedingCurveDays(form.feeding_curve_id);
-  if (form.sala_id) await fetchStallOptions(form.sala_id);
+  if (form.sala_id) await fetchBaiasOptions(form.sala_id);
 };
 
 const fetchSheds = async () => {
@@ -96,8 +96,8 @@ const generateMoviments = () => {
     moviment_kind_code: "ENTRADA_LOTE",
     moviment_kind_id:
       movimentKindOptions.value.find((x) => x.label === "ENTRADA_LOTE")?.value || null,
-    stall_origin_id: baia.value,
-    stall_destination_id: null,
+    baia_origin_id: baia.value,
+    baia_destination_id: null,
     quantity: 0,
     description: "",
     isNew: true,
@@ -107,15 +107,15 @@ const generateMoviments = () => {
 
 const newMoviment = reactive({
   moviment_kind_: {},
-  stall_origin_id: null,
-  stall_destination_id: null,
+  baia_origin_id: null,
+  baia_destination_id: null,
   quantity: null,
   description: "",
 });
 
 onMounted(async () => {
   batchId.value = route.params.id;
-  await Promise.all([fetchSheds(), fetchFeedingCurves(), fetchMovimentKinds(), fetchStallOptions()]);
+  await Promise.all([fetchSheds(), fetchFeedingCurves(), fetchMovimentKinds(), fetchBaiasOptions()]);
   if (batchId.value) {
     await fetchBatch();
   }
@@ -169,13 +169,13 @@ const submit = async () => {
 const movimentRules = computed(() => ({
   moviment_kind_id: { required },
 
-  stall_origin_id: {
+  baia_origin_id: {
     required: requiredIf(() =>
       ["ENTRADA", "TRANSFERENCIA"].includes(movimentKindAction.value)
     ),
   },
 
-  stall_destination_id: {
+  baia_destination_id: {
     required: requiredIf(() =>
       ["SAIDA", "TRANSFERENCIA"].includes(movimentKindAction.value)
     ),
@@ -191,8 +191,8 @@ const showMovimentModal = ref(false);
 const openModalMoviment = () => {
   Object.assign(newMoviment, {
     moviment_kind_id: null,
-    stall_origin_id: null,
-    stall_destination_id: null,
+    baia_origin_id: null,
+    baia_destination_id: null,
     quantity: null,
     description: "",
   });
@@ -382,7 +382,7 @@ const execMoviment = async () => {
                     {{ baia.label }} ({{ baia.qnt }} animais)
                   </option>
                 </select>
-                <div v-if="vMoviment$.stall_origin_id.$error" class="invalid-feedback"> Campo obrigatório </div>
+                <div v-if="vMoviment$.baia_origin_id.$error" class="invalid-feedback"> Campo obrigatório </div>
               </div>
 
               <!-- Destino -->

@@ -15,3 +15,8 @@ class Formula(Base, table=True):
         back_populates="formula",
         sa_relationship_kwargs={"lazy": "selectin"}
     )
+
+    feeding_curve_details: Optional[List["FeedingCurveDetail"]] = Relationship(
+        back_populates="formula",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )

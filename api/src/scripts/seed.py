@@ -149,31 +149,78 @@ def create_installations(db, user):
 
 def create_products(db, user):
     create_product(db, actor=user, name="Água", description="Água natural", moisture_percentage=0, kind="liquid", density=1000, is_active=True)
-    create_product(db, actor=user, name="Milho", description="Milho em grão", moisture_percentage=12, kind="solid", density=600, is_active=True)
-    create_product(db, actor=user, name="Soja", description="Soja em grão", moisture_percentage=0, kind="solid", density=800, is_active=True)
-    create_product(db, actor=user, name="Sorgo", description="Sorgo em grão", moisture_percentage=10, kind="solid", density=500, is_active=True)
+    create_product(db, actor=user, name="Milho", description="Milho em grão", moisture_percentage=12, kind="solid", density=650, is_active=True)
+    create_product(db, actor=user, name="Soja", description="Soja em grão", moisture_percentage=8, kind="solid", density=790, is_active=True)
+    create_product(db, actor=user, name="Sorgo", description="Sorgo em grão", moisture_percentage=10, kind="solid", density=800, is_active=True)
+    create_product(db, actor=user, name="Premix 01", description="Premix", moisture_percentage=0, kind="solid", density=1200, is_active=True)
     logger.info("[SEED] Produtos criados")
 
 
 def create_product_tanks(db, user):
     global PINS_COUNT
-    create_product_tank(db, actor=user, name="T01", description="Tanque para água", pin_id=PINS_COUNT, product_id=1)
-    create_product_tank(db, actor=user, name="T02", description="Tanque para milho", pin_id=PINS_COUNT+1, product_id=2)
-    create_product_tank(db, actor=user, name="T03", description="Tanque para soja", pin_id=PINS_COUNT+2, product_id=3)
-    create_product_tank(db, actor=user, name="T04", description="Tanque para sorgo", pin_id=PINS_COUNT+3, product_id=4)
+    create_product_tank(db, actor=user, name="TQ01", description="Silo Externo 01", pin_id=PINS_COUNT, product_id=2)
+    create_product_tank(db, actor=user, name="TQ02", description="Silo Externo 02", pin_id=PINS_COUNT+1, product_id=2)
+    create_product_tank(db, actor=user, name="TQ03", description="Soli Externo 03", pin_id=PINS_COUNT+2, product_id=3)
+    create_product_tank(db, actor=user, name="CX01", description="Caixa Dágua", pin_id=PINS_COUNT+3, product_id=1)
+    create_product_tank(db, actor=user, name="TQPX01", description="Silo de Premix", pin_id=PINS_COUNT+4, product_id=5)
     logger.info("[SEED] Tanques de produtos criados")
 
 def create_formulas(db, user):
-    details = [
-        { "product_id": 1, "product_percentage_without_moisture": 50 },  # Água
-        { "product_id": 2, "product_percentage_without_moisture": 30 },  # Milho
-        { "product_id": 3, "product_percentage_without_moisture": 15 },  # Soja  
-        { "product_id": 4, "product_percentage_without_moisture": 5 },   # Farelo de soja
-    ]
-    create_formula(db, actor=user, name="Fórmula Exemplo", description="Fórmula de ração exemplo", water_percentage=10, stirring_time=300, details=details)
-    create_formula(db, actor=user, name="Fórmula Avançada", description="Fórmula de ração avançada", water_percentage=20, stirring_time=450, details=details)
-    create_formula(db, actor=user, name="Fórmula Premium", description="Fórmula de ração premium", water_percentage=30, stirring_time=600, details=details)
-    logger.info(f"[SEED] Fórmula criada")
+    create_formula(db,
+        actor=user,
+        name="ALOJAMENTO",
+        description="Fórmula de alojamento para adaptação da vinda da creche",
+        water_percentage=75, stirring_time=400,
+        details=[
+          { "product_id": 2, "product_percentage_without_moisture": 100 }  
+        ]
+    )
+
+    create_formula(db,
+        actor=user,
+        name="CRESCIMENTO 1",
+        description="Fórmula de crescimento fase 1",
+        water_percentage=75,
+        stirring_time=400,
+        details=[
+          { "product_id": 2, "product_percentage_without_moisture": 50 },
+          { "product_id": 3, "product_percentage_without_moisture": 50 }
+        ]
+    )
+
+    create_formula(db,
+        actor=user,
+        name="CRESCIMENTO 2",
+        description="CRESCIMENTO FASE 2",
+        water_percentage=75,
+        stirring_time=400,
+        details=[
+          { "product_id": 2, "product_percentage_without_moisture": 100 }
+        ]
+    )
+
+    create_formula(db,
+        actor=user,
+        name="TERMINAÇÃO",
+        description="POLIMENTO DE FIM DE CICLO",
+        water_percentage=75,
+        stirring_time=400,
+        details=[
+          { "product_id": 2, "product_percentage_without_moisture": 100 }
+        ]
+    )
+
+    create_formula(db,
+        actor=user,
+        name="FINAL",
+        description="MANUTENÇÃO ATÉ RETIRADA DO GALPÃO",
+        water_percentage=75,
+        stirring_time=400,
+        details=[
+          { "product_id": 2, "product_percentage_without_moisture": 100 }
+        ]
+    )
+    logger.info(f"[SEED] Fórmulas criadas")
 
 
 def create_feeding_curves(db, user):
@@ -231,6 +278,7 @@ def seed():
             create_hardware_devices(db, user)
             create_installations(db, user)
             create_products(db, user)
+            create_formulas(db, user)
             create_kitchen(db, user)
             create_sheds(db, user)
             create_tratos(db, user)

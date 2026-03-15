@@ -2,7 +2,7 @@ from src.cruds.kitchen import KitchenRepository
 from src.schemas.kicthen import KitchenCreate
 
 KITCHEN = KitchenCreate(
-    name="CZ1",
+    name="CZ2",
     shaker_pin_id=1,
     pump_pin_id=2,
     scale_pin_id=3,
