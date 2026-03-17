@@ -18,4 +18,4 @@ class Baia(Base, table=True):
     t6: Decimal = Field(sa_column=Column(Numeric(5, 2)), default=0)
 
     sala: Optional["Sala"] = Relationship(back_populates="baias")
-    comedouros: List["Comedouro"] = Relationship(back_populates="baia", sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"})
+    valvulas: List["Valve"] = Relationship(back_populates="baia", sa_relationship_kwargs={"lazy": "selectin", "cascade": "all, delete-orphan"})

@@ -32,7 +32,11 @@ watch(
 );
 
 watch(selected, (val) => {
-  emit("update:modelValue", val === "" || val === "null" ? null : Number(val));
+  if (val === "" || val === "null" || val === null) {
+    emit("update:modelValue", null);
+  } else {
+    emit("update:modelValue", Number(val));
+  }
 });
 
 // Carrega pins e reatribui valor inicial depois
@@ -51,7 +55,22 @@ const loadPins = async () => {
 };
 const attrs = useAttrs();
 
-onMounted(loadPins);
+onMounted(() => {
+  loadPins();
+  const observer = new MutationObserver(() => {
+    const modalOpen = document.querySelector(".modal.show");
+    
+    if (!modalOpen) {
+      loadPins();
+    }
+  });
+
+  observer.observe(document.body, {
+    attributes: true,
+    subtree: true,
+    attributeFilter: ["class"],
+  });
+});
 </script>
 
 <template>
@@ -62,7 +81,7 @@ onMounted(loadPins);
       v-model="selected"
       v-bind="attrs"
     >
-      <option value="">Selecione um pino</option>
+      <option :value="null">Sem Pino</option>
       <template v-for="group in pinGroups" :key="group.board">
         <optgroup :label="group.board">
           <option

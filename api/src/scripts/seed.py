@@ -18,7 +18,7 @@ from tests.fixtures.user_fixture import create_user
 from tests.fixtures.kitchen_fixture import create_kitchen
 from tests.fixtures.kitchen_tank_fixture import create_kitchen_tank
 from tests.fixtures.installation_fixture import create_installation
-from tests.fixtures.feeder_valve_fixture import create_feeder_valve
+from tests.fixtures.valve_fixture import create_valve
 from tests.fixtures.product_fixture import create_product
 from tests.fixtures.product_tank_fixture import create_product_tank
 from tests.fixtures.formula_fixture import create_formula
@@ -26,15 +26,16 @@ from tests.fixtures.feeding_curve_fixture import create_feeding_curve
 from tests.fixtures.feeding_curve_detail_fixture import create_feeding_curve_detail
 from tests.fixtures.moviment_kinds_fixture import create_moviment_kind
 from tests.fixtures.shed_fixture import create_shed
+from tests.fixtures.sala_fixture import create_sala
+from tests.fixtures.baia_fixture import create_baia
+
+
 from src.cruds.trato import TratoRepository
 from src.schemas.trato import TratoCreate
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
-
-global PINS_COUNT
-PINS_COUNT = 0
 
 
 def reset_database():
@@ -157,12 +158,11 @@ def create_products(db, user):
 
 
 def create_product_tanks(db, user):
-    global PINS_COUNT
-    create_product_tank(db, actor=user, name="TQ01", description="Silo Externo 01", pin_id=PINS_COUNT, product_id=2)
-    create_product_tank(db, actor=user, name="TQ02", description="Silo Externo 02", pin_id=PINS_COUNT+1, product_id=2)
-    create_product_tank(db, actor=user, name="TQ03", description="Soli Externo 03", pin_id=PINS_COUNT+2, product_id=3)
-    create_product_tank(db, actor=user, name="CX01", description="Caixa Dágua", pin_id=PINS_COUNT+3, product_id=1)
-    create_product_tank(db, actor=user, name="TQPX01", description="Silo de Premix", pin_id=PINS_COUNT+4, product_id=5)
+    create_product_tank(db, actor=user, name="TQ01", description="Silo Externo 01", pin_id=None, product_id=2)
+    create_product_tank(db, actor=user, name="TQ02", description="Silo Externo 02", pin_id=None, product_id=2)
+    create_product_tank(db, actor=user, name="TQ03", description="Soli Externo 03", pin_id=None, product_id=3)
+    create_product_tank(db, actor=user, name="CX01", description="Caixa Dágua", pin_id=None, product_id=1)
+    create_product_tank(db, actor=user, name="TQPX01", description="Silo de Premix", pin_id=None, product_id=5)
     logger.info("[SEED] Tanques de produtos criados")
 
 def create_formulas(db, user):
@@ -224,36 +224,61 @@ def create_formulas(db, user):
 
 
 def create_feeding_curves(db, user):
-    for i in range(1, 3):
-        curve = create_feeding_curve(db, actor=user, name=f"Curva {i}", description=f"Descrição da Curva de Alimentação {i}")
-        for day in range(1, 29):
-            formula_id = 1 if day <= 14 else 2 if day <= 21 else 3
-            create_feeding_curve_detail(
-                db,
-                actor=user,
-                feeding_curve_id=curve.id,
-                age_day=day,
-                formula_id=formula_id,
-                formula_mass_per_animal=2.5 + (day * 0.1),  # Exemplo de variação de massa
-                animal_weight=0.5 + (day * 0.2),  # Exemplo de variação de peso
-            )
+    curve = create_feeding_curve(db,
+            actor=user,
+            name="AURORA_CR_TE_AJ_01",
+            description=f"Curva fornecida pela Aurora, ajustada dia a dia"
+        )
+    
+    #dia 22 ao 35 ALOJAMENTO
+    for day in range(22, 36):
+        create_feeding_curve_detail(
+            db,
+            actor=user,
+            feeding_curve_id=curve.id,
+            age_day=day,
+            formula_id=1,
+            formula_mass_per_animal=2.5 + (day * 0.1),  # Exemplo de variação de massa
+            animal_weight=0.5 + (day * 0.2),  # Exemplo de variação de peso
+        )
+    #dia 36 ao 63 CRESCIMENTO 1
+    for day in range(36, 64):
+        formula_id = 2
+    #dia 64 ao 84 CRESCIMENTO 2
+    for day in range(64, 85):
+        formula_id = 3
+    #dia 85 ao 105 TERMINAÇÃO
+    for day in range(85, 106):
+        formula_id = 4
+    #dia 106 ao 120 FINAL
+    for day in range(106, 121):
+        formula_id = 5
+    
     logger.info("[SEED] Curvas de alimentação criadas")
 
 def create_moviment_kinds(db, user):
-    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA_LOTE")
-    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA_OUTRO_LOTE")
-    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA_COMPRA_POSTERIOR")
-    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_LOTE")
-    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_VENDA_AVULSA")
-    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_OUTRO_LOTE")
-    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA_MORTE")
-    create_moviment_kind(db, actor=user, kind="TRANSFERENCIA", code="MOVE_DETRO_LOTE")
+    create_moviment_kind(db, actor=user, kind="ENTRADA", code="ENTRADA DE LOTE")
+    create_moviment_kind(db, actor=user, kind="SAIDA", code="SAIDA DE LOTE")
+    create_moviment_kind(db, actor=user, kind="SAIDA", code="OBITO")
+    create_moviment_kind(db, actor=user, kind="TRANSFERENCIA", code="TRANSFERENCIA ENTRE BAIAS")
     logger.info("[SEED] Tipos de movimentação criados")
 
-def create_sheds(db, user):
-    create_shed(db, actor=user, name="G1", kitchen_id=1)
-    create_shed(db, actor=user, name="G2", kitchen_id=1)
+def criar_galpoes(db, user):
+    create_shed(db, actor=user, name="G3", kitchen_id=1)
+    create_shed(db, actor=user, name="G4", kitchen_id=1)
     logger.info("[SEED] Galpões criados")
+
+def criar_salas(db, user):
+    create_sala(db, actor=user, name="S01", shed_id=1)
+    create_sala(db, actor=user, name="S01", shed_id=2)
+    logger.info("[SEED] Salas criadas")
+
+def criar_baias(db, user):
+    #44 baias pra cada sala
+    for i in range(1, 45):
+        create_baia(db, actor=user, name=f"B{i:02d}", sala_id=1)
+        create_baia(db, actor=user, name=f"B{i:02d}", sala_id=2)
+
 
 def create_tratos(db, user):
     trato_repo = TratoRepository(db)
@@ -278,9 +303,14 @@ def seed():
             create_hardware_devices(db, user)
             create_installations(db, user)
             create_products(db, user)
+            create_product_tanks(db, user)
             create_formulas(db, user)
             create_kitchen(db, user)
-            create_sheds(db, user)
+            criar_galpoes(db, user)
+            criar_salas(db, user)
+            criar_baias(db, user)
+            create_moviment_kinds(db, user)
+            create_feeding_curves(db, user)
             create_tratos(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:

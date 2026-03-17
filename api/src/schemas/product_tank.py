@@ -7,8 +7,8 @@ from src.schemas.device_pins import DevicePin
 class ProductTankBase(BaseModel):
     name: str
     description: Optional[str] = None
-    pin_id: int
-    product_id: int
+    pin_id: Optional[int] = None
+    product_id: Optional[int] = None
 
 class ProductTankCreate(ProductTankBase):
     pass
@@ -17,8 +17,8 @@ class ProductTankUpdate(ProductTankBase):
     pass
 
 class ProductTankRead(ProductTankBase, GlobalFields):
-    product: ProductRead
-    device_pin: DevicePin
+    product: Optional[ProductRead]
+    device_pin: Optional[DevicePin]
 
 class ProductTankFilter(BaseFilter):
     pass

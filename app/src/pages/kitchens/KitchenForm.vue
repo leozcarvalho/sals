@@ -18,8 +18,8 @@ const form = reactive({
   shaker_pin_id: null,
   pump_pin_id: null,
   scale_pin_id: null,
-  max_bowl_weight: null,
-  bowl_weight_fraction: null,
+  volume_misturador: null,
+  fracao_volume_misturador: null,
   tanks: []
 });
 
@@ -45,11 +45,8 @@ onMounted(async () => {
 
 const rules = reactive({
   name: { required },
-  shaker_pin_id: { required, minValue: minValue(1) },
-  pump_pin_id: { required, minValue: minValue(1) },
-  scale_pin_id: { required, minValue: minValue(1) },
-  max_bowl_weight: { required, minValue: minValue(0) },
-  bowl_weight_fraction: { required },
+  volume_misturador: { required, minValue: minValue(0) },
+  fracao_volume_misturador: { required },
   tanks: {
     $each: helpers.forEach({
       product_tank_id: {
@@ -90,41 +87,43 @@ const submit = async () => {
 
       <div class="mb-3">
         <label class="form-label">Agitador</label>
-        <pin-select v-model="form.shaker_pin_id" :class="{ 'is-invalid': v$.shaker_pin_id.$error }" />
-        <div v-if="v$.shaker_pin_id.$error" class="invalid-feedback">Campo necessário</div>
+        <pin-select v-model="form.shaker_pin_id" />
       </div>
 
       <div class="mb-3">
         <label class="form-label">Bomba</label>
-        <pin-select v-model="form.pump_pin_id" :class="{ 'is-invalid': v$.pump_pin_id.$error }" />
-        <div v-if="v$.pump_pin_id.$error" class="invalid-feedback">Campo necessário</div>
+        <pin-select v-model="form.pump_pin_id" />
       </div>
 
       <div class="mb-3">
         <label class="form-label">Balança</label>
-        <pin-select v-model="form.scale_pin_id" :class="{ 'is-invalid': v$.scale_pin_id.$error }" />
-        <div v-if="v$.scale_pin_id.$error" class="invalid-feedback">Campo necessário</div>
+        <pin-select v-model="form.scale_pin_id" />
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Peso máximo da cuba (kg)</label>
-        <input v-model="form.max_bowl_weight" type="number" class="form-control"
-          :class="{ 'is-invalid': v$.max_bowl_weight.$error }" />
-        <div v-if="v$.max_bowl_weight.$error" class="invalid-feedback">
+        <label class="form-label">Volume do Misturador (L)</label>
+        <NumericInput
+          v-model="form.volume_misturador"
+          type="decimal"
+          :min="0"
+          :step="0.01"
+          :class="{ 'is-invalid': v$.volume_misturador.$error }"
+        />
+        <div v-if="v$.volume_misturador.$error" class="invalid-feedback">
           Campo obrigatório e ≥ 0
         </div>
       </div>
       <div class="mb-3">
-        <label class="form-label">Fração de peso da cuba</label>
+        <label class="form-label">Fração de volume do misturador</label>
         <NumericInput
-          v-model="form.bowl_weight_fraction"
+          v-model="form.fracao_volume_misturador"
           type="integer"
           :min="0"
           :max="100"
           :step="0.01"
-          :class="{ 'is-invalid': v$.bowl_weight_fraction.$error }"
+          :class="{ 'is-invalid': v$.fracao_volume_misturador.$error }"
         />
-        <div v-if="v$.bowl_weight_fraction.$error" class="invalid-feedback">
+        <div v-if="v$.fracao_volume_misturador.$error" class="invalid-feedback">
           Campo obrigatório (0 ≤ valor ≤ 100)
         </div>
       </div>

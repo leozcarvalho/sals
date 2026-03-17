@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.domain.svg import SVG
 from src.cruds.repo import Repository
 from sqlalchemy import select, case
-from src.domain import Kitchen, Shed, DevicePin, Installation, Sala, Baia, Comedouro, FeederValve
+from src.domain import Kitchen, Shed, DevicePin, Installation, Sala, Baia, Valve
 from src.schemas.svg import SVGRead
 from src.domain import exceptions as exc
 
@@ -118,9 +118,9 @@ class SvgRepository(Repository):
 
         if svg.owner_type == "sheds":
             shed = self.db_session.get(Shed, svg.owner_id)
-            comedouros = self.db_session.query(FeederValve).join(Comedouro).join(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
-            for comedouro in comedouros:
-                options.append(self.map_pin_option(comedouro.device_pin, "Válvula de Alimentação - "))
+            valvulas = self.db_session.query(Valve).join(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
+            for valvula in valvulas:
+                options.append(self.map_pin_option(valvula.device_pin, "Válvula de Alimentação - "))
             salas = self.db_session.query(Sala).filter(Sala.shed_id == shed.id).all()
             for sala in salas:
                 options.append(self.map_pin_option(sala.entrance_pin, f'Bit de Entrada ({sala.name}) - '))
@@ -151,9 +151,9 @@ class SvgRepository(Repository):
             if not shed:
                 return []
 
-            comedouros = self.db_session.query(Comedouro).join(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
-            for comedouro in comedouros:
-                variables.append(self.map_variable(f"Nome do Comedouro ({comedouro.name})", f"R{comedouro.id}", comedouro.name))
+            valvulas = self.db_session.query(Valve).join(Baia).join(Sala).filter(Sala.shed_id == shed.id).all()
+            for valvula in valvulas:
+                variables.append(self.map_variable(f"Nome da Válvula ({valvula.name})", f"R{valvula.id}", valvula.name))
 
             for sala in shed.salas:
                 variables.append(self.map_variable(f"Nome da Sala ({sala.name})", f"S{sala.id}", sala.name))

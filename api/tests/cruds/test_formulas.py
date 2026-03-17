@@ -37,16 +37,6 @@ def test_invalid_details_sum(session, formula_repository, get_detail_data):
     details[0]['product_percentage_without_moisture'] = 80  # Invalid sum (80 + 30 != 100)
     data = FORMULA.model_dump().copy()
     data["details"] = details
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(exc.InvalidData) as exc_info:
         formula_repository.save(data)
     assert str(exc_info.value) == "A soma das porcentagens dos produtos deve ser igual a 100%."
-
-def test_product_with_zero_percentage(session, formula_repository, get_detail_data):
-    details = get_detail_data()
-    product = create_product(session, name="Óleo")
-    details.append({"product_id": product.id, "product_percentage_without_moisture": 0})
-    data = FORMULA.model_dump().copy()
-    data["details"] = details
-    with pytest.raises(ValueError) as exc_info:
-        formula_repository.save(data)
-    assert str(exc_info.value) == "Porcentagem do produto sem umidade deve ser maior que 0%."

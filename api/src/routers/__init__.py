@@ -10,9 +10,8 @@ from .device_pins import router_device_pins
 from .shed import router_sheds
 from .sala import router_salas
 from .kitchen import router_kitchens
-from .feeder_valves import router_feeder_valves
+from .valves import router_valves
 from .baia import router_baia
-from .comedouro import router_comedouros
 from .healthcheck_priority import router_healthcheck_priorities
 from .product import router_products
 from .product_tank import router_product_tanks
@@ -40,8 +39,7 @@ routers = [
     router_salas.router,
     router_kitchens.router,
     router_baia.router,
-    router_feeder_valves.router,
-    router_comedouros.router,
+    router_valves.router,
     router_healthcheck_priorities.router,
     router_products.router,
     router_product_tanks.router,

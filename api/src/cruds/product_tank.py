@@ -9,9 +9,11 @@ class ProductTankRepository(Repository):
         self.device_pin_repo = DevicePinRepository(db_session)
 
     def save(self, values, actor=None):
-        self.device_pin_repo._is_valid_pin(values["pin_id"])
+        if values["pin_id"]: self.device_pin_repo._is_valid_pin(values["pin_id"])
         return super().save(values, actor)
     
     def update(self, id, values, actor=None):
-        self.device_pin_repo._is_valid_pin(values["pin_id"])
+        current = self.get(id)
+        changed_pin = "pin_id" in values and values["pin_id"] != current.pin_id
+        if changed_pin: self.device_pin_repo._is_valid_pin(values["pin_id"])
         return super().update(id, values, actor)

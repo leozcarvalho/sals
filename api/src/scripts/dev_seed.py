@@ -21,8 +21,7 @@ from tests.fixtures.installation_fixture import create_installation
 from tests.fixtures.shed_fixture import create_shed
 from tests.fixtures.sala_fixture import create_sala
 from tests.fixtures.baia_fixture import create_baia
-from tests.fixtures.comedouro_fixture import create_comedouro
-from tests.fixtures.feeder_valve_fixture import create_feeder_valve
+from tests.fixtures.valve_fixture import create_valve
 from tests.fixtures.product_fixture import create_product
 from tests.fixtures.product_tank_fixture import create_product_tank
 from tests.fixtures.formula_fixture import create_formula
@@ -158,19 +157,18 @@ def create_kitchens(db, user):
     logger.info("[SEED] Cozinhas criadas")
 
 
-def create_comedouros(db, baia_id, user):
+def create_valvulas(db, baia_id, user):
     global PINS_COUNT
     for i in range(1, randint(2, 6)):
-        comedouro = create_comedouro(db, actor=user, name=f"C{i}", baia_id=baia_id, max_weight=1000.0)
         if PINS_COUNT < 25:
-            create_feeder_valve(db, actor=user, device_pin_id=PINS_COUNT, comedouro_id=comedouro.id)
+            create_valve(db, actor=user, device_pin_id=PINS_COUNT, baia_id=baia_id)
             PINS_COUNT += 1
-    logger.info("[SEED] Comedouros de baia criados")
+    logger.info("[SEED] Válvulas de baia criadas")
 
 def create_baias(db, sala_id, user):
     for i in range(1, randint(2, 6)):
         baia = create_baia(db, actor=user, name=f"B{i}", sala_id=sala_id)
-        create_comedouros(db, baia.id, user)
+        create_valvulas(db, baia.id, user)
     logger.info("[SEED] Baias de sala criadas")
 
 def create_salas(db, shed_id, user):

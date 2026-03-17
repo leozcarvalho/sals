@@ -1,7 +1,7 @@
 from .profile import Profile
 from .user import User
 from .device_pins import DevicePin
-from .feeder_valves import FeederValve
+from .valves import Valve
 from .hardware_connection_template import ConnectionTemplate
 from .hardware_device import Device
 from .hardware_kind import HardwareKind
@@ -12,7 +12,6 @@ from .installations import Installation
 from .shed import Shed
 from .sala import Sala
 from .baia import Baia
-from .comedouro import Comedouro
 from .healthcheck_priority import HealthcheckPriority
 from .product import Product
 from .product_tank import ProductTank
@@ -31,7 +30,7 @@ __all__ = [
     "Profile",
     "User",
     "DevicePin",
-    "FeederValve",
+    "Valve",
     "ConnectionTemplate",
     "Device",
     "HardwareKind",
@@ -42,7 +41,6 @@ __all__ = [
     "Shed",
     "Sala",
     "Baia",
-    "Comedouro",
     "HealthcheckPriority",
     "Product",
     "ProductTank",

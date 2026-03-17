@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from src.domain.base import Base
-from src.domain.feeder_valves import FeederValve
+from src.domain.valves import Valve
 
 class DevicePin(Base, table=True):
     __tablename__ = "device_pins"
@@ -26,7 +26,7 @@ class DevicePin(Base, table=True):
         sa_relationship_kwargs={"lazy": "selectin"}
     )
 
-    feeder_valves: Optional[List["FeederValve"]] = Relationship(
+    valves: Optional[List["Valve"]] = Relationship(
         back_populates="device_pin",
         sa_relationship_kwargs={"lazy": "selectin"}
     )

@@ -18,7 +18,7 @@ def test_create_kitchen(session, kitchen_repository, create_installations):
     data['tanks'] = [{"product_tank_id": product_tank.id}]
     kitchen = kitchen_repository.save({**data, "installation_id": installation.id})
     assert kitchen.id is not None
-    assert kitchen.name == "Test Kitchen"
+    assert kitchen.name == "CZ2"
     assert len(kitchen.tanks) == 1
     assert kitchen.tanks[0].id == product_tank.id
 

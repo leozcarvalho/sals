@@ -207,7 +207,7 @@ const submit = async () => {
               v-model="detail.animal_weight"
               type="decimal"
               :min="0"
-              :max="100"
+              :max="999.9"
               :step="0.01"
               :class="{ 'is-invalid': v$.details.$each.$response.$data[index].animal_weight.$error && submitted }"
             />

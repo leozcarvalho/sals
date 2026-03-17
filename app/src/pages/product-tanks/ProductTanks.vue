@@ -27,10 +27,10 @@ const modalForm = ref(null);
 
 <template>
   <BaseModalForm ref="modalForm" v-model="tankSelected" :fields="[
-    { name: 'product_id', label: 'Produto', type: 'async-select', rules: 'required', entity: 'products' },
+    { name: 'product_id', label: 'Produto', type: 'async-select', entity: 'products' },
     { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
     { name: 'description', label: 'Descrição', type: 'text' },
-    { name: 'pin_id', label: 'Pino', component: PinSelect, rules: 'required' }
+    { name: 'pin_id', label: 'Pino', component: PinSelect }
   ]" :api="productTanksApi" @saved="onTankSaved" @close="tankSelected = null"/>
   <BaseList ref="baseList" :title="'Tanques de Produto'" :api="productTanksApi" :cols="cols"
     @create="modalForm.openModal(true)" @edit="tankSelected = $event; modalForm.openModal()" />

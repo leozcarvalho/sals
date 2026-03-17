@@ -14,10 +14,9 @@ class PermissionEnum(str, Enum):
     MANAGE_HARDWARE_POINT_TYPE = "manage_hardware_point_type"
     MANAGE_HARDWARE_CONNECTION_TEMPLATE = "manage_hardware_connection_template"
     MANAGE_DEVICE_PIN = "manage_device_pin"
-    MANAGE_FEEDER_VALVE = "manage_feeder_valve"
+    MANAGE_VALVE = "manage_valve"
     MANAGE_SALA = "manage_sala"
     MANAGE_BAIA = "manage_baia"
-    MANAGE_COMEDOURO = "manage_comedouro"
     MANAGE_HEALTHCHECK_PRIORITY = "manage_healthcheck_priority"
     MANAGE_PRODUCT = "manage_product"
     MANAGE_PRODUCT_TANK = "manage_product_tank"
@@ -43,10 +42,9 @@ class PermissionEnum(str, Enum):
             "manage_hardware_point_type": "Gerenciar Tipos de Pontos de Hardware",
             "manage_hardware_connection_template": "Gerenciar Templates de Conexão",
             "manage_device_pin": "Gerenciar Pinos de Dispositivos",
-            "manage_feeder_valve": "Gerenciar Válvulas de Alimentadores",
+            "manage_valve": "Gerenciar Válvulas",
             "manage_sala": "Gerenciar Salas",
             "manage_baia": "Gerenciar Baias",
-            "manage_comedouro": "Gerenciar Comedouros",
             "manage_shed": "Gerenciar Galpões",
             "manage_stall": "Gerenciar Baias",
             "manage_healthcheck_priority": "Gerenciar Prioridades de Healthcheck",

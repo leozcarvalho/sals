@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { required, minValue, maxValue } from "@vuelidate/validators";
 import { helpers } from "@vuelidate/validators";
@@ -25,33 +25,68 @@ const form = reactive({
   details: []
 });
 
+// ---------------- FETCH FORMULA ----------------
 const fetchFormula = async () => {
   const res = await formulasApi.get(formulaId.value);
   Object.assign(form, res.data);
 };
 
+// ---------------- FETCH PRODUCTS ----------------
 const fetchProducts = async () => {
   const res = await productsApi.getList();
-  productsOptions.value =
-    res.data.items.map((p) => ({ label: p.name, value: p.id })) || [];
+
+  const products =
+    res.data.items.filter((p) => p.name.toLowerCase() !== "água") || [];
+
+  productsOptions.value = products.map((p) => ({
+    label: p.name,
+    value: p.id
+  }));
+
+  // monta details mantendo valores existentes (edição)
+  form.details = products.map((p) => {
+    const existing = form.details.find((d) => d.product_id === p.id);
+
+    return {
+      product_id: p.id,
+      product_percentage_without_moisture: existing
+        ? existing.product_percentage_without_moisture
+        : 0
+    };
+  });
 };
 
 onMounted(async () => {
   formulaId.value = route.params.id;
-  if (formulaId.value) await fetchFormula();
+
+  if (formulaId.value) {
+    await fetchFormula();
+  }
+
   await fetchProducts();
 });
 
-// ---- Vuelidate ----
+// ---------------- TOTALIZADOR ----------------
+const totalPercentage = computed(() => {
+  return form.details.reduce((acc, item) => {
+    const val = Number(item.product_percentage_without_moisture);
+    return acc + (isNaN(val) ? 0 : val);
+  }, 0);
+});
+
+// ---------------- VALIDAÇÃO ----------------
 const rules = reactive({
   name: { required },
   description: { required },
-  water_percentage: { required, minValue: minValue(0), maxValue: maxValue(100) },
+  water_percentage: {
+    required,
+    minValue: minValue(0),
+    maxValue: maxValue(100)
+  },
   stirring_time: { required, minValue: minValue(1) },
   is_active: { required },
   details: {
     $each: helpers.forEach({
-      product_id: { required },
       product_percentage_without_moisture: {
         required,
         minValue: minValue(0),
@@ -63,16 +98,18 @@ const rules = reactive({
 
 const v$ = useVuelidate(rules, form);
 
-// ---- submit ----
+// ---------------- SUBMIT ----------------
 const handleResponse = (res) => {
   handleApiToast(res, "Fórmula salva com sucesso");
   if (res.success) router.push({ name: "formulas" });
 };
 
 const submitted = ref(false);
+
 const submit = async () => {
   v$.value.$touch();
   submitted.value = true;
+
   if (v$.value.$invalid) return;
   if (formulaId.value) {
     handleResponse(await formulasApi.update(formulaId.value, form));
@@ -85,12 +122,15 @@ const submit = async () => {
 <template>
   <div class="content">
     <BaseBlock title="Fórmula">
+
       <!-- Nome -->
       <div class="mb-3">
         <label class="form-label">Nome</label>
         <input v-model="form.name" type="text" class="form-control"
           :class="{ 'is-invalid': v$.name.$error && submitted }" />
-        <div v-if="v$.name.$error && submitted" class="invalid-feedback">Campo obrigatório</div>
+        <div v-if="v$.name.$error && submitted" class="invalid-feedback">
+          Campo obrigatório
+        </div>
       </div>
 
       <!-- Descrição -->
@@ -98,7 +138,9 @@ const submit = async () => {
         <label class="form-label">Descrição</label>
         <input v-model="form.description" type="text" class="form-control"
           :class="{ 'is-invalid': v$.description.$error && submitted }" />
-        <div v-if="v$.description.$error && submitted" class="invalid-feedback">Campo obrigatório</div>
+        <div v-if="v$.description.$error && submitted" class="invalid-feedback">
+          Campo obrigatório
+        </div>
       </div>
 
       <!-- % Água -->
@@ -106,84 +148,80 @@ const submit = async () => {
         <label class="form-label">% Água</label>
         <input v-model="form.water_percentage" type="number" class="form-control"
           :class="{ 'is-invalid': v$.water_percentage.$error && submitted }" />
-        <div v-if="v$.water_percentage.$error && submitted" class="invalid-feedback">
-          Campo obrigatório (0 ≤ valor ≤ 100)
-        </div>
       </div>
 
-      <!-- Tempo de Agitação -->
+      <!-- Tempo -->
       <div class="mb-3">
-        <label class="form-label">Tempo de Agitação (segundos)</label>
+        <label class="form-label">Tempo de Agitação</label>
         <input v-model="form.stirring_time" type="number" class="form-control"
           :class="{ 'is-invalid': v$.stirring_time.$error && submitted }" />
-        <div v-if="v$.stirring_time.$error && submitted" class="invalid-feedback">
-          Campo obrigatório (≥ 1)
-        </div>
       </div>
 
       <!-- Status -->
       <div class="mb-3">
         <label class="form-label">Status</label>
-        <select v-model="form.is_active" class="form-select"
-          :class="{ 'is-invalid': v$.is_active.$error && submitted }">
+        <select v-model="form.is_active" class="form-select">
           <option :value="true">Ativo</option>
           <option :value="false">Inativo</option>
         </select>
-        <div v-if="v$.is_active.$error && submitted" class="invalid-feedback">
-          Campo obrigatório
-        </div>
       </div>
 
-      <!-- Detalhes -->
-      <div class="flex">
-        <label class="form-label me-3">Detalhes</label>
-        <button type="button" class="btn btn-lg btn-success mb-2"
-          @click="form.details.push({ product_id: null, product_percentage_without_moisture: null })">
-          <mdicon name="plus" />
-        </button>
+      <!-- DETALHES -->
+      <div class="mb-3">
+        <label class="form-label">Detalhes</label>
       </div>
-      <div class="row mb-3" v-if="form.details.length > 0">
+
+      <div class="row mb-2">
         <div class="col-6"><strong>Produto</strong></div>
-        <div class="col-4"><strong>% Produto (sem umidade)</strong></div>
-        <div class="col-2"><strong></strong></div>
+        <div class="col-4"><strong>%</strong></div>
       </div>
 
-      <div v-for="(detail, index) in form.details" :key="index" class="row g-2 align-items-start mb-2">
+      <div v-for="(detail, index) in form.details"
+           :key="detail.product_id"
+           class="row g-2 mb-2">
+
         <!-- Produto -->
         <div class="col-6">
-          <select v-model="detail.product_id" class="form-select"
-            :class="{ 'is-invalid': v$.details.$each.$response.$data[index].product_id.$error && submitted }">
-            <option value="">Selecione um produto</option>
-            <option v-for="option in productsOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-          <div v-if="v$.details.$each.$response.$data[index].product_id.$error && submitted" class="invalid-feedback">
-            Campo obrigatório
-          </div>
+          <input
+            type="text"
+            class="form-control"
+            :value="productsOptions.find(p => p.value === detail.product_id)?.label"
+            disabled
+          />
         </div>
 
-        <!-- % Produto -->
+        <!-- % -->
         <div class="col-4">
-          <input v-model="detail.product_percentage_without_moisture" type="number" step="0.01" class="form-control"
-            placeholder="% Produto"
-            :class="{ 'is-invalid': v$.details.$each.$response.$data[index].product_percentage_without_moisture.$error && submitted }" />
-          <div v-if="v$.details.$each.$response.$data[index].product_percentage_without_moisture.$error && submitted"
-            class="invalid-feedback">
-            Campo obrigatório (0 ≤ valor ≤ 100)
-          </div>
-        </div>
-
-        <!-- Botão remover -->
-        <div class="col-auto d-flex align-items-start">
-          <button type="button" class="btn btn-lg btn-danger" @click="form.details.splice(index, 1)">
-            <mdicon name="close" />
-          </button>
+          <input
+            v-model="detail.product_percentage_without_moisture"
+            type="number"
+            step="0.01"
+            class="form-control"
+            :class="{
+              'is-invalid':
+                v$.details.$each.$response.$data[index]
+                  .product_percentage_without_moisture.$error && submitted
+            }"
+          />
         </div>
       </div>
 
-      <!-- Salvar -->
-      <button @click="submit" class="btn btn-primary mb-4 btn-lg">Salvar</button>
+      <!-- TOTAL -->
+      <div class="mt-3">
+        <strong>Total: </strong>
+        <span :class="{
+          'text-success': totalPercentage === 100,
+          'text-danger': totalPercentage !== 100
+        }">
+          {{ totalPercentage.toFixed(2) }}%
+        </span>
+      </div>
+
+      <!-- BOTÃO -->
+      <button @click="submit" class="btn btn-primary my-4 btn-lg">
+        Salvar
+      </button>
+
     </BaseBlock>
   </div>
 </template>

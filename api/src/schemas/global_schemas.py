@@ -35,11 +35,6 @@ class GlobalFilters(BaseModel):
     updated_at_end: datetime
     pagination: Pagination
 
-
-class Message(BaseModel):
-    status: str = "success"
-    detail: Optional[str] = None
-
 class BaseFilter(BaseModel):
     skip: Optional[int] = 0
     limit: Optional[int] = None

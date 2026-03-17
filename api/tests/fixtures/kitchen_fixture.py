@@ -6,8 +6,8 @@ KITCHEN = KitchenCreate(
     shaker_pin_id=1,
     pump_pin_id=2,
     scale_pin_id=3,
-    max_bowl_weight=2000,
-    bowl_weight_fraction=95,
+    volume_misturador=2000,
+    fracao_volume_misturador=95,
 )
 
 def create_kitchen(session, actor=None, **overrides):

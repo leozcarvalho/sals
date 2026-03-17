@@ -12,6 +12,7 @@ export const handleApiToast = (response, successMessage = "Operação realizada 
   if (response.success) {
     toastApi("success", successMessage);
   } else {
+    console.error("API Error:", response);
     const errorMessage =
       response.error || response?.data?.error || "Erro inesperado";
     toastApi("error", errorMessage);

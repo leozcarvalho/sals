@@ -8,8 +8,7 @@ from tests.fixtures.kitchen_fixture import create_kitchen
 from tests.fixtures.shed_fixture import create_shed
 from tests.fixtures.sala_fixture import create_sala
 from tests.fixtures.baia_fixture import create_baia
-from tests.fixtures.comedouro_fixture import create_comedouro
-from tests.fixtures.feeder_valve_fixture import create_feeder_valve
+from tests.fixtures.valve_fixture import create_valve
 
 def test_get_pins_binary_and_decimal(session, create_installations):
     installation = create_installations
@@ -62,7 +61,7 @@ def test_get_pin_usage_and_is_valid_pin(session, create_installations):
     pin_product = pins[0]
     pin_kitchen = pins[1]
     pin_room = pins[2]
-    pin_feeder = pins[3]
+    pin_valve = pins[3]
     pump_pin = pins[4]
     scale_pin = pins[5]
 
@@ -86,11 +85,10 @@ def test_get_pin_usage_and_is_valid_pin(session, create_installations):
     usage_r = repo.get_pin_usage(pin_room.id)
     assert usage_r is not None and "entrada da sala" in usage_r
 
-    # feeder valve usage
+    # valve usage
     baia = create_baia(session, sala_id=sala.id, name="Baia Teste")
-    feeder = create_comedouro(session, baia_id=baia.id, name="Feeder Teste")
-    fv = create_feeder_valve(session, device_pin_id=pin_feeder.id, comedouro_id=feeder.id)
-    usage_f = repo.get_pin_usage(pin_feeder.id)
+    valve = create_valve(session, baia_id=baia.id, name="Valvula Teste", device_pin_id=pin_valve.id)
+    usage_f = repo.get_pin_usage(valve.device_pin_id)
     assert usage_f is not None and "válvula" in usage_f
 
 def test_get_grouped_not_used_device_pins(session, create_installations):

@@ -12,13 +12,13 @@ const route = useRoute();
 const shedsApi = new ApiClient("/sheds");
 const salasApi = new ApiClient("/salas");
 const baiasApi = new ApiClient("/baias");
-const comedourosApi = new ApiClient("/comedouros");
-const valvesApi = new ApiClient("/feeder-valves");
+const valvesApi = new ApiClient("/valves");
 
 const shedId = route.query.id;
 const shed = ref({});
 
 const modalForm = ref(null);
+
 const modalData = reactive({
   type: null,
   entity: null,
@@ -30,22 +30,20 @@ const deleteData = reactive({
   entity: null,
 });
 
-
-const fetchValvulas = async (comedouroId) => {
-  const res = await valvesApi.getList({ comedouro_id: comedouroId });
+const fetchValvulas = async (baiaId) => {
+  const res = await valvesApi.getList({ baia_id: baiaId });
   return res.data.items || [];
 };
 
 const refresh = async () => {
   const res = await shedsApi.get(shedId);
   shed.value = res.data || {};
-  shed.value.salas?.forEach((sala) => {
-    sala.baias?.forEach((baia) => {
-      baia.comedouros?.forEach(async (comedouro) => {
-        comedouro.device_pins = await fetchValvulas(comedouro.id);
-      });
-    });
-  });
+
+  for (const sala of shed.value.salas || []) {
+    for (const baia of sala.baias || []) {
+      baia.valves = await fetchValvulas(baia.id);
+    }
+  }
 };
 
 onMounted(async () => {
@@ -74,13 +72,15 @@ const openConfirm = (type, entity) => {
 
 const deleteItem = async () => {
   let api;
+
   if (deleteData.type === "sala") api = salasApi;
   else if (deleteData.type === "baia") api = baiasApi;
-  else if (deleteData.type === "comedouro") api = comedourosApi;
   else api = valvesApi;
 
   const res = await api.delete(deleteData.entity.id);
+
   handleApiToast(res, "Item excluído com sucesso");
+
   if (res.success) {
     await refresh();
     deleteData.type = null;
@@ -89,10 +89,10 @@ const deleteItem = async () => {
 };
 
 const numericProps = {
-  type: 'decimal',
-  step: '0.01',
-  max: '100'
-}
+  type: "decimal",
+  step: "0.01",
+  max: "100",
+};
 
 const formConfig = ref({
   sala: {
@@ -103,6 +103,7 @@ const formConfig = ref({
     ],
     extraPayload: () => ({ shed_id: modalData.parentId }),
   },
+
   baia: {
     api: baiasApi,
     fields: [
@@ -116,25 +117,30 @@ const formConfig = ref({
     ],
     extraPayload: () => ({ sala_id: modalData.parentId }),
   },
-  comedouro: {
-    api: comedourosApi,
-    fields: [
-      { name: "name", label: "Nome", type: "text", rules: "required" },
-      {
-        name: "max_weight",
-        label: "Peso máximo (kg)",
-        type: "number",
-        rules: "required|numeric|min:0",
-      },
-    ],
-    extraPayload: () => ({ baia_id: modalData.parentId }),
-  },
+
   valve: {
     api: valvesApi,
     fields: [
-      { name: "device_pin_id", label: "Pino do Dispositivo", component: PinSelect, rules: "required" },
+      {
+        name: "name",
+        label: "Nome",
+        type: "text",
+        rules: "required",
+      },
+      {
+        name: "max_weight",
+        label: "Peso Máximo (kg)",
+        component: NumericInput,
+        props: { type: "decimal", step: "0.01" },
+        rules: "required",
+      },
+      {
+        name: "device_pin_id",
+        label: "Pino do Dispositivo",
+        component: PinSelect,
+      },
     ],
-    extraPayload: () => ({ comedouro_id: modalData.parentId }),
+    extraPayload: () => ({ baia_id: modalData.parentId }),
   },
 });
 </script>
@@ -142,77 +148,74 @@ const formConfig = ref({
 <template>
   <div class="container py-4">
     <h3 class="mb-4">{{ shed.name }}</h3>
+
     <button class="btn btn-success mb-3" @click="openModal('sala', null, shedId)">
       + Sala
     </button>
 
+    <!-- SALAS -->
     <div v-for="sala in shed.salas" :key="sala.id" class="card mb-3 p-3 shadow-sm sala-card">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">{{ sala.name }}</h5>
+
         <div>
           <button class="btn btn-lg btn-info me-1" type="button" data-bs-toggle="collapse"
-            :data-bs-target="'#sala-' + sala.id" aria-expanded="true" :aria-controls="'sala-' + sala.id">
+            :data-bs-target="'#sala-' + sala.id">
             <i class="fa fa-chevron-down"></i>
           </button>
+
           <button class="btn btn-lg btn-warning" @click="openModal('sala', sala, shedId)">
             <i class="fa fa-pencil"></i>
           </button>
+
           <button class="btn btn-lg btn-danger ms-1" @click="openConfirm('sala', sala)">
             <i class="fa fa-trash"></i>
           </button>
+
           <button class="btn btn-lg btn-success ms-1" @click="openModal('baia', null, sala.id)">
             + Baia
           </button>
         </div>
       </div>
-      <!-- Conteúdo colapsável -->
+
+      <!-- BAIAS -->
       <div class="collapse" :id="'sala-' + sala.id">
         <div v-for="baia in sala.baias" :key="baia.id" class="card mb-2 ms-3 p-2 shadow-sm baia-card">
           <div class="d-flex justify-content-between align-items-center">
             <strong>{{ baia.name }}</strong>
+
             <div>
               <button class="btn btn-lg btn-warning" @click="openModal('baia', baia, sala.id)">
                 <i class="fa fa-pencil"></i>
               </button>
+
               <button class="btn btn-lg btn-danger ms-1" @click="openConfirm('baia', baia)">
                 <i class="fa fa-trash"></i>
               </button>
-              <button class="btn btn-lg btn-success ms-1" @click="openModal('comedouro', null, baia.id)">
-                + Comedouro
+
+              <button class="btn btn-lg btn-success ms-1" @click="openModal('valve', null, baia.id)">
+                + Válvula
               </button>
             </div>
           </div>
 
-          <div v-for="comedouro in baia.comedouros" :key="comedouro.id" class="card mt-2 ms-3 p-2 comedouro-card">
-            <div class="d-flex justify-content-between align-items-center">
-              <span>{{ comedouro.name }}</span>
-              <div>
-                <button class="btn btn-lg btn-warning" @click="openModal('comedouro', comedouro, baia.id)">
-                  <i class="fa fa-pencil"></i>
-                </button>
-                <button class="btn btn-lg btn-danger ms-1" @click="openConfirm('comedouro', comedouro)">
-                  <i class="fa fa-trash"></i>
-                </button>
-                <button class="btn btn-lg btn-success ms-1" @click="openModal('valve', null, comedouro.id)">
-                  + Válvula
-                </button>
-              </div>
-            </div>
+          <!-- VÁLVULAS -->
+          <div class="mt-2 ms-3 row">
+            <div v-for="valve in baia.valves" :key="valve.id" class="d-flex align-items-center mb-1 col-auto">
+              <button class="btn btn-lg btn-primary disabled me-2">
+                {{ valve.name }}
+              </button>
 
-            <!-- Lista de válvulas -->
-            <div class="mt-2 ms-3 row">
-              <div v-for="valve in comedouro.device_pins" :key="valve.id" class="d-flex align-items-center mb-1 col-auto">
-                <button class="btn btn-lg btn-primary disabled me-2">{{ valve.device_pin.name }}</button>
-                <button class="btn btn-lg btn-danger" @click="openConfirm('feeder-valves', valve)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </div>
+              <button class="btn btn-lg btn-danger" @click="openConfirm('valve', valve)">
+                <i class="fa fa-trash"></i>
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Modal de exclusão -->
+
+    <!-- MODAL DELETE -->
     <div class="modal fade" id="modal-delete" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -220,16 +223,25 @@ const formConfig = ref({
             <h5 class="modal-title">Confirmar Ação</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
+
           <div class="modal-body">
-            Deseja realmente excluir <strong>{{ deleteData.entity?.name || 'este item' }}</strong>?
+            Deseja realmente excluir
+            <strong>{{ deleteData.entity?.name || "este item" }}</strong>?
           </div>
+
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-danger" data-bs-dismiss="modal" @click="deleteItem">Confirmar</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+
+            <button class="btn btn-danger" data-bs-dismiss="modal" @click="deleteItem">
+              Confirmar
+            </button>
           </div>
         </div>
       </div>
     </div>
+
     <BaseModalForm ref="modalForm" v-model="modalData.entity" :fields="formConfig[modalData.type]?.fields || []"
       :api="formConfig[modalData.type]?.api || {}" :extra-payload="formConfig[modalData.type]?.extraPayload()"
       @saved="onSaved" />
@@ -244,10 +256,6 @@ const formConfig = ref({
 
 .baia-card {
   border-radius: 8px;
-}
-
-.feeder-card {
-  border-radius: 6px;
 }
 
 .badge {

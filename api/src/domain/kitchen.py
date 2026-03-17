@@ -10,12 +10,12 @@ class Kitchen(Base, table=True):
     name: str = Field(nullable=False, max_length=100)
 
     # Pinos
-    shaker_pin_id: int = Field(foreign_key="device_pins.id", nullable=False)
-    pump_pin_id: int = Field(foreign_key="device_pins.id", nullable=False)
-    scale_pin_id: int = Field(foreign_key="device_pins.id", nullable=False)
+    shaker_pin_id: int = Field(foreign_key="device_pins.id", nullable=True)
+    pump_pin_id: int = Field(foreign_key="device_pins.id", nullable=True)
+    scale_pin_id: int = Field(foreign_key="device_pins.id", nullable=True)
 
-    max_bowl_weight: Decimal = Field(sa_column=Column(Numeric(10, 2)))
-    bowl_weight_fraction: Decimal = Field(sa_column=Column(Numeric(5, 2)))
+    volume_misturador: Decimal = Field(sa_column=Column(Numeric(10, 2)))
+    fracao_volume_misturador: Decimal = Field(sa_column=Column(Numeric(5, 2)))
 
     shaker_pin: Optional["DevicePin"] = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Kitchen.shaker_pin_id]"}

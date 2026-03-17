@@ -20,3 +20,7 @@ class Shed(ShedBase, GlobalFields):
 
 class ShedFilter(BaseFilter):
     name: Optional[str] = None
+
+class ShedCloneRequest(BaseModel):
+    shed_id: int
+    name: str

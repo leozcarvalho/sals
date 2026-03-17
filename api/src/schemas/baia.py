@@ -1,8 +1,8 @@
 from pydantic.main import BaseModel
-from typing import Optional
+from typing import Optional, List
 from decimal import Decimal
 from src.schemas.global_schemas import BaseFilter, GlobalFields
-from src.schemas.comedouro import Comedouro
+from src.schemas.valves import Valve
 
 class BaiaBase(BaseModel):
     name: str
@@ -22,7 +22,7 @@ class BaiaUpdate(BaiaBase):
     pass
 
 class Baia(BaiaBase, GlobalFields):
-    comedouros: Optional[list[Comedouro]] = None
+    valvulas: Optional[List[Valve]] = None
 
 class BaiaFilter(BaseFilter):
     name: Optional[str] = None

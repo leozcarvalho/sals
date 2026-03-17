@@ -141,12 +141,21 @@ class Repository:
 
     def check_unique_constraints(self, values: dict, id: int = None):
         unique_fields = self.get_unique_fields()
+
         for field in unique_fields:
-            if field in values:
-                existing = self.db_session.query(self.model).filter(getattr(self.model, field) == values[field]).first()
-                if existing and existing.id != id:
-                    raise exc.Conflict(f" '{values[field]}' já existe.")
-    
+            value = values.get(field)
+            if value is None:
+                continue
+
+            existing = (
+                self.db_session.query(self.model)
+                .filter(getattr(self.model, field) == value)
+                .first()
+            )
+
+            if existing and existing.id != id:
+                raise exc.Conflict(f"'{value}' já existe.")
+        
     def save(self, values: dict, actor=None):
         try:
             self.check_unique_constraints(values)

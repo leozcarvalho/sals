@@ -1,4 +1,5 @@
 from sqlmodel import Session
+from src.domain.exceptions import InvalidData
 from src.cruds.repo import Repository
 from src.domain.formula import Formula
 from src.cruds.formula_detail import FormulaDetailRepository
@@ -23,12 +24,12 @@ class FormulaRepository(Repository):
         return formula
 
     def __validate_details(self, details: List[FormulaDetailCreate]):
-        if any(detail['product_percentage_without_moisture'] <= 0 for detail in details):
-            raise ValueError("Porcentagem do produto sem umidade deve ser maior que 0%.")
+        #if any(detail['product_percentage_without_moisture'] <= 0 for detail in details):
+            #raise InvalidData("Porcentagem do produto sem umidade deve ser maior que 0%.")
 
         total_percentage = sum(detail['product_percentage_without_moisture'] for detail in details)
         if total_percentage != 100:
-            raise ValueError("A soma das porcentagens dos produtos deve ser igual a 100%.")
+            raise InvalidData("A soma das porcentagens dos produtos deve ser igual a 100%.")
 
     def __update_details(self, formula_id: int, details: List[FormulaDetailCreate], actor=None):
         self.__validate_details(details)

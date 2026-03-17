@@ -16,10 +16,11 @@ class KitchenRepository(Repository):
     def __check_used_pins(self, values):
         pin_fields = ['shaker_pin_id', 'pump_pin_id', 'scale_pin_id']
         for field in pin_fields:
-            self.device_pin_repo._is_valid_pin(values[field])
+            if values[field]:
+                self.device_pin_repo._is_valid_pin(values[field])
 
     def __check_is_duplicated(self, values):
-        ids = [values[field] for field in ['shaker_pin_id', 'pump_pin_id', 'scale_pin_id'] if field in values]
+        ids = [values[field] for field in ['shaker_pin_id', 'pump_pin_id', 'scale_pin_id'] if field in values and values[field] is not None]
         if len(ids) != len(set(ids)):
             raise exc.InvalidData("Não é permitido usar o mesmo pino em mais de uma função.")
 

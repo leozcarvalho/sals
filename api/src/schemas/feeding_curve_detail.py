@@ -1,12 +1,12 @@
-from pydantic import BaseModel, condecimal, Field
+from pydantic import BaseModel
 from decimal import Decimal
 from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class FeedingCurveDetailBase(BaseModel):
     age_day: int
     formula_id: int
-    formula_mass_per_animal: float
-    animal_weight: float
+    formula_mass_per_animal: Decimal
+    animal_weight: Decimal
     is_active: bool = True
 
 class FeedingCurveDetailCreate(FeedingCurveDetailBase):
