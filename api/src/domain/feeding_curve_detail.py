@@ -10,7 +10,7 @@ class FeedingCurveDetail(Base, table=True):
     feeding_curve_id: int = Field(foreign_key="feeding_curves.id", nullable=False)
     age_day: int = Field(nullable=False)
     formula_id: int = Field(foreign_key="formulas.id", nullable=False)
-    formula_mass_per_animal: Decimal = Field(sa_column=Column(Numeric(10, 1)), ge=0)
+    formula_mass_per_animal: Decimal = Field(sa_column=Column(Numeric(10, 2)), ge=0)
 
     animal_weight: Decimal = Field(
         sa_column=Column(Numeric(10, 1)),
