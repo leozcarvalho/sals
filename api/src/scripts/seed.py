@@ -28,7 +28,7 @@ from tests.fixtures.moviment_kinds_fixture import create_moviment_kind
 from tests.fixtures.shed_fixture import create_shed
 from tests.fixtures.sala_fixture import create_sala
 from tests.fixtures.baia_fixture import create_baia
-
+from tests.fixtures.batch_fixture import create_batch
 
 from src.cruds.trato import TratoRepository
 from src.schemas.trato import TratoCreate
@@ -283,21 +283,25 @@ def criar_salas(db, user):
 def criar_baias(db, user):
     #44 baias pra cada sala
     for i in range(1, 45):
-        create_baia(db, actor=user, name=f"B{i:02d}", sala_id=1)
-        create_baia(db, actor=user, name=f"B{i:02d}", sala_id=2)
+        create_baia(db, actor=user, name=f"B{i:02d}", sala_id=1, animals_quantity=20)
+        create_baia(db, actor=user, name=f"B{i:02d}", sala_id=2, animals_quantity=20)
 
 
 def create_tratos(db, user):
     trato_repo = TratoRepository(db)
     trato_repo.bulk_save([
-        TratoCreate(name="T1", hour=6, percent=20),
-        TratoCreate(name="T2", hour=12, percent=20),
-        TratoCreate(name="T3", hour=18, percent=20),
-        TratoCreate(name="T4", hour=22, percent=20),
-        TratoCreate(name="T5", hour=22, percent=20),
-        TratoCreate(name="T6", hour=22, percent=0),
+        TratoCreate(name="T1", hour=7, percent=20),
+        TratoCreate(name="T2", hour=9, percent=20),
+        TratoCreate(name="T3", hour=11, percent=0),
+        TratoCreate(name="T4", hour=13, percent=30),
+        TratoCreate(name="T5", hour=15, percent=0),
+        TratoCreate(name="T6", hour=17, percent=30),
     ], actor=user)
     logger.info("[SEED] Tratos criados")
+
+def criar_lotes(db, user):
+    create_batch(db, actor=user, name="LOTE G3 16/03/26", description="1225", shed_id=1, sala_id=1, feeding_curve_id=1)
+    create_batch(db, actor=user, name="LOTE G3 16/01/26", description="1228", shed_id=2, sala_id=2, feeding_curve_id=1)
 
 def seed():
     with session_scope() as db:
@@ -319,6 +323,7 @@ def seed():
             create_moviment_kinds(db, user)
             create_feeding_curves(db, user)
             create_tratos(db, user)
+            criar_lotes(db, user)
             logger.info("[SEED] Seed executado com sucesso")
         except Exception as e:
             logger.error(f"[SEED] Erro ao executar seed: {e}")

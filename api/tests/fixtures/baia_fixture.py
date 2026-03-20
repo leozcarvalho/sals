@@ -3,7 +3,8 @@ from src.schemas.baia import BaiaCreate
 
 BAIA = BaiaCreate(
     name="Baia 1",
-    sala_id=1
+    sala_id=1,
+    animals_quantity=100
 )
 
 def create_baia(session, actor=None, **overrides):

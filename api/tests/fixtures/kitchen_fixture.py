@@ -6,7 +6,7 @@ KITCHEN = KitchenCreate(
     shaker_pin_id=1,
     pump_pin_id=2,
     scale_pin_id=3,
-    volume_misturador=2000,
+    volume_misturador=1000,
     fracao_volume_misturador=95,
 )
 

@@ -182,7 +182,7 @@ const formConfig = ref({
       <div class="collapse" :id="'sala-' + sala.id">
         <div v-for="baia in sala.baias" :key="baia.id" class="card mb-2 ms-3 p-2 shadow-sm baia-card">
           <div class="d-flex justify-content-between align-items-center">
-            <strong>{{ baia.name }}</strong>
+            <strong>{{ baia.name }} - {{(baia.animals_quantity)}}</strong>
 
             <div>
               <button class="btn btn-lg btn-warning" @click="openModal('baia', baia, sala.id)">
