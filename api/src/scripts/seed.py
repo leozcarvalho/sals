@@ -7,6 +7,7 @@ from random import randint
 from src.core.db import session_scope, engine
 from src.domain.permissions import PermissionEnum
 from src.core.config import settings
+from datetime import date
 
 # Fixtures
 from tests.fixtures.hardware_kind_fixture import create_hardware_kind
@@ -222,10 +223,7 @@ def create_formulas(db, user):
     )
     logger.info(f"[SEED] Fórmulas criadas")
 
-
-def create_feeding_curves(db, user):
-    #dia curva, id formula, peso suino, alimento por animal
-    CURVE_DETAILS_DATA = [[22,1,22.8,1.21],[23,1,23.4,1.23],[24,1,24.0,1.25],[25,1,24.6,1.27],[26,1,25.2,1.30],[27,1,25.8,1.32],
+CURVE_DETAILS_DATA = [[22,1,22.8,1.21],[23,1,23.4,1.23],[24,1,24.0,1.25],[25,1,24.6,1.27],[26,1,25.2,1.30],[27,1,25.8,1.32],
                           [28,1,26.4,1.34],[29,1,27.0,1.36],[30,1,27.6,1.37],[31,1,28.3,1.38],[32,1,28.9,1.39],[33,1,29.5,1.39],[34,1,30.1,1.40],
                           [35,1,30.8,1.41],[36,1,31.4,1.42],[37,1,32.1,1.44],[38,1,32.7,1.46],[39,1,33.4,1.48],[40,1,34.1,1.51],[41,1,34.8,1.53],
                           [42,1,35.4,1.55],[43,1,36.1,1.57],[44,1,36.8,1.60],[45,1,37.5,1.63],[46,1,38.2,1.66],[47,1,39.0,1.70],[48,1,39.7,1.73],
@@ -244,6 +242,8 @@ def create_feeding_curves(db, user):
                           [133,5,118.1,2.90],[134,5,118.8,2.90],[135,5,119.5,2.90],[136,5,120.1,2.90],[137,5,120.8,2.90],[138,5,121.5,2.90],[139,5,122.2,2.90],
                           [140,5,122.8,2.90],[141,5,123.5,2.90]]
 
+def create_feeding_curves(db, user):
+    #dia curva, id formula, peso suino, alimento por animal
     curve = create_feeding_curve(db,
             actor=user,
             name="AURORA_CR_TE_AJ_01",
@@ -276,14 +276,15 @@ def criar_galpoes(db, user):
     logger.info("[SEED] Galpões criados")
 
 def criar_salas(db, user):
-    create_sala(db, actor=user, name="S01", shed_id=1)
-    create_sala(db, actor=user, name="S01", shed_id=2)
+    create_sala(db, actor=user, name="S1", shed_id=1)
+    create_sala(db, actor=user, name="S1", shed_id=2)
     logger.info("[SEED] Salas criadas")
 
 def criar_baias(db, user):
-    #44 baias pra cada sala
     for i in range(1, 45):
         create_baia(db, actor=user, name=f"B{i:02d}", sala_id=1, animals_quantity=20)
+
+    for i in range(1, 45):
         create_baia(db, actor=user, name=f"B{i:02d}", sala_id=2, animals_quantity=20)
 
 
@@ -291,17 +292,40 @@ def create_tratos(db, user):
     trato_repo = TratoRepository(db)
     trato_repo.bulk_save([
         TratoCreate(name="T1", hour=7, percent=20),
-        TratoCreate(name="T2", hour=9, percent=20),
+        TratoCreate(name="T2", hour=9, percent=30),
         TratoCreate(name="T3", hour=11, percent=0),
         TratoCreate(name="T4", hour=13, percent=30),
         TratoCreate(name="T5", hour=15, percent=0),
-        TratoCreate(name="T6", hour=17, percent=30),
+        TratoCreate(name="T6", hour=17, percent=20),
     ], actor=user)
     logger.info("[SEED] Tratos criados")
 
 def criar_lotes(db, user):
-    create_batch(db, actor=user, name="LOTE G3 16/03/26", description="1225", shed_id=1, sala_id=1, feeding_curve_id=1)
-    create_batch(db, actor=user, name="LOTE G3 16/01/26", description="1228", shed_id=2, sala_id=2, feeding_curve_id=1)
+    def get_index_of_day(age_day):
+        for index, detail in enumerate(CURVE_DETAILS_DATA):
+            if detail[0] == age_day:
+                return index + 1
+        return None
+    create_batch(db,
+        actor=user,
+        name="LOTE G3 16/03/26",
+        description="1225",
+        shed_id=1,
+        sala_id=1,
+        feeding_curve_id=1,
+        initial_curve_detail_id=get_index_of_day(26),
+        created_at=date(2026, 3, 16)
+    )
+    create_batch(db,
+        actor=user,
+        name="LOTE G3 16/01/26",
+        description="1228",
+        shed_id=2,
+        sala_id=2,
+        feeding_curve_id=1,
+        initial_curve_detail_id=get_index_of_day(85),
+        created_at=date(2026, 3, 16)
+    )
 
 def seed():
     with session_scope() as db:

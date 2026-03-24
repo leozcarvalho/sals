@@ -28,3 +28,8 @@ class FeedingCurveDetail(Base, table=True):
         back_populates="feeding_curve_details",
         sa_relationship_kwargs={"lazy": "selectin"}
     )
+
+    batch: Optional["Batch"] = Relationship(
+        back_populates="initial_curve_detail",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )

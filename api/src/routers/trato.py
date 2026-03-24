@@ -32,3 +32,11 @@ def bulk_update_tratos(
 ):
     service.bulk_update(tratos, actor=current_user)
     return ApiResponse(success=True, data=tratos)
+
+@router_trato.router.get("/report")
+def get_trato_report(
+    service: TratoRepository = Depends(get_trato_service),
+    current_user = Depends(get_current_user)
+):
+    report = service.report()
+    return ApiResponse(success=True, data=report)

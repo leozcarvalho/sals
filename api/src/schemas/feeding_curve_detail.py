@@ -15,7 +15,7 @@ class FeedingCurveDetailCreate(FeedingCurveDetailBase):
 class FeedingCurveDetailUpdate(FeedingCurveDetailBase):
     feeding_curve_id: int
 
-class FeedingCurveDetailRead(FeedingCurveDetailBase, GlobalFields):
+class FeedingCurveDetail(FeedingCurveDetailBase, GlobalFields):
     pass
 
 class FeedingCurveDetailFilter(BaseFilter):

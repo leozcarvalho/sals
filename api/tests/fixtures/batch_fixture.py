@@ -4,7 +4,7 @@ from src.schemas.batch import BatchCreate
 BATCH = BatchCreate(
     name="Lote 1",
     description="Lote inicial",
-    initial_day=1,
+    initial_curve_detail_id=1,
     is_active=True,
     feeding_curve_id=1,
     shed_id=1,

@@ -9,7 +9,7 @@ class Batch(Base, table=True):
     description: str = Field(nullable=True, max_length=255)
     
     #Deve vir dos dias cadastrados na curva de alimentação
-    initial_day: int = Field(nullable=False)
+    initial_curve_detail_id: int = Field(foreign_key="feeding_curve_details.id", nullable=False)
 
     is_active: bool = Field(nullable=False, default=True)
     feeding_curve_id: int = Field(foreign_key="feeding_curves.id", nullable=False)
@@ -19,5 +19,6 @@ class Batch(Base, table=True):
     shed: "Shed" = Relationship(back_populates="batch")
     sala: "Sala" = Relationship(back_populates="batch")
     feeding_curve: "FeedingCurve" = Relationship(back_populates="batch")
+    initial_curve_detail: "FeedingCurveDetail" = Relationship(back_populates="batch")
 
     moviments: List["Moviment"] = Relationship(back_populates="batch")

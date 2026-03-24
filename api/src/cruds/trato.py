@@ -48,3 +48,7 @@ class TratoRepository(Repository):
             updated_tratos.append(trato)
         self.refresh_baia_tratos()
         return updated_tratos
+    
+    def report(self):
+        #VERIFICA SE TEM 0 EM ALGUM TRATO, POR SALA
+        return []
