@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { required, minValue, requiredIf } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
@@ -31,7 +31,7 @@ const movimentKindOptions = ref([]);
 const form = reactive({
   name: "",
   description: "",
-  initial_day: null,
+  initial_curve_detail_id: null,
   is_active: true,
   feeding_curve_id: null,
   shed_id: null,
@@ -44,7 +44,7 @@ const fetchBatch = async () => {
   const res = await batchesApi.get(batchId.value);
   Object.assign(form, res.data);
   if (form.shed_id) await fetchRooms(form.shed_id);
-  if (form.feeding_curve_id) await setFeedingCurveDays(form.feeding_curve_id);
+  if (form.feeding_curve_id) setFeedingCurveDays(form.feeding_curve_id);
   if (form.sala_id) await fetchBaiasOptions(form.sala_id);
 };
 
@@ -65,10 +65,16 @@ const fetchFeedingCurves = async () => {
     res.data.items.map((c) => ({ label: c.name, value: c.id, details: c.details })) || [];
 };
 
-const setFeedingCurveDays = async (curveId) => {
-  const selectedCurve = feedingCurvesOptions.value.find((c) => c.value === curveId);
+const setFeedingCurveDays = (curveId) => {
+  const selectedCurve = feedingCurvesOptions.value.find(
+    (c) => c.value === curveId
+  );
   if (selectedCurve) {
-    feedingCurveDays.value = selectedCurve.details?.map((d) => d.age_day) || [];
+    feedingCurveDays.value = selectedCurve.details?.map((d) => ({
+      value: d.id,
+      age_day: d.age_day,
+      label: `Dia ${d.age_day} (${d.animal_weight}kg)`
+    })) || [];
   }
 };
 
@@ -125,7 +131,7 @@ const rules = reactive({
   name: { required },
   description: {},
   is_active: { required },
-  initial_day: { required, minValue: minValue(1) },
+  initial_curve_detail_id: { required },
   feeding_curve_id: { required },
   shed_id: { required },
   sala_id: { required },
@@ -278,12 +284,14 @@ const execMoviment = async () => {
 
         <div class="mb-3 col-6">
           <label class="form-label">Dia Inicial</label>
-          <select v-model="form.initial_day" class="form-select"
-            :class="{ 'is-invalid': v$.initial_day.$error && submitted }" :disabled="feedingCurveDays.length === 0">
+          <select v-model="form.initial_curve_detail_id" class="form-select"
+            :class="{ 'is-invalid': v$.initial_curve_detail_id.$error && submitted }"
+            :disabled="feedingCurveDays.length === 0">
             <option value="">Selecione</option>
-            <option v-for="day in feedingCurveDays" :key="day" :value="day"> Dia {{ day }} </option>
+            <option v-for="opt in feedingCurveDays" :key="opt.value" :value="opt.value"> {{ opt.label }} </option>
           </select>
-          <div v-if="v$.initial_day.$error && submitted" class="invalid-feedback"> Selecione o dia inicial do lote
+          <div v-if="v$.initial_curve_detail_id.$error && submitted" class="invalid-feedback"> Selecione o dia inicial
+            do lote
           </div>
         </div>
       </div>
@@ -313,7 +321,7 @@ const execMoviment = async () => {
               <select v-model="mov.moviment_kind_id" class="form-select" :disabled="!mov.isNew">
                 <option value="">Selecione o tipo</option>
                 <option v-for="option in movimentKindOptions" :key="option.value" :value="option.value"> {{ option.label
-                }} </option>
+                  }} </option>
               </select>
             </div>
 

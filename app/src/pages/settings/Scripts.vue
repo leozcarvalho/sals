@@ -10,7 +10,7 @@ const loader = ref(null);
 const result = ref(null);
 const selectedScript = ref(null);
 const scriptOptions = [
-  { value: "script_1", label: "Script 1", params: [{ name: "initial_day", type: "number", label: "Dia inicial" }] },
+  { value: "script_1", label: "Script 1", params: [{ name: "data_base", type: "date", label: "Dia inicial" }] },
   { value: "script_2", label: "Script 2", params: [{ name: "another_param", type: "string", label: "Param 1" }, { name: "extra_param", type: "boolean", label: "Param 2" }] },
 ];
 
@@ -39,16 +39,37 @@ const exec = async () => {
         <div class="mt-3" v-if="selectedScript">
           <div class="col-3">
             <input v-for="param in scriptOptions.find(opt => opt.value === selectedScript).params" :key="param.name"
-            :type="param.type" class="form-control mb-2" v-model="data[param.name]" :placeholder="param.name" />
+              :type="param.type" class="form-control mb-2" v-model="data[param.name]" :placeholder="param.name" />
           </div>
           <div class="col-3">
             <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-confirm">Executar
               Script</button>
           </div>
         </div>
-        <div class="col-12 mt-3">
-          <div v-if="result" class="alert alert-info">
-            <pre>{{ result }}</pre>
+      </div>
+      <div v-if="result && result.length">
+        <div v-for="(group, index) in result" :key="index" class="mb-4">
+          <h5 class="mb-2 text-capitalize">
+            {{ Object.keys(group)[0] }}
+          </h5>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th v-for="(value, key) in Object.values(group)[0][0]" :key="key">
+                    {{ key }}
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr v-for="(row, rowIndex) in Object.values(group)[0]" :key="rowIndex">
+                  <td v-for="(value, key) in row" :key="key">
+                    {{ value }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

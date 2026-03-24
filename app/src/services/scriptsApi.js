@@ -10,7 +10,6 @@ class ScriptsClient extends ApiClient {
       script_name: scriptName,
       params: data,
     };
-    console.log(payload);
     try {
       const response = await this.api.post(`${this.path}/script-1`, payload);
       return response.data;
