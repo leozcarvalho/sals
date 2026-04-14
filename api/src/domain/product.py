@@ -11,8 +11,13 @@ class Product(Base, table=True):
     kind: str = Field(nullable=False, max_length=10)  # 'solid' or 'liquid'
     density: int = Field(nullable=False, ge=0, le=10000)
     is_active: bool = Field(nullable=False, default=True)
+    is_micronutrient: bool = Field(nullable=False, default=False)
 
     tanks: Optional[list["ProductTank"]] = Relationship(
+        back_populates="product",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
+    formula_details: Optional[list["FormulaDetail"]] = Relationship(
         back_populates="product",
         sa_relationship_kwargs={"lazy": "selectin"}
     )

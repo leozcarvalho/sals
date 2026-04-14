@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, make_transient
 from src.domain import Shed, Sala, Baia, Valve
 from src.cruds.repo import Repository
+from src.domain.exceptions import NotFound
 
 
 class ShedRepository(Repository):
@@ -11,7 +12,7 @@ class ShedRepository(Repository):
         shed = self.get(shed_id)
 
         if not shed:
-            raise Exception("Shed not found")
+            raise NotFound("Galpão não encontrado")
 
         # cria o novo shed
         new_shed = Shed(

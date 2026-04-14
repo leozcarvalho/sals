@@ -27,6 +27,7 @@ class PermissionEnum(str, Enum):
     MANAGE_BATCH = "manage_batch"
     MANAGE_MOVIMENT_KIND = "manage_moviment_kind"
     MANAGE_TRATO = "manage_trato"
+    MANAGE_DOSADOR_SECO = "manage_dosador_seco"
 
     @property
     def label(self) -> str:
@@ -57,5 +58,6 @@ class PermissionEnum(str, Enum):
             "manage_batch": "Gerenciar Lotes",
             "manage_moviment_kind": "Gerenciar Tipos de Movimentação",
             "manage_trato": "Gerenciar Tratos",
+            "manage_dosador_seco": "Gerenciar Dosadores Secos",
         }
         return labels[self.value]

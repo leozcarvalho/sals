@@ -19,214 +19,286 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def calcular_dia_curva(lote: Batch, data_base: date):
-    start_date = lote.created_at.date()
+# =========================================================
+# 🔥 HELPERS
+# =========================================================
+def d(v): return Decimal(str(v))
+def r(v): return v.quantize(Decimal("0.01"))
 
-    dias_passados = (data_base - start_date).days
+# =========================================================
+# 🔥 DIA CURVA
+# =========================================================
+def calcular_dia_curva(lote: Batch, data_base: date):
+    dias_passados = (data_base - lote.created_at.date()).days
 
     if dias_passados < 0:
         raise Exception(f"Data base menor que início do lote {lote.id}")
 
-    curva_inicio: FeedingCurveDetail = lote.initial_curve_detail
-
-    if not curva_inicio:
-        raise Exception(f"Lote {lote.id} sem initial_curve_detail")
-
-    dia_inicial = curva_inicio.age_day
-
-    dia_curva = dia_inicial + dias_passados
+    curva_inicio = lote.initial_curve_detail
+    dia_curva = curva_inicio.age_day + dias_passados
 
     max_dia = max(c.age_day for c in lote.feeding_curve.details)
 
-    if dia_curva > max_dia:
-        dia_curva = max_dia
-
-    return dia_curva, dias_passados
+    return min(dia_curva, max_dia), dias_passados
 
 
-def script_1(session, data_base: date, show_debug: bool = True):
-    '''
-    DATA → DIA CURVA
-    → CONSUMO ANIMAL
-    → CONSUMO BAIA
-    → DIVISÃO POR TRATO
-    → DIVISÃO POR FÓRMULA
-    → SOMA FINAL
-    '''
-    logger.info("Iniciando script_1")
-    logger.info(f"Data base: {data_base}")
-
+def script_1(session, data_base, show_debug=True):
     batch_repo = BatchRepository(session)
     trato_repo = TratoRepository(session)
 
-    lotes: List[Batch] = batch_repo.get_list(filters={'is_active': True})
-    tratos: List[Trato] = trato_repo.get_list()
+    lotes = batch_repo.get_list(filters={'is_active': True})
+    tratos = trato_repo.get_list()
 
     trato_repo.validate_percent(tratos)
 
-    debug_curva = []
-    debug_baia = []
+    map_formulas = {}
+    for lote in lotes:
+        for c in lote.feeding_curve.details:
+            if c.formula:
+                map_formulas[c.formula.id] = c.formula
+
+    consultas_curva = []
+    dados_curva = []
+    total_baia_trato = []
+    total_formula_trato = defaultdict(Decimal)
     matriz_detalhada = []
 
+    # =========================================================
+    # LOOP PRINCIPAL
+    # =========================================================
     for lote in lotes:
-        logger.info(f"Processando lote {lote.id}")
 
         sala = lote.sala
         galpao = sala.shed
-        baias: List[Baia] = sala.baias
-        curva: FeedingCurve = lote.feeding_curve
+        baias = sala.baias
 
-        #data_base = date(2026, 3, 16)
-        dia_curva, dias_passados = calcular_dia_curva(lote, data_base)
-        logger.info(f"Lote {lote.id} - Dia curva: {dia_curva} Data base: {data_base} (dias passados: {dias_passados})")
+        consultas_curva.append({
+            "LOTE": lote.id,
+            "ID_SA": sala.id,
+            "GALPAO": galpao.name
+        })
 
-        # 🔥 pega detalhe da curva
-        curva_dia: FeedingCurveDetail = next(
-            (c for c in curva.details if c.age_day == dia_curva),
+        dia_curva, dias = calcular_dia_curva(lote, data_base)
+
+        curva_dia = next(
+            (c for c in lote.feeding_curve.details if c.age_day == dia_curva),
             None
         )
 
-        if not curva_dia:
-            logger.warning(
-                f"Curva não encontrada | lote={lote.id} | dia={dia_curva}"
-            )
+        if not curva_dia or not curva_dia.formula:
             continue
 
-        consumo_animal = Decimal(curva_dia.formula_mass_per_animal)
-        formula: Formula = curva_dia.formula
+        consumo_animal = d(curva_dia.formula_mass_per_animal)
+        formula = curva_dia.formula
 
-
-        debug_curva.append({
+        dados_curva.append({
             "LOTE": lote.id,
-            "ID_SA": sala.id,
-            "GALPAO": galpao.name,
-            "SALA": sala.name,
-            "DATA_BASE": str(data_base),
-            "DIAS_PASSADOS": dias_passados,
-            "DIA_INICIAL": lote.initial_curve_detail.age_day,
             "DIA_CURVA": dia_curva,
-            "PESO_SUINO": float(curva_dia.animal_weight),
-            "P_SECO_ANIMAL": float(consumo_animal),
-            "FORMULA_ID": formula.id if formula else None,
-            "FORMULA": formula.name if formula else None,
+            "FORMULA": formula.id,
+            "CONSUMO_ANIMAL": float(consumo_animal)
         })
-
-        if not formula:
-            continue
-
-        formula_itens: List[FormulaDetail] = formula.details
-
-        # 🔥 valida fórmula
-        total_formula = sum(
-            Decimal(i.product_percentage_without_moisture)
-            for i in formula_itens
-        )
-
-        if total_formula != Decimal("100"):
-            raise Exception(f"Fórmula {formula.id} não fecha 100%")
-
 
         for baia in baias:
 
-            qtd_animais = Decimal(baia.animals_quantity)
-            consumo_total_baia = consumo_animal * qtd_animais
-
-            row_baia = {
-                "ID_BA": baia.id,
-                "ID_SA": sala.id,
-                "SUINOS": int(qtd_animais)
-            }
-
-            total_dia = Decimal(0)
+            qtd = d(baia.animals_quantity)
+            consumo_baia = consumo_animal * qtd
 
             for trato in tratos:
 
-                percentual = Decimal(trato.percent) / Decimal(100)
-                consumo_trato = consumo_total_baia * percentual
+                if trato.percent == 0:
+                    continue
 
-                row_baia[f"P_SECO_T{trato.id}"] = float(round(consumo_trato, 2))
+                consumo_trato = consumo_baia * d(trato.percent) / 100
 
-                total_dia += consumo_trato
+                total_baia_trato.append({
+                    "ID_BA": baia.id,
+                    "TRATO": trato.id,
+                    "P_SECO": float(r(consumo_trato))
+                })
 
-                # 🔥 explode fórmula
-                for item in formula_itens:
+                total_formula_trato[(trato.id, formula.id)] += consumo_trato
 
-                    percentual_item = Decimal(
-                        item.product_percentage_without_moisture
-                    ) / Decimal(100)
+                for item in formula.details:
 
-                    massa = consumo_trato * percentual_item
+                    perc = d(item.product_percentage_without_moisture) / 100
+                    massa_seca = consumo_trato * perc
+
+                    produto = item.product
+                    umidade = d(getattr(produto, "moisture_percentage", 0)) / 100
+
+                    # 🔥 converte para massa real
+                    if umidade < 1:
+                        massa_real = massa_seca / (1 - umidade)
+                    else:
+                        massa_real = massa_seca
 
                     matriz_detalhada.append({
                         "sala_id": sala.id,
-                        "galpao": galpao.name,
-                        "sala": sala.name,
                         "trato_id": trato.id,
                         "formula_id": formula.id,
-                        "formula": formula.name,
-                        "massa": massa
+                        "product": produto.name if produto else None,
+                        "massa_seca": massa_seca,
+                        "massa_real": massa_real
                     })
 
-            row_baia["P_SECO_TOTAL"] = float(round(total_dia, 2))
-            debug_baia.append(row_baia)
-
     # =========================================================
-    # 🔥 AGRUPAMENTO FINAL
+    # PRODUÇÃO SECA
     # =========================================================
-    matriz_agrupada = defaultdict(Decimal)
-
+    producao_seca = defaultdict(Decimal)
     for row in matriz_detalhada:
-        chave = (
-            row["sala_id"],
-            row["galpao"],
-            row["sala"],
-            row["trato_id"],
-            row["formula_id"],
-            row["formula"]
+        producao_seca[row["product"]] += row["massa_seca"]
+
+    # =========================================================
+    # RAÇÃO LIQUIDA (COM ÁGUA)
+    # =========================================================
+    racao_liquida = defaultdict(Decimal)
+
+    for (trato_id, formula_id), massa_seca_total in total_formula_trato.items():
+
+        formula = map_formulas.get(formula_id)
+        if not formula:
+            continue
+
+        water_pct = d(formula.water_percentage) / 100
+
+        # 🔥 adiciona água
+        if water_pct < 1:
+            massa_total = massa_seca_total / (1 - water_pct)
+        else:
+            massa_total = massa_seca_total
+
+        racao_liquida[(trato_id, formula_id)] += massa_total
+
+    # =========================================================
+    # PRODUÇÃO LIQUIDA (CORRIGIDA)
+    # =========================================================
+    producao_liquida = defaultdict(Decimal)
+
+    for (trato_id, formula_id), massa_total in racao_liquida.items():
+
+        formula = map_formulas.get(formula_id)
+        if not formula:
+            continue
+
+        for item in formula.details:
+            perc = d(item.product_percentage_without_moisture) / 100
+            nome = item.product.name if item.product else f"PROD_{item.product_id}"
+
+            producao_liquida[nome] += massa_total * perc
+
+        # 🔥 adiciona água como produto separado
+        producao_liquida["Água"] += massa_total * (d(formula.water_percentage) / 100)
+
+    # =========================================================
+    # DISTRIBUIÇÃO SECA
+    # =========================================================
+    distribuicao_seca = defaultdict(Decimal)
+    for row in matriz_detalhada:
+        chave = (row["sala_id"], row["trato_id"], row["product"])
+        distribuicao_seca[chave] += row["massa_seca"]
+
+    # =========================================================
+    # ETAPAS
+    # =========================================================
+    distribuicao_etapa = []
+
+    map_etapas = {
+        1: 2,
+        2: 3,
+        3: 0,
+        4: 3,
+        5: 0,
+        6: 2
+    }
+
+    for lote in lotes:
+
+        sala = lote.sala
+        baias = sala.baias
+
+        dia_curva, _ = calcular_dia_curva(lote, data_base)
+
+        curva_dia = next(
+            (c for c in lote.feeding_curve.details if c.age_day == dia_curva),
+            None
         )
-        matriz_agrupada[chave] += row["massa"]
 
-    resultado_final = []
+        if not curva_dia or not curva_dia.formula:
+            continue
 
-    for (
-        sala_id,
-        galpao,
-        sala,
-        trato_id,
-        formula_id,
-        formula_nome
-    ), massa in matriz_agrupada.items():
+        consumo_animal = d(curva_dia.formula_mass_per_animal)
 
-        resultado_final.append({
-            "ID_SA": sala_id,
-            "GALPAO": galpao,
-            "SALA": sala,
-            "TRATO": trato_id,
-            "ID_FO": formula_id,
-            "FORMULA": formula_nome,
-            "P_SECO": float(round(massa, 2))
-        })
+        for baia in baias:
 
-    resultado_final.sort(key=lambda x: (x["ID_SA"], x["TRATO"]))
+            qtd = d(baia.animals_quantity)
+            consumo_baia = consumo_animal * qtd
+
+            row = {
+                "ID": baia.id,
+                "DESC": baia.name,
+                "ID_SA": sala.id,
+                "SUINOS": int(qtd)
+            }
+
+            for trato in tratos:
+
+                etapas = map_etapas.get(trato.id, 0)
+                col = f"T{trato.id}-ETAPA-TRATO"
+
+                if etapas == 0 or trato.percent == 0:
+                    row[col] = 0
+                    continue
+
+                consumo_trato = consumo_baia * d(trato.percent) / 100
+                valor_etapa = consumo_trato / etapas
+
+                row[col] = float(r(valor_etapa))
+
+            distribuicao_etapa.append(row)
+
+    # =========================================================
+    # OUTPUT FINAL
+    # =========================================================
+    resultado = {
+        "CONSULTAS DE PREPARAÇÃO DE DADOS DA CURVA": consultas_curva,
+        "LOCALIZAÇÃO NA CURVA": dados_curva,
+        "TOTAL POR BAIA/TRATO": total_baia_trato,
+        "TOTAL FORMULA/TRATO": [
+            {"TRATO": k[0], "FORMULA": k[1], "VALOR": float(r(v))}
+            for k, v in total_formula_trato.items()
+        ],
+        "MATRIZ MASSA SECA": matriz_detalhada,
+        "PRODUÇÃO SECA": [
+            {"PRODUTO": k, "VALOR": float(r(v))}
+            for k, v in producao_seca.items()
+        ],
+        "RAÇÃO LIQUIDA": [
+            {"TRATO": k[0], "FORMULA": k[1], "VALOR": float(r(v))}
+            for k, v in racao_liquida.items()
+        ],
+        "PRODUÇÃO LIQUIDA": [
+            {"PRODUTO": k, "VALOR": float(r(v))}
+            for k, v in producao_liquida.items()
+        ],
+        "DISTRIBUIÇÃO SECA": [
+            {"SALA": k[0], "TRATO": k[1], "PRODUTO": k[2], "VALOR": float(r(v))}
+            for k, v in distribuicao_seca.items()
+        ],
+        "ETAPAS": distribuicao_etapa,
+    }
 
     if show_debug:
-        print("\n===== DEBUG CURVA =====")
-        print(json.dumps(debug_curva, indent=2, ensure_ascii=False))
+        print(json.dumps(resultado, indent=2, ensure_ascii=False))
 
-        print("\n===== DEBUG BAIA =====")
-        print(json.dumps(debug_baia[:20], indent=2, ensure_ascii=False))
+    return resultado
 
-        print("\n===== RESULTADO FINAL =====")
-        print(json.dumps(resultado_final, indent=2, ensure_ascii=False))
 
-    return [
-        {"curva": debug_curva},
-        {"baia": debug_baia},
-        {"final": resultado_final}
-    ]
-
+# =========================================================
+# 🚀 MAIN
+# =========================================================
 def main():
-    data_base = date(2026, 3, 16)  # 🔥 igual planilha
+    data_base = date(2026, 3, 16)
+
     with session_scope() as session:
         script_1(session, data_base=data_base, show_debug=True)
 

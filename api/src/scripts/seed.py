@@ -167,61 +167,76 @@ def create_product_tanks(db, user):
     logger.info("[SEED] Tanques de produtos criados")
 
 def create_formulas(db, user):
+    # 🐖 ALOJAMENTO (mais proteína + mais água)
     create_formula(db,
         actor=user,
         name="ALOJAMENTO",
-        description="Fórmula de alojamento para adaptação da vinda da creche",
-        water_percentage=75, stirring_time=400,
+        description="Fase inicial pós-creche (alta digestibilidade)",
+        water_percentage=80,
+        stirring_time=400,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 100 }  
+          { "product_id": 2, "product_percentage_without_moisture": 60 },  # milho
+          { "product_id": 3, "product_percentage_without_moisture": 35 },  # soja
+          { "product_id": 5, "product_percentage_without_moisture": 5 }    # premix
         ]
     )
 
+    # 🐖 CRESCIMENTO 1
     create_formula(db,
         actor=user,
         name="CRESCIMENTO 1",
-        description="Fórmula de crescimento fase 1",
+        description="Fase de crescimento inicial",
         water_percentage=75,
         stirring_time=400,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 50 },
-          { "product_id": 3, "product_percentage_without_moisture": 50 }
+          { "product_id": 2, "product_percentage_without_moisture": 65 },
+          { "product_id": 3, "product_percentage_without_moisture": 30 },
+          { "product_id": 5, "product_percentage_without_moisture": 5 }
         ]
     )
 
+    # 🐖 CRESCIMENTO 2
     create_formula(db,
         actor=user,
         name="CRESCIMENTO 2",
-        description="CRESCIMENTO FASE 2",
-        water_percentage=75,
+        description="Fase intermediária de ganho de peso",
+        water_percentage=73,
         stirring_time=400,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 100 }
+          { "product_id": 2, "product_percentage_without_moisture": 70 },
+          { "product_id": 3, "product_percentage_without_moisture": 25 },
+          { "product_id": 5, "product_percentage_without_moisture": 5 }
         ]
     )
 
+    # 🐖 TERMINAÇÃO
     create_formula(db,
         actor=user,
         name="TERMINAÇÃO",
-        description="POLIMENTO DE FIM DE CICLO",
-        water_percentage=75,
+        description="Fase de acabamento",
+        water_percentage=70,
         stirring_time=400,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 100 }
+          { "product_id": 2, "product_percentage_without_moisture": 75 },
+          { "product_id": 3, "product_percentage_without_moisture": 20 },
+          { "product_id": 5, "product_percentage_without_moisture": 5 }
         ]
     )
 
+    # 🐖 FINAL
     create_formula(db,
         actor=user,
         name="FINAL",
-        description="MANUTENÇÃO ATÉ RETIRADA DO GALPÃO",
-        water_percentage=75,
+        description="Manutenção até retirada",
+        water_percentage=68,
         stirring_time=400,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 100 }
+          { "product_id": 2, "product_percentage_without_moisture": 78 },
+          { "product_id": 3, "product_percentage_without_moisture": 17 },
+          { "product_id": 5, "product_percentage_without_moisture": 5 }
         ]
     )
-    logger.info(f"[SEED] Fórmulas criadas")
+    logger.info("[SEED] Fórmulas corrigidas conforme padrão nutricional")
 
 CURVE_DETAILS_DATA = [[22,1,22.8,1.21],[23,1,23.4,1.23],[24,1,24.0,1.25],[25,1,24.6,1.27],[26,1,25.2,1.30],[27,1,25.8,1.32],
                           [28,1,26.4,1.34],[29,1,27.0,1.36],[30,1,27.6,1.37],[31,1,28.3,1.38],[32,1,28.9,1.39],[33,1,29.5,1.39],[34,1,30.1,1.40],

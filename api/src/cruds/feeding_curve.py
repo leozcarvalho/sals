@@ -1,6 +1,7 @@
 from sqlmodel import Session
 from src.cruds.repo import Repository
 from src.domain import FeedingCurve, FeedingCurveDetail
+from src.domain.exceptions import NotFound
 from src.cruds.feeding_curve_detail import FeedingCurveDetailRepository
 from src.schemas.feeding_curve_detail import FeedingCurveDetailCreate
 from typing import List
@@ -43,7 +44,7 @@ class FeedingCurveRepository(Repository):
         original = self.get(feeding_curve_id)
 
         if not original:
-            raise Exception("Feeding curve not found")
+            raise NotFound("Curva de alimentação original não encontrada.")
 
         new_curve = FeedingCurve(
             name=f"{original.name} (Clone)",

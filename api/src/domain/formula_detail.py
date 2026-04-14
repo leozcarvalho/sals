@@ -10,3 +10,4 @@ class FormulaDetail(Base, table=True):
     product_percentage_without_moisture: int = Field(nullable=False, ge=0, le=100)
 
     formula: Optional["Formula"] = Relationship(back_populates="details")
+    product: Optional["Product"] = Relationship(back_populates="formula_details")

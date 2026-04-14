@@ -14,7 +14,7 @@ const cols = reactive([
   { name: "Descrição", field: "description" },
   { name: "Porcentagem de Umidade", field: "moisture_percentage" },
   { name: "Tipo", field: "kind", formatter: (value) => value === 'solid' ? 'Sólido' : 'Líquido' },
-  { name: "Densidade", field: "density" },
+  { name: "Densidade", field: "density" }
 ]);
 
 const productSelected = ref(null);
@@ -41,6 +41,7 @@ const modalForm = ref(null);
       { label: 'Ativo', value: true },
       { label: 'Inativo', value: false },
     ] },
+    { name: 'is_micronutrient', label: 'Micronutriente', type: 'checkbox' }
   ]" :api="productsApi" @saved="onProductSaved" @close="productSelected = null">
   </BaseModalForm>
   <BaseList ref="baseList" :title="'Produtos'" :api="productsApi" :cols="cols"

@@ -9,6 +9,7 @@ class ProductBase(BaseModel):
     kind: str
     density: int
     is_active: bool = True
+    is_micronutrient: bool = False
 
 class ProductCreate(ProductBase):
     pass

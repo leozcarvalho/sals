@@ -47,30 +47,42 @@ const exec = async () => {
           </div>
         </div>
       </div>
-      <div v-if="result && result.length">
-        <div v-for="(group, index) in result" :key="index" class="mb-4">
-          <h5 class="mb-2 text-capitalize">
-            {{ Object.keys(group)[0] }}
+      <div>
+        <div v-for="(rows, groupName) in result" :key="groupName" class="mb-4">
+          <h5 class="mb-2 text-capitalize border-bottom pb-1">
+            {{ groupName.replaceAll('_', ' ') }}
           </h5>
-          <div class="table-responsive">
-            <table class="table table-striped">
+
+          <div class="table-responsive" v-if="rows && rows.length">
+
+            <table class="table table-striped table-sm">
+
+              <!-- HEADER -->
               <thead>
                 <tr>
-                  <th v-for="(value, key) in Object.values(group)[0][0]" :key="key">
+                  <th v-for="(value, key) in rows[0]" :key="key">
                     {{ key }}
                   </th>
                 </tr>
               </thead>
 
+              <!-- BODY -->
               <tbody>
-                <tr v-for="(row, rowIndex) in Object.values(group)[0]" :key="rowIndex">
+                <tr v-for="(row, rowIndex) in rows" :key="rowIndex">
                   <td v-for="(value, key) in row" :key="key">
                     {{ value }}
                   </td>
                 </tr>
               </tbody>
+
             </table>
+
           </div>
+
+          <div v-else class="text-muted">
+            Sem dados
+          </div>
+
         </div>
       </div>
     </BaseBlock>

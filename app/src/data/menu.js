@@ -13,6 +13,7 @@ export const baseMenu = [
       { name: "Perfis", to: "profiles", icon: "account", action: "manage_profile" },
       { name: "SVGS", to: "svgs", icon: "vector-square", action: "manage_svg" },
       { name: "Cozinhas", to: "kitchens", icon: "chef-hat", action: "manage_kitchen" },
+      { name: "Dosadores Secos", to: "dry-dispensers", icon: "leaf", action: "manage_dosador_seco" },
       { name: "Galpões", to: "sheds", icon: "warehouse", action: "manage_shed" },
       { name: "Produtos", to: "products", icon: "package-variant", action: "manage_product" },
       { name: "Tanques de Produto", to: "product-tanks", icon: "tank", action: "manage_product_tank" },

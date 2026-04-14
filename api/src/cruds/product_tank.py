@@ -15,5 +15,5 @@ class ProductTankRepository(Repository):
     def update(self, id, values, actor=None):
         current = self.get(id)
         changed_pin = "pin_id" in values and values["pin_id"] != current.pin_id
-        if changed_pin: self.device_pin_repo._is_valid_pin(values["pin_id"])
+        if changed_pin and values["pin_id"]: self.device_pin_repo._is_valid_pin(values["pin_id"])
         return super().update(id, values, actor)

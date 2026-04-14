@@ -10,7 +10,7 @@ const baseList = ref(null);
 const cols = reactive([
   { name: "#", field: "id" },
   { name: "Nome", field: "name" },
-  { name: "Dia Inicial", field: "initial_day" },
+  { name: "Dia Inicial", field: "created_at", formatter: (value) => new Date(value).toLocaleDateString() },
   { name: "Curva", field: "feeding_curve_id", formatter: (value, row) => row.feeding_curve.name  },
   { name: "Galpão", field: "shed_id", formatter: (value, row) => row.shed.name  },
   { name: "Sala", field: "sala_id", formatter: (value, row) => row.sala.name  },

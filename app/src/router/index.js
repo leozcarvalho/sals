@@ -41,6 +41,8 @@ const Profiles = () => import("@/pages/profiles/Profiles.vue");
 const Kitchens = () => import("@/pages/kitchens/Kitchens.vue");
 const KitchenForm = () => import("@/pages/kitchens/KitchenForm.vue");
 
+const DosadoresSecos = () => import("@/pages/dosadores-secos/DosadoresSecos.vue");
+
 const Sheds = () => import("@/pages/sheds/ShedsList.vue");
 const Shed = () => import("@/pages/sheds/Shed.vue");
 
@@ -129,6 +131,12 @@ const routes = [
         name: "kitchen-form",
         meta: { requiresAuth: true },
         component: KitchenForm,
+      },
+      {
+        path: "dry-dispensers",
+        name: "dry-dispensers",
+        meta: { requiresAuth: true },
+        component: DosadoresSecos,
       },
       {
         path: "sheds",
