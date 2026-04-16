@@ -172,12 +172,11 @@ def create_formulas(db, user):
         actor=user,
         name="ALOJAMENTO",
         description="Fase inicial pós-creche (alta digestibilidade)",
-        water_percentage=80,
-        stirring_time=400,
+        water_percentage=76,
+        stirring_time=420,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 60 },  # milho
-          { "product_id": 3, "product_percentage_without_moisture": 35 },  # soja
-          { "product_id": 5, "product_percentage_without_moisture": 5 }    # premix
+          { "product_id": 2, "product_percentage_without_moisture": 75 },  # milho
+          { "product_id": 3, "product_percentage_without_moisture": 25 },  # soja
         ]
     )
 
@@ -187,11 +186,11 @@ def create_formulas(db, user):
         name="CRESCIMENTO 1",
         description="Fase de crescimento inicial",
         water_percentage=75,
-        stirring_time=400,
+        stirring_time=360,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 65 },
-          { "product_id": 3, "product_percentage_without_moisture": 30 },
-          { "product_id": 5, "product_percentage_without_moisture": 5 }
+          { "product_id": 2, "product_percentage_without_moisture": 75 },
+          { "product_id": 3, "product_percentage_without_moisture": 20 },
+          { "product_id": 4, "product_percentage_without_moisture": 5 }
         ]
     )
 
@@ -200,12 +199,12 @@ def create_formulas(db, user):
         actor=user,
         name="CRESCIMENTO 2",
         description="Fase intermediária de ganho de peso",
-        water_percentage=73,
-        stirring_time=400,
+        water_percentage=75,
+        stirring_time=360,
         details=[
           { "product_id": 2, "product_percentage_without_moisture": 70 },
-          { "product_id": 3, "product_percentage_without_moisture": 25 },
-          { "product_id": 5, "product_percentage_without_moisture": 5 }
+          { "product_id": 3, "product_percentage_without_moisture": 19 },
+          { "product_id": 4, "product_percentage_without_moisture": 11 }
         ]
     )
 
@@ -214,12 +213,12 @@ def create_formulas(db, user):
         actor=user,
         name="TERMINAÇÃO",
         description="Fase de acabamento",
-        water_percentage=70,
-        stirring_time=400,
+        water_percentage=75,
+        stirring_time=330,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 75 },
-          { "product_id": 3, "product_percentage_without_moisture": 20 },
-          { "product_id": 5, "product_percentage_without_moisture": 5 }
+          { "product_id": 2, "product_percentage_without_moisture": 65 },
+          { "product_id": 3, "product_percentage_without_moisture": 18 },
+          { "product_id": 4, "product_percentage_without_moisture": 17 }
         ]
     )
 
@@ -228,12 +227,11 @@ def create_formulas(db, user):
         actor=user,
         name="FINAL",
         description="Manutenção até retirada",
-        water_percentage=68,
-        stirring_time=400,
+        water_percentage=75,
+        stirring_time=320,
         details=[
-          { "product_id": 2, "product_percentage_without_moisture": 78 },
-          { "product_id": 3, "product_percentage_without_moisture": 17 },
-          { "product_id": 5, "product_percentage_without_moisture": 5 }
+          { "product_id": 4, "product_percentage_without_moisture": 81 },
+          { "product_id": 3, "product_percentage_without_moisture": 19 },
         ]
     )
     logger.info("[SEED] Fórmulas corrigidas conforme padrão nutricional")
@@ -328,7 +326,7 @@ def criar_lotes(db, user):
         shed_id=1,
         sala_id=1,
         feeding_curve_id=1,
-        initial_curve_detail_id=get_index_of_day(26),
+        initial_curve_detail_id=1,
         created_at=date(2026, 3, 16)
     )
     create_batch(db,
@@ -338,8 +336,8 @@ def criar_lotes(db, user):
         shed_id=2,
         sala_id=2,
         feeding_curve_id=1,
-        initial_curve_detail_id=get_index_of_day(85),
-        created_at=date(2026, 3, 16)
+        initial_curve_detail_id=1,
+        created_at=date(2026, 1, 16)
     )
 
 def seed():
