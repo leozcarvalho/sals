@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pydantic.main import BaseModel
 from typing import Optional
 from src.schemas.global_schemas import BaseFilter, GlobalFields
@@ -9,6 +10,7 @@ class ProductTankBase(BaseModel):
     description: Optional[str] = None
     pin_id: Optional[int] = None
     product_id: Optional[int] = None
+    volume: Optional[Decimal] = None
 
 class ProductTankCreate(ProductTankBase):
     pass

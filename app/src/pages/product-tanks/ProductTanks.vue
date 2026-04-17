@@ -4,6 +4,7 @@ import BaseList from "../../components/BaseList.vue";
 import { ApiClient } from "../../services/genericApi";
 import BaseModalForm from "../../components/BaseModalForm.vue";
 import PinSelect from "../../components/PinSelect.vue";
+import NumericInput from "../../components/NumericInput.vue";
 
 const productTanksApi = new ApiClient("/product-tanks");
 const baseList = ref(null);
@@ -30,7 +31,8 @@ const modalForm = ref(null);
     { name: 'product_id', label: 'Produto', type: 'async-select', entity: 'products' },
     { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
     { name: 'description', label: 'Descrição', type: 'text' },
-    { name: 'pin_id', label: 'Pino', component: PinSelect }
+    { name: 'pin_id', label: 'Pino', component: PinSelect },
+    { name: 'volume', label: 'Volume', component: NumericInput, props: { min: 0, step: 0.01 } },
   ]" :api="productTanksApi" @saved="onTankSaved" @close="tankSelected = null"/>
   <BaseList ref="baseList" :title="'Tanques de Produto'" :api="productTanksApi" :cols="cols"
     @create="modalForm.openModal(true)" @edit="tankSelected = $event; modalForm.openModal()" />

@@ -1,6 +1,8 @@
 from sqlmodel import Field, Relationship
 from typing import Optional
 from src.domain.base import Base
+from sqlalchemy import Numeric, Column
+from decimal import Decimal
 
 class ProductTank(Base, table=True):
     __tablename__ = "product_tanks"
@@ -9,6 +11,7 @@ class ProductTank(Base, table=True):
     description: Optional[str] = Field(default=None, max_length=255)
     pin_id: int = Field(foreign_key="device_pins.id", nullable=True, unique=True)
     product_id: int = Field(foreign_key="products.id", nullable=True)
+    volume: Decimal = Field(sa_column=Column(Numeric(10, 2)), ge=0)
 
     device_pin: Optional["DevicePin"] = Relationship(back_populates="product_tanks")
     product: Optional["Product"] = Relationship(back_populates="tanks")
