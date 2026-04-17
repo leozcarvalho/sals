@@ -224,10 +224,7 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=True):
                 p_trato = r(p_trato)
 
                 if produto.density > 0:
-                    if ignorar_fracao_liquida:
-                        v_trato = p_trato
-                    else:
-                        v_trato = p_trato / (d(produto.density) / 1000)
+                    v_trato = p_trato / (d(produto.density) / 1000)
                 else:
                     v_trato = d(0)
 
@@ -278,17 +275,21 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=True):
 
             chave = (trato.id, formula.id)
 
-            sum_p = total_formula_trato.get(chave, d(0))
+            sum_p = sum(
+                d(linha["P_TRATO"])
+                for linha in matriz_producao_receita
+                if linha["TRATO"] == trato.id and linha["ID_FO"] == formula.id
+            )
 
             water_pct = d(formula.water_percentage) / 100
             etapas = map_etapas.get(trato.id, 0)
 
             # SUM_V correto vindo da matriz
-            sum_v = d(0)
-
-            for linha in matriz_producao_receita:
-                if linha["TRATO"] == trato.id and linha["ID_FO"] == formula.id:
-                    sum_v += d(linha["V_TRATO"])
+            sum_v = sum(
+                d(linha["V_TRATO"])
+                for linha in matriz_producao_receita
+                if linha["TRATO"] == trato.id and linha["ID_FO"] == formula.id
+            )
 
             # capacidade
             PCT_P_MAX_CZ = d(cozinha.fracao_volume_misturador) / 100
