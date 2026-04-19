@@ -37,7 +37,7 @@ def calcular_dia_curva(lote: Batch, data_base: date):
     return dias_passados
 
 
-def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=True):
+def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
 
     batch_repo = BatchRepository(session)
     trato_repo = TratoRepository(session)
@@ -201,34 +201,94 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=True):
         formula = curva_dia.formula
 
         for trato in tratos:
+
+            massa_total_trato = total_formula_trato.get((trato.id, formula.id), d(0))
+            pct_seco_formula = (100 - d(formula.water_percentage)) / 100
+
+            linhas_trato = []
+            soma_agua_produtos = d(0)
+
+            # =====================================================
+            # 1️⃣ PRIMEIRO PASSO (SEM AJUSTE DE ÁGUA)
+            # =====================================================
             for produto in todos_produtos.values():
+
                 item_formula = next(
                     (i for i in formula.details if i.product_id == produto.id),
                     None
                 )
+
                 pct_produto = d(item_formula.product_percentage_without_moisture) if item_formula else d(0)
 
-                massa_total_trato = total_formula_trato.get((trato.id, formula.id), d(0))
+                pct_umid = d(getattr(produto, "moisture_percentage", 0))
+                frac_seca = (100 - pct_umid) / 100
 
-                pct_seco_formula = (100 - d(formula.water_percentage)) / 100
+                # 🔥 MASSA SECA (BASE REAL DO EXCEL)
+                massa_seca = (pct_produto / 100) * massa_total_trato
 
                 if produto.id == 1:
-                    # água
-                    if pct_seco_formula > 0:
-                        p_trato = massa_total_trato / pct_seco_formula
+                    # água calculada depois
+                    p_trato = d(0)
+                    massa_real = d(0)
+                else:
+                    # 🔥 IGUAL EXCEL
+                    if frac_seca > 0:
+                        p_trato = massa_seca / frac_seca
                     else:
                         p_trato = d(0)
-                else:
-                    p_trato = (pct_produto / 100) * massa_total_trato
 
-                p_trato = r(p_trato)
+                    p_trato = r(p_trato)
+
+                    # massa real (natural)
+                    massa_real = p_trato
+
+                    # 🔥 água do produto = N - M
+                    agua_prod = massa_real - massa_seca
+                    soma_agua_produtos += agua_prod
+
+                frac_h2o = 1 - frac_seca
+
+                linhas_trato.append({
+                    "produto": produto,
+                    "pct_produto": pct_produto,
+                    "massa_seca": massa_seca,
+                    "p_trato": p_trato,
+                    "pct_umid": pct_umid,
+                    "frac_h2o": frac_h2o,
+                    "frac_seca": frac_seca,
+                })
+
+            # =====================================================
+            # 2️⃣ AJUSTE DA ÁGUA (SÓ SE NÃO IGNORAR)
+            # =====================================================
+            if not ignorar_fracao_liquida:
+                # total da mistura (M209 do Excel)
+                if pct_seco_formula > 0:
+                    total_mistura = massa_total_trato / pct_seco_formula
+                else:
+                    total_mistura = d(0)
+
+                # água = total mistura - soma(N - M)
+                agua_total = total_mistura - soma_agua_produtos
+
+                for l in linhas_trato:
+                    if l["produto"].id == 1:
+                        l["p_trato"] = r(max(d(0), agua_total))
+
+            # =====================================================
+            # 3️⃣ MONTAGEM FINAL
+            # =====================================================
+            for l in linhas_trato:
+
+                produto = l["produto"]
+                p_trato = r(l["p_trato"])
 
                 if produto.density > 0:
-                    v_trato = p_trato / (d(produto.density) / 1000)
+                    v_trato = r(p_trato / (d(produto.density) / 1000))
                 else:
                     v_trato = d(0)
 
-                matriz_producao_receita.append({
+                row = {
                     "GALPÃO": galpao.name,
                     "SALA": sala.name,
                     "ID_PR": produto.id,
@@ -237,11 +297,22 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=True):
                     "ID_FO": formula.id,
                     "TRATO": trato.id,
                     "PCT_H20_FO": float(formula.water_percentage),
-                    "PCT_PR_100_PCT_S_H2O_FO": float(pct_produto),
+                    "PCT_PR_100_PCT_S_H2O_FO": float(l["pct_produto"]),
                     "EH_AGUA": produto.id == 1,
                     "P_TRATO": p_trato,
                     "V_TRATO": v_trato,
-                })
+                }
+
+                # CAMPOS DINÂMICOS (SÓ QUANDO CONSIDERA FRAÇÃO)
+                if not ignorar_fracao_liquida:
+                    row.update({
+                        "PCT_UMID_PR": float(l["pct_umid"]),
+                        "FRAC_SECA_PR": float(l["frac_seca"]),
+                        "FRAC_H2O_PR": float(l["frac_h2o"]),
+                        "P_TRATO_S_CALC_UMID": float(r(l["massa_seca"])),
+                    })
+
+                matriz_producao_receita.append(row)
 
     # =========================================================
     # 🔥 RAÇÃO LIQUIDA (NOVO COM COZINHA)
