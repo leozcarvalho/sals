@@ -1,4 +1,5 @@
 import json
+from math import ceil
 from typing import List
 from decimal import Decimal
 from collections import defaultdict
@@ -343,7 +344,6 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
         formula = curva_dia.formula
 
         for trato in tratos:
-
             chave = (trato.id, formula.id)
 
             sum_p = sum(
@@ -353,7 +353,6 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
             )
 
             water_pct = d(formula.water_percentage) / 100
-            etapas = map_etapas.get(trato.id, 0)
 
             # SUM_V correto vindo da matriz
             sum_v = sum(
@@ -368,15 +367,14 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
 
             div = sum_v / V_MAX_UTIL_CZ if V_MAX_UTIL_CZ > 0 else d(0)
 
+            if V_MAX_UTIL_CZ > 0:
+                etapas = int(ceil(div))
+            else:
+                etapas = 0
+
             v_etapa = r(sum_v / etapas) if etapas > 0 else d(0)
             p_etapa = r(sum_p / etapas) if etapas > 0 else d(0)
-            
-            # SUM_P =SOMASES($J$131:$J$190;$F$131:$F$190;E194;$E$131:$E$190;D194)
-            # SUM_V =SOMASES($K$131:$K$190;$F$131:$F$190;E194;$E$131:$E$190;D194)
-            # V_MAX_UTIL_CZ =J194*K194/100
-            # SUM_V_DIV_V_MAX_UTIL_CZ= =G194/L194
-            # V_ETAPA_TRATO =ARRED(SE(ÉERRO(G194/N194);0;G194/N194);1)
-            # P_ETAPA_TRATO =ARRED(SE(ÉERRO(F194/N194);0;F194/N194);1)
+
             matriz_racao_totalizada.append({
                 "ID_SA": sala.id,
                 "GALPÃO": galpao.name,
