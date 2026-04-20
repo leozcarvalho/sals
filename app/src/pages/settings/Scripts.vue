@@ -10,7 +10,7 @@ const loader = ref(null);
 const result = ref(null);
 const selectedScript = ref(null);
 const scriptOptions = [
-  { value: "script_1", label: "Script 1", params: [{ name: "data_base", type: "date", label: "Dia inicial" }] },
+  { value: "script_1", label: "Script 1", params: [{ name: "data_base", type: "date", label: "Dia inicial" }, { name: "ignorar_fracao_liquida", type: "checkbox", label: "Ignorar Fração Líquida" }] },
   { value: "script_2", label: "Script 2", params: [{ name: "another_param", type: "string", label: "Param 1" }, { name: "extra_param", type: "boolean", label: "Param 2" }] },
 ];
 
@@ -37,9 +37,20 @@ const exec = async () => {
           </select>
         </div>
         <div class="mt-3" v-if="selectedScript">
-          <div class="col-3">
-            <input v-for="param in scriptOptions.find(opt => opt.value === selectedScript).params" :key="param.name"
-              :type="param.type" class="form-control mb-2" v-model="data[param.name]" :placeholder="param.name" />
+          <div v-for="param in scriptOptions.find(opt => opt.value === selectedScript).params" :key="param.name">
+
+            <!-- INPUT NORMAL -->
+            <input v-if="param.type !== 'checkbox'" :type="param.type" class="form-control mb-2"
+              v-model="data[param.name]" :placeholder="param.label" />
+
+            <!-- CHECKBOX -->
+            <div v-else class="form-check mb-2">
+              <input type="checkbox" class="form-check-input" v-model="data[param.name]" :id="param.name" />
+              <label class="form-check-label" :for="param.name">
+                {{ param.label }}
+              </label>
+            </div>
+
           </div>
           <div class="col-3">
             <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-confirm">Executar

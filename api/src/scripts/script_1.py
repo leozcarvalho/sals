@@ -3,13 +3,28 @@ from math import ceil
 from decimal import Decimal
 from collections import defaultdict
 from datetime import date
-
+from typing import TYPE_CHECKING
 import logging
-from src.core.db import session_scope
 
+from src.core.db import session_scope
 from src.cruds.batch import BatchRepository
 from src.cruds.trato import TratoRepository
 from src.cruds.product import ProductRepository
+
+if TYPE_CHECKING:
+    from src.domain import (
+        Batch,
+        Trato,
+        Product,
+        Formula,
+        FormulaDetail,
+        FeedingCurve,
+        FeedingCurveDetail,
+        Kitchen,
+        Shed,
+        Sala,
+        Baia,
+    )
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,26 +36,42 @@ logger = logging.getLogger(__name__)
 def d(v): return Decimal(str(v))
 def r(v): return v.quantize(Decimal("0.01"))
 
+WATER_PRODUCT_ID = 1  # ID do produto Água — nunca pode ser apagado
+
 
 # =========================================================
 # DIA CURVA
 # =========================================================
-def calcular_dia_curva(lote, data_base: date):
+def calcular_dia_curva(lote: "Batch", data_base: date) -> int:
+    if not lote.created_at:
+        raise ValueError(f"Lote {lote.id} não possui data de criação.")
     dias_passados = (data_base - lote.created_at.date()).days
     if dias_passados < 0:
-        raise Exception(f"Data base menor que início do lote {lote.id}")
+        raise ValueError(f"Data base {data_base} é anterior ao início do lote {lote.id}.")
     return dias_passados
 
 
-def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
+def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> dict:
+    """
+    Calcula o plano de alimentação diário por lote/sala/baia/trato.
+
+    Args:
+        session: Sessão do banco de dados.
+        data_base: Data de referência para o cálculo.
+        ignorar_fracao_liquida: Se True, calcula a água proporcionalmente ao pct_agua
+            da fórmula sem corrigir a umidade dos sólidos (método simplificado).
+
+    Returns:
+        dict com todas as matrizes de resultado.
+    """
 
     batch_repo = BatchRepository(session)
     trato_repo = TratoRepository(session)
     product_repo = ProductRepository(session)
 
-    lotes = batch_repo.get_list(filters={'is_active': True})
-    tratos = trato_repo.get_list()
-    produtos = product_repo.get_list()
+    lotes: list["Batch"] = batch_repo.get_list(filters={'is_active': True})
+    tratos: list["Trato"] = trato_repo.get_list()
+    produtos: list["Product"] = product_repo.get_list()
 
     trato_repo.validate_percent(tratos)
 
@@ -70,7 +101,22 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
     dados_curva = []
     total_baia_trato = []
     total_formula_trato = defaultdict(Decimal)
-    matriz_detalhada = []
+
+    # cache de dia_curva e curva_dia/formula por lote — evita recalcular em múltiplos loops
+    cache_dia_curva: dict[int, int] = {}
+    cache_curva_dia: dict[int, object] = {}   # FeedingCurveDetail | None
+    cache_formula: dict[int, object] = {}     # Formula | None
+
+    for lote in lotes:
+        dia = calcular_dia_curva(lote, data_base)
+        cache_dia_curva[lote.id] = dia
+        detalhes = lote.feeding_curve.details if lote.feeding_curve else []
+        if dia < len(detalhes) and detalhes[dia] and detalhes[dia].formula:
+            cache_curva_dia[lote.id] = detalhes[dia]
+            cache_formula[lote.id] = detalhes[dia].formula
+        else:
+            cache_curva_dia[lote.id] = None
+            cache_formula[lote.id] = None
 
     # =========================================================
     # LOOP PRINCIPAL
@@ -87,14 +133,15 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
             "GALPAO": galpao.name
         })
 
-        dia_curva = calcular_dia_curva(lote, data_base)
-        curva_dia = lote.feeding_curve.details[dia_curva]
+        dia_curva = cache_dia_curva[lote.id]
+        curva_dia = cache_curva_dia[lote.id]
 
-        if not curva_dia or not curva_dia.formula:
+        if not curva_dia:
+            logger.warning("Lote %s: dia_curva %s fora do range ou sem fórmula. Ignorando.", lote.id, dia_curva)
             continue
 
         consumo_animal = d(curva_dia.formula_mass_per_animal)
-        formula = curva_dia.formula
+        formula = cache_formula[lote.id]
 
         dados_curva.append({
             "GALPÃO": galpao.name,
@@ -142,13 +189,14 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
         sala = lote.sala
         galpao = sala.shed
 
-        dia_curva = calcular_dia_curva(lote, data_base)
-        curva_dia = lote.feeding_curve.details[dia_curva]
+        dia_curva = cache_dia_curva[lote.id]
+        curva_dia = cache_curva_dia[lote.id]
 
-        if not curva_dia or not curva_dia.formula:
+        if not curva_dia:
+            logger.warning("Lote %s: dia_curva %s fora do range na receita. Ignorando.", lote.id, dia_curva)
             continue
 
-        formula = curva_dia.formula
+        formula = cache_formula[lote.id]
 
         if formula.id not in cache_formulas:
             cache_formulas[formula.id] = {
@@ -180,14 +228,15 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
                 # M (Excel)
                 massa_seca = (pct_produto / 100) * massa_total
 
-                if product_id == 1:
+                if product_id == WATER_PRODUCT_ID:
                     p_trato = d(0)
                 else:
-                    p_trato = massa_seca / frac_seca if frac_seca > 0 else d(0)
-                    p_trato = r(p_trato)
+                    p_trato_exato = massa_seca / frac_seca if frac_seca > 0 else d(0)
 
-                    # N - M
-                    soma_agua += (p_trato - massa_seca)
+                    # N - M: acumula com valor exato para evitar propagação de erros de arredondamento
+                    soma_agua += (p_trato_exato - massa_seca)
+
+                    p_trato = r(p_trato_exato)  # arredonda apenas para saída
 
                 linhas.append({
                     "produto": produto,
@@ -200,43 +249,52 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
                     "pct_produto": pct_produto
                 })
 
-            # Água (igual Excel)
+            # Água
+            # - ignorar_fracao_liquida=False: calcula água como complemento após
+            #   corrigir umidade dos sólidos (método preciso)
+            # - ignorar_fracao_liquida=True: usa diretamente o pct_agua da fórmula
+            #   sobre a massa total sem correção de umidade (método simplificado)
             if not ignorar_fracao_liquida:
                 total_mistura = massa_total / pct_seco_formula if pct_seco_formula > 0 else d(0)
                 agua = total_mistura - soma_agua
-
-                for l in linhas:
-                    if l["produto"].id == 1:
-                        l["p_trato"] = r(max(d(0), agua))
+                for linha_prod in linhas:
+                    if linha_prod["produto"].id == WATER_PRODUCT_ID:
+                        linha_prod["p_trato"] = r(max(d(0), agua))
+            else:
+                pct_agua_formula = d(formula.water_percentage) / 100
+                agua_direta = r(massa_total * pct_agua_formula / (1 - pct_agua_formula)) if pct_agua_formula < 1 else d(0)
+                for linha_prod in linhas:
+                    if linha_prod["produto"].id == WATER_PRODUCT_ID:
+                        linha_prod["p_trato"] = agua_direta
 
             # Montagem final
-            for l in linhas:
-                p_trato = r(l["p_trato"])
-                dens = l["dens"]
+            for linha_prod in linhas:
+                p_trato = r(linha_prod["p_trato"])
+                dens = linha_prod["dens"]
 
                 v_trato = r(p_trato / (dens / 1000)) if dens > 0 else d(0)
 
                 row = {
                     "GALPÃO": galpao.name,
                     "SALA": sala.name,
-                    "ID_PR": l["produto"].id,
-                    "PRODUTO": l["produto"].name,
-                    "D_PR": l["dens"],
+                    "ID_PR": linha_prod["produto"].id,
+                    "PRODUTO": linha_prod["produto"].name,
+                    "D_PR": linha_prod["dens"],
                     "ID_FO": formula.id,
                     "TRATO": trato.id,
                     "PCT_H20_FO": float(formula.water_percentage),
-                    "PCT_PR_100_PCT_S_H2O_FO": float(l["pct_produto"]),
-                    "EH_AGUA": l["produto"].id == 1,
+                    "PCT_PR_100_PCT_S_H2O_FO": float(linha_prod["pct_produto"]),
+                    "EH_AGUA": linha_prod["produto"].id == WATER_PRODUCT_ID,
                     "P_TRATO": p_trato,
                     "V_TRATO": v_trato,
                 }
 
                 if not ignorar_fracao_liquida:
                     row.update({
-                        "PCT_UMID_PR": float(l["umid"]),
-                        "FRAC_SECA_PR": float(l["frac_seca"]),
-                        "FRAC_H2O_PR": float(l["frac_h2o"]),
-                        "P_TRATO_S_CALC_UMID": float(r(l["massa_seca"])),
+                        "PCT_UMID_PR": float(linha_prod["umid"]),
+                        "FRAC_SECA_PR": float(linha_prod["frac_seca"]),
+                        "FRAC_H2O_PR": float(linha_prod["frac_h2o"]),
+                        "P_TRATO_S_CALC_UMID": float(r(linha_prod["massa_seca"])),
                     })
 
                 matriz_producao_receita.append(row)
@@ -248,8 +306,8 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
 
     for linha in matriz_producao_receita:
         chave = (linha["SALA"], linha["TRATO"], linha["ID_FO"])
-        agrupado[chave]["sum_p"] += d(linha["P_TRATO"])
-        agrupado[chave]["sum_v"] += d(linha["V_TRATO"])
+        agrupado[chave]["sum_p"] += linha["P_TRATO"]
+        agrupado[chave]["sum_v"] += linha["V_TRATO"]
 
     # =========================================================
     # RAÇÃO LIQUIDA
@@ -260,18 +318,23 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
 
         sala = lote.sala
         galpao = sala.shed
-        cozinha = getattr(galpao, "kitchen", None)
+        cozinha = galpao.kitchen
 
         if not cozinha:
             continue
 
-        V_MAX_CZ = d(cozinha.volume_misturador)
-        PCT = d(cozinha.fracao_volume_misturador) / 100
-        V_MAX_UTIL = V_MAX_CZ * PCT
+        v_max_cz = d(cozinha.volume_misturador)
+        pct_util = d(cozinha.fracao_volume_misturador) / 100
+        v_max_util = v_max_cz * pct_util
 
-        formula = lote.feeding_curve.details[
-            calcular_dia_curva(lote, data_base)
-        ].formula
+        dia_curva_racao = cache_dia_curva[lote.id]
+        curva_dia_racao = cache_curva_dia[lote.id]
+
+        if not curva_dia_racao:
+            logger.warning("Lote %s: dia_curva %s fora do range na ração líquida. Ignorando.", lote.id, dia_curva_racao)
+            continue
+
+        formula = cache_formula[lote.id]
 
         for trato in tratos:
 
@@ -279,8 +342,8 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
             sum_p = agrupado[chave]["sum_p"]
             sum_v = agrupado[chave]["sum_v"]
 
-            div = sum_v / V_MAX_UTIL if V_MAX_UTIL > 0 else d(0)
-            etapas = int(ceil(div)) if V_MAX_UTIL > 0 else 0
+            div = sum_v / v_max_util if v_max_util > 0 else d(0)
+            etapas = int(ceil(div)) if v_max_util > 0 else 0
 
             v_etapa = r(sum_v / etapas) if etapas else d(0)
             p_etapa = r(sum_p / etapas) if etapas else d(0)
@@ -294,10 +357,10 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
                 "SUM_P": float(r(sum_p)),
                 "SUM_V": float(r(sum_v)),
                 "ID_GA": galpao.id,
-                "ID_CZ": getattr(cozinha, "id", 1),
-                "V_MAX_CZ": float(V_MAX_CZ),
-                "PCT_P_MAX_CZ": float(PCT * 100),
-                "V_MAX_UTIL_CZ": float(r(V_MAX_UTIL)),
+                "ID_CZ": cozinha.id,
+                "V_MAX_CZ": float(v_max_cz),
+                "PCT_P_MAX_CZ": float(pct_util * 100),
+                "V_MAX_UTIL_CZ": float(r(v_max_util)),
                 "SUM_V_DIV_V_MAX_UTIL_CZ": float(r(div)),
                 "ETAPAS_TRATO": etapas,
                 "V_ETAPA_TRATO": float(r(v_etapa)),
@@ -316,15 +379,11 @@ def script_1(session, data_base, show_debug=True, ignorar_fracao_liquida=False):
         "CALCULO DE RAÇÃO LIQUIDA POR TRATO E FORMULA TOTALIZADOS": matriz_racao_totalizada,
     }
 
-    if show_debug:
-        print(json.dumps(resultado, indent=2, ensure_ascii=False))
-
     return resultado
 
 
 def main():
     data_base = date(2026, 3, 20)
-
     with session_scope() as session:
         script_1(
             session,
