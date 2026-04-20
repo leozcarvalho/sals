@@ -366,6 +366,111 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
                 "V_ETAPA_TRATO": float(r(v_etapa)),
                 "P_ETAPA_TRATO": float(r(p_etapa)),
             })
+    
+    # =========================================================
+    # 🔥 PREPARAÇÃO DE DADOS PARA CÁLCULO
+    # =========================================================
+    matriz_preparacao = []
+
+    for lote in lotes:
+
+        sala = lote.sala
+        galpao = sala.shed
+        baias = sala.baias
+
+        dia_curva = cache_dia_curva[lote.id]
+        curva_dia = cache_curva_dia[lote.id]
+
+        if not curva_dia:
+            continue
+
+        formula = cache_formula[lote.id]
+
+        total_suinos = sum(d(b.animals_quantity) for b in baias)
+
+        for trato in tratos:
+
+            linha_racao = next(
+                (
+                    l for l in matriz_racao_totalizada
+                    if l["SALA"] == sala.name
+                    and l["TRATO"] == trato.id
+                    and l["ID_FO"] == formula.id
+                ),
+                None
+            )
+
+            if not linha_racao:
+                continue
+
+            etapas = linha_racao["ETAPAS_TRATO"]
+            p_etapa = d(linha_racao["P_ETAPA_TRATO"])
+
+            p_suino_etapa = (
+                r(p_etapa / total_suinos)
+                if total_suinos > 0 else d(0)
+            )
+
+            matriz_preparacao.append({
+                "ID_SA": sala.id,
+                "GALPÃO": galpao.name,
+                "SALA": sala.name,
+                "ID_FO": formula.id,
+                "FORMULA": formula.name,
+                "TRATO": trato.id,
+                "ETAPAS_TRATO": etapas,
+                "P_ETAPA_TRATO": float(r(p_etapa)),
+                "TOTAL_SUINOS": int(total_suinos),
+                "P_SUINO_ETAPA_TRATO": float(r(p_suino_etapa)),
+            })
+    
+    # =========================================================
+    # 🔥 CÁLCULO POR ETAPA (RECEITA FINAL DE DISTRIBUIÇÃO)
+    # =========================================================
+    matriz_final = []
+
+    for lote in lotes:
+
+        sala = lote.sala
+        baias = sala.baias
+
+        dia_curva = cache_dia_curva[lote.id]
+        curva_dia = cache_curva_dia[lote.id]
+
+        if not curva_dia:
+            continue
+
+        for baia in baias:
+
+            qtd = d(baia.animals_quantity)
+
+            row = {
+                "ID": baia.id,
+                "DESC": f"BA{baia.id}",
+                "ID_SA": sala.id,
+                "SUINOS": int(qtd),
+                "T1-ETAPA-TRATO": 0,
+                "T2-ETAPA-TRATO": 0,
+                "T3-ETAPA-TRATO": 0,
+                "T4-ETAPA-TRATO": 0,
+                "T5-ETAPA-TRATO": 0,
+                "T6-ETAPA-TRATO": 0,
+            }
+
+            for prep in matriz_preparacao:
+
+                if prep["ID_SA"] != sala.id:
+                    continue
+
+                trato = prep["TRATO"]
+                p_suino = d(prep["P_SUINO_ETAPA_TRATO"])
+
+                valor = r(p_suino * qtd)
+
+                col = f"T{trato}-ETAPA-TRATO"
+                row[col] = float(valor)
+
+            matriz_final.append(row)
 
     resultado = {
         "CONSULTAS DE PREPARAÇÃO DE DADOS DA CURVA": consultas_curva,
@@ -377,6 +482,8 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
         ],
         "CÁLCULO DE PRODUÇÃO E RECEITA- MÉTODO IGNORANDO FRAÇÃO LÍQUIDA NOS PRODUTOS": matriz_producao_receita,
         "CALCULO DE RAÇÃO LIQUIDA POR TRATO E FORMULA TOTALIZADOS": matriz_racao_totalizada,
+        "CÁLCULO DE DISTRIBUIÇÃO": matriz_preparacao,
+        "RECEITA FINAL DE DISTRIBUIÇÃO POR BAIA": matriz_final,
     }
 
     return resultado
