@@ -110,7 +110,7 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
     for lote in lotes:
         dia = calcular_dia_curva(lote, data_base)
         cache_dia_curva[lote.id] = dia
-        detalhes = lote.feeding_curve.details if lote.feeding_curve else []
+        detalhes: list[FeedingCurveDetail] = lote.feeding_curve.details if lote.feeding_curve else []
         if dia < len(detalhes) and detalhes[dia] and detalhes[dia].formula:
             cache_curva_dia[lote.id] = detalhes[dia]
             cache_formula[lote.id] = detalhes[dia].formula
@@ -123,9 +123,9 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
     # =========================================================
     for lote in lotes:
 
-        sala = lote.sala
-        galpao = sala.shed
-        baias = sala.baias
+        sala: Sala = lote.sala
+        galpao: Shed = sala.shed
+        baias: list[Baia] = sala.baias
 
         consultas_curva.append({
             "LOTE": lote.id,
@@ -141,7 +141,7 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
             continue
 
         consumo_animal = d(curva_dia.formula_mass_per_animal)
-        formula = cache_formula[lote.id]
+        formula : Formula = cache_formula[lote.id]
 
         dados_curva.append({
             "GALPÃO": galpao.name,
@@ -316,9 +316,9 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
 
     for lote in lotes:
 
-        sala = lote.sala
-        galpao = sala.shed
-        cozinha = galpao.kitchen
+        sala : Sala = lote.sala
+        galpao : Shed = sala.shed
+        cozinha : Kitchen = galpao.kitchen
 
         if not cozinha:
             continue

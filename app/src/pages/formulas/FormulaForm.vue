@@ -49,6 +49,7 @@ const fetchProducts = async () => {
 
     return {
       product_id: p.id,
+      is_micronutrient: p.is_micronutrient,
       product_percentage_without_moisture: existing
         ? existing.product_percentage_without_moisture
         : 0
@@ -69,6 +70,7 @@ onMounted(async () => {
 // ---------------- TOTALIZADOR ----------------
 const totalPercentage = computed(() => {
   return form.details.reduce((acc, item) => {
+    if (item.is_micronutrient) return acc; // ignora micronutrientes
     const val = Number(item.product_percentage_without_moisture);
     return acc + (isNaN(val) ? 0 : val);
   }, 0);

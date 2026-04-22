@@ -6,6 +6,7 @@ from decimal import Decimal
 class TratoBase(BaseModel):
     name: str
     hour: int
+    minute: int
     percent: Decimal
 
 class TratoCreate(TratoBase):

@@ -267,12 +267,12 @@ def create_moviment_kinds(db, user):
 def create_tratos(db, user):
     trato_repo = TratoRepository(db)
     trato_repo.bulk_save([
-        TratoCreate(name="T1", hour=6, percent=20),
-        TratoCreate(name="T2", hour=12, percent=20),
-        TratoCreate(name="T3", hour=18, percent=20),
-        TratoCreate(name="T4", hour=22, percent=20),
-        TratoCreate(name="T5", hour=22, percent=20),
-        TratoCreate(name="T6", hour=22, percent=0),
+        TratoCreate(name="T1", hour=6, minute=0, percent=20),
+        TratoCreate(name="T2", hour=12, minute=0, percent=20),
+        TratoCreate(name="T3", hour=18, minute=0, percent=20),
+        TratoCreate(name="T4", hour=22, minute=0, percent=20),
+        TratoCreate(name="T5", hour=22, minute=0, percent=20),
+        TratoCreate(name="T6", hour=22, minute=0, percent=0),
     ], actor=user)
     logger.info("[SEED] Tratos criados")
 

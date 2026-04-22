@@ -61,7 +61,8 @@ const saveTratos = async () => {
       <!-- HEADER -->
       <div class="row fw-bold mb-2 border-bottom pb-2">
         <div class="col-1">TRATO</div>
-        <div class="col-2">HORA</div>
+        <div class="col-1">HORA</div>
+        <div class="col-1">MIN</div>
         <div class="col-2">PCT</div>
         <div class="col-2">STATUS</div>
       </div>
@@ -78,8 +79,13 @@ const saveTratos = async () => {
         </div>
 
         <!-- HORA -->
-        <div class="col-2">
+        <div class="col-1">
           <input v-model="trato.hour" type="number" class="form-control" />
+        </div>
+        :
+        <!-- MIN -->
+        <div class="col-1">
+          <input v-model="trato.minute" type="number" class="form-control" />
         </div>
 
         <!-- PERCENT -->

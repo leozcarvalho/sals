@@ -40,7 +40,6 @@ class ShedRepository(Repository):
                 new_baia = Baia(
                     name=baia.name,
                     sala_id=new_sala.id,
-                    animals_quantity=baia.animals_quantity,
                     t1=baia.t1,
                     t2=baia.t2,
                     t3=baia.t3,

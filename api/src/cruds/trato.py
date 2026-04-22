@@ -3,6 +3,7 @@ from src.domain.trato import Trato
 from src.cruds.repo import Repository
 from src.schemas.trato import TratoUpdateWithId, TratoCreate
 from src.cruds.baia import BaiaRepository
+from src.domain import exceptions as exc
 
 
 class TratoRepository(Repository):
@@ -13,7 +14,7 @@ class TratoRepository(Repository):
         '''Pegar todos os tratos e garantir que a soma dos percentuais seja 100'''
         total_percent = sum(trato.percent for trato in tratos)
         if total_percent != 100:
-            raise ValueError(f"A soma dos percentuais deve ser 100, mas é {total_percent}")
+            raise exc.InvalidData(f"A soma dos percentuais deve ser 100, mas é {total_percent}")
 
     def delete(self, id, actor=None):
         pass  # Deleção de tratos não é permitida

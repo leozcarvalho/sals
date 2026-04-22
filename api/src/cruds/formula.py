@@ -3,6 +3,7 @@ from src.domain.exceptions import InvalidData
 from src.cruds.repo import Repository
 from src.domain.formula import Formula
 from src.cruds.formula_detail import FormulaDetailRepository
+from src.cruds.product import ProductRepository
 from src.schemas.formula_detail import FormulaDetailCreate
 from typing import List
 
@@ -10,7 +11,8 @@ class FormulaRepository(Repository):
     def __init__(self, db_session: Session):
         super().__init__(Formula, db_session)
         self.formula_details_repo = FormulaDetailRepository(db_session)
-    
+        self.product_repo = ProductRepository(db_session)
+
     def save(self, values, actor=None):
         details = values.pop('details', None)
         formula = super().save(values, actor)
@@ -24,10 +26,12 @@ class FormulaRepository(Repository):
         return formula
 
     def __validate_details(self, details: List[FormulaDetailCreate]):
-        #if any(detail['product_percentage_without_moisture'] <= 0 for detail in details):
-            #raise InvalidData("Porcentagem do produto sem umidade deve ser maior que 0%.")
-
-        total_percentage = sum(detail['product_percentage_without_moisture'] for detail in details)
+        total_percentage = 0
+        for detail in details:
+            product = self.product_repo.get(detail['product_id'])
+            if product and product.is_micronutrient:
+                continue
+            total_percentage += detail['product_percentage_without_moisture']
         if total_percentage != 100:
             raise InvalidData("A soma das porcentagens dos produtos deve ser igual a 100%.")
 

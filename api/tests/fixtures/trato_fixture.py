@@ -5,6 +5,7 @@ from decimal import Decimal
 TRATO = TratoCreate(
     name="Test Trato",
     hour=12,
+    minute=0,
     percent=Decimal("75.5")
 )
 

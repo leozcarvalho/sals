@@ -304,12 +304,12 @@ def criar_baias(db, user):
 def create_tratos(db, user):
     trato_repo = TratoRepository(db)
     trato_repo.bulk_save([
-        TratoCreate(name="T1", hour=7, percent=20),
-        TratoCreate(name="T2", hour=9, percent=30),
-        TratoCreate(name="T3", hour=11, percent=0),
-        TratoCreate(name="T4", hour=13, percent=30),
-        TratoCreate(name="T5", hour=15, percent=0),
-        TratoCreate(name="T6", hour=17, percent=20),
+        TratoCreate(name="T1", hour=7, minute=0, percent=20),
+        TratoCreate(name="T2", hour=9, minute=0, percent=30),
+        TratoCreate(name="T3", hour=11, minute=0, percent=0),
+        TratoCreate(name="T4", hour=13, minute=0, percent=30),
+        TratoCreate(name="T5", hour=15, minute=0, percent=0),
+        TratoCreate(name="T6", hour=17, minute=0, percent=20),
     ], actor=user)
     logger.info("[SEED] Tratos criados")
 
