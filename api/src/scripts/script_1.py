@@ -230,13 +230,19 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
 
                 if product_id == WATER_PRODUCT_ID:
                     p_trato = d(0)
-                else:
+                elif not ignorar_fracao_liquida:
+                    # Corrige a umidade do produto: divide pela fração seca
+                    # para obter a massa úmida real que deve ser pesada.
+                    # A diferença (N - M) é a água interna do produto, acumulada
+                    # para depois calcular a água complementar.
                     p_trato_exato = massa_seca / frac_seca if frac_seca > 0 else d(0)
-
-                    # N - M: acumula com valor exato para evitar propagação de erros de arredondamento
                     soma_agua += (p_trato_exato - massa_seca)
-
-                    p_trato = r(p_trato_exato)  # arredonda apenas para saída
+                    p_trato = r(p_trato_exato)
+                else:
+                    # ignorar_fracao_liquida=True: usa a massa seca diretamente,
+                    # sem corrigir a umidade do produto. A água vem 100% da
+                    # fração hídrica da fórmula (calculada abaixo).
+                    p_trato = r(massa_seca)
 
                 linhas.append({
                     "produto": produto,
