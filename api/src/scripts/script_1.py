@@ -51,14 +51,14 @@ def calcular_dia_curva(lote: "Batch", data_base: date) -> int:
     return dias_passados
 
 
-def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> dict:
+def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) -> dict:
     """
     Calcula o plano de alimentação diário por lote/sala/baia/trato.
 
     Args:
         session: Sessão do banco de dados.
         data_base: Data de referência para o cálculo.
-        ignorar_fracao_liquida: Se True, calcula a água proporcionalmente ao pct_agua
+        considerar_fracao_liquida: Se True, calcula a água proporcionalmente ao pct_agua
             da fórmula sem corrigir a umidade dos sólidos (método simplificado).
 
     Returns:
@@ -215,7 +215,6 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
             soma_agua = d(0)
 
             for product_id, pdata in cache_produtos.items():
-
                 produto = pdata["obj"]
                 umid = pdata["umid"]
                 dens = pdata["dens"]
@@ -229,19 +228,20 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
                 massa_seca = (pct_produto / 100) * massa_total
 
                 if product_id == WATER_PRODUCT_ID:
+                    # Água é calculada depois como complemento — placeholder aqui
                     p_trato = d(0)
-                elif not ignorar_fracao_liquida:
+                elif considerar_fracao_liquida:
                     # Corrige a umidade do produto: divide pela fração seca
                     # para obter a massa úmida real que deve ser pesada.
-                    # A diferença (N - M) é a água interna do produto, acumulada
-                    # para depois calcular a água complementar.
+                    # A diferença (P_TRATO − massa_seca) é a água interna,
+                    # acumulada para calcular a água complementar.
                     p_trato_exato = massa_seca / frac_seca if frac_seca > 0 else d(0)
                     soma_agua += (p_trato_exato - massa_seca)
                     p_trato = r(p_trato_exato)
                 else:
-                    # ignorar_fracao_liquida=True: usa a massa seca diretamente,
-                    # sem corrigir a umidade do produto. A água vem 100% da
-                    # fração hídrica da fórmula (calculada abaixo).
+                    # Sem correção de umidade: replica a planilha
+                    #   SE(EH_AGUA; massa_total/pct_seco; pct_produto/100*massa_total)
+                    # → para não-água: pct_produto/100 * massa_total = massa_seca
                     p_trato = r(massa_seca)
 
                 linhas.append({
@@ -256,22 +256,19 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
                 })
 
             # Água
-            # - ignorar_fracao_liquida=False: calcula água como complemento após
-            #   corrigir umidade dos sólidos (método preciso)
-            # - ignorar_fracao_liquida=True: usa diretamente o pct_agua da fórmula
-            #   sobre a massa total sem correção de umidade (método simplificado)
-            if not ignorar_fracao_liquida:
-                total_mistura = massa_total / pct_seco_formula if pct_seco_formula > 0 else d(0)
-                agua = total_mistura - soma_agua
-                for linha_prod in linhas:
-                    if linha_prod["produto"].id == WATER_PRODUCT_ID:
-                        linha_prod["p_trato"] = r(max(d(0), agua))
+            # considerar_fracao_liquida=True : sólidos corrigidos pela umidade;
+            #   agua = (massa_total / pct_seco) − soma_agua  (complemento à mistura úmida)
+            # considerar_fracao_liquida=False: sólidos usam massa_seca diretamente;
+            #   agua = massa_total / pct_seco  — replica a planilha:
+            #   SE(EH_AGUA; PROCX_massa_total / ((100−pct_agua)/100); massa_seca)
+            if considerar_fracao_liquida:
+                agua = (massa_total / pct_seco_formula if pct_seco_formula > 0 else d(0)) - soma_agua
             else:
-                pct_agua_formula = d(formula.water_percentage) / 100
-                agua_direta = r(massa_total * pct_agua_formula / (1 - pct_agua_formula)) if pct_agua_formula < 1 else d(0)
-                for linha_prod in linhas:
-                    if linha_prod["produto"].id == WATER_PRODUCT_ID:
-                        linha_prod["p_trato"] = agua_direta
+                agua = massa_total / pct_seco_formula if pct_seco_formula > 0 else d(0)
+
+            for linha_prod in linhas:
+                if linha_prod["produto"].id == WATER_PRODUCT_ID:
+                    linha_prod["p_trato"] = r(max(d(0), agua))
 
             # Montagem final
             for linha_prod in linhas:
@@ -291,17 +288,19 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
                     "PCT_H20_FO": float(formula.water_percentage),
                     "PCT_PR_100_PCT_S_H2O_FO": float(linha_prod["pct_produto"]),
                     "EH_AGUA": linha_prod["produto"].id == WATER_PRODUCT_ID,
+                    "P_TRATO_S_CALC_UMID": float(r(linha_prod["massa_seca"])),
                     "P_TRATO": p_trato,
                     "V_TRATO": v_trato,
+                    "PCT_UMID_PR": float(linha_prod["umid"]),
+                    "FRAC_SECA_PR": float(linha_prod["frac_seca"]),
+                    "FRAC_H2O_PR": float(linha_prod["frac_h2o"]),
                 }
 
-                if not ignorar_fracao_liquida:
-                    row.update({
-                        "PCT_UMID_PR": float(linha_prod["umid"]),
-                        "FRAC_SECA_PR": float(linha_prod["frac_seca"]),
-                        "FRAC_H2O_PR": float(linha_prod["frac_h2o"]),
-                        "P_TRATO_S_CALC_UMID": float(r(linha_prod["massa_seca"])),
-                    })
+                if not considerar_fracao_liquida:
+                    row.pop("P_TRATO_S_CALC_UMID", None)
+                    row.pop("PCT_UMID_PR", None)
+                    row.pop("FRAC_SECA_PR", None)
+                    row.pop("FRAC_H2O_PR", None)
 
                 matriz_producao_receita.append(row)
 
@@ -486,7 +485,7 @@ def script_1(session, data_base: date, ignorar_fracao_liquida: bool = False) -> 
             {"TRATO": k[0], "FORMULA": k[1], "VALOR": float(r(v))}
             for k, v in total_formula_trato.items()
         ],
-        "CÁLCULO DE PRODUÇÃO E RECEITA- MÉTODO IGNORANDO FRAÇÃO LÍQUIDA NOS PRODUTOS": matriz_producao_receita,
+        "CÁLCULO DE PRODUÇÃO E RECEITA": matriz_producao_receita,
         "CALCULO DE RAÇÃO LIQUIDA POR TRATO E FORMULA TOTALIZADOS": matriz_racao_totalizada,
         "CÁLCULO DE DISTRIBUIÇÃO": matriz_preparacao,
         "RECEITA FINAL DE DISTRIBUIÇÃO POR BAIA": matriz_final,
@@ -501,7 +500,7 @@ def main():
         script_1(
             session,
             data_base=data_base,
-            ignorar_fracao_liquida=True
+            considerar_fracao_liquida=False
         )
 
 

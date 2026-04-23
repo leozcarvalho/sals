@@ -10,7 +10,7 @@ const loader = ref(null);
 const result = ref(null);
 const selectedScript = ref(null);
 const scriptOptions = [
-  { value: "script_1", label: "Script 1", params: [{ name: "data_base", type: "date", label: "Dia inicial" }, { name: "ignorar_fracao_liquida", type: "checkbox", label: "Ignorar Fração Líquida" }] },
+  { value: "script_1", label: "Script 1", params: [{ name: "data_base", type: "date", label: "Dia inicial" }, { name: "considerar_fracao_liquida", type: "checkbox", label: "Considerar Fração Líquida" }] },
   { value: "script_2", label: "Script 2", params: [{ name: "another_param", type: "string", label: "Param 1" }, { name: "extra_param", type: "boolean", label: "Param 2" }] },
 ];
 
