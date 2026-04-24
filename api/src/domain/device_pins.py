@@ -21,9 +21,18 @@ class DevicePin(Base, table=True):
         sa_relationship_kwargs={"lazy": "selectin"}
     )
 
-    product_tanks: Optional[List["ProductTank"]] = Relationship(
-        back_populates="device_pin",
-        sa_relationship_kwargs={"lazy": "selectin"}
+    screw_tanks: Optional[List["ProductTank"]] = Relationship(
+        back_populates="screw_pin",
+        sa_relationship_kwargs={
+            "foreign_keys": "[ProductTank.screw_pin_id]"
+        }
+    )
+
+    scale_tanks: Optional[List["ProductTank"]] = Relationship(
+        back_populates="scale_pin",
+        sa_relationship_kwargs={
+            "foreign_keys": "[ProductTank.scale_pin_id]"
+        }
     )
 
     valves: Optional[List["Valve"]] = Relationship(

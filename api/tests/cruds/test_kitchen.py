@@ -13,7 +13,7 @@ def kitchen_repository(session) -> KitchenRepository:
 def test_create_kitchen(session, kitchen_repository, create_installations):
     installation = create_installations
     product = create_product(session, name="Produto Teste")
-    product_tank = create_product_tank(session, product_id=product.id, name="Tanque Teste", pin_id=5)
+    product_tank = create_product_tank(session, product_id=product.id, name="Tanque Teste", screw_pin_id=5)
     data = KITCHEN.model_dump().copy()
     data['tanks'] = [{"product_tank_id": product_tank.id}]
     kitchen = kitchen_repository.save({**data, "installation_id": installation.id})

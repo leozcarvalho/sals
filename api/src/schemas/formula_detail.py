@@ -1,9 +1,10 @@
-from pydantic import BaseModel, field_validator
+from decimal import Decimal
+from pydantic import BaseModel 
 from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class FormulaDetailBase(BaseModel):
     product_id: int
-    product_percentage_without_moisture: int
+    product_percentage_without_moisture: Decimal
 
 class FormulaDetailCreate(FormulaDetailBase):
     pass

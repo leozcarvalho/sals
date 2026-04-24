@@ -35,7 +35,7 @@ def test_get_kitchen_variables(svg_repository, session, create_installations):
 
 def test_get_kitchen_options(svg_repository, session, create_installations):
     product = create_product(session, name="Produto Teste")
-    product_tank = create_product_tank(session, product_id=product.id, name="Tanque Teste", pin_id=5)
+    product_tank = create_product_tank(session, product_id=product.id, name="Tanque Teste", screw_pin_id=5)
     kitchen = create_kitchen(session, tanks=[{"product_tank_id": product_tank.id}], shaker_pin_id=10, pump_pin_id=11, scale_pin_id=12, installation_id=create_installations.id)
     svg = create_svg(session, owner_type="kitchens", owner_id=kitchen.id, content="""<svg>{{VAL}}</svg>""")
     options = svg_repository.get_options(svg.id)

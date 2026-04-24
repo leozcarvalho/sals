@@ -4,6 +4,7 @@ from src.schemas.global_schemas import BaseFilter, GlobalFields
 
 class ProductBase(BaseModel):
     name: str
+    insertion_order: int
     description: Optional[str] = None
     moisture_percentage: int
     kind: str

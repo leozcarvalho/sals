@@ -296,7 +296,7 @@ const closeModal = () => {
         <div class="modal-body">
           <div v-for="field in fields" :key="field.name" class="mb-3">
             <!-- Label -->
-            <label v-if="field.type !== 'checkbox'" class="form-label">
+            <label v-if="field.type !== 'checkbox' && !field.slot" class="form-label">
               {{ field.label }}
             </label>
 

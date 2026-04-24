@@ -113,7 +113,8 @@ class SvgRepository(Repository):
                 self.map_pin_option(owner.scale_pin, f'Balança - '),
             ])
             for tank in owner.tanks:
-                options.append(self.map_pin_option(tank.tank.device_pin, f'Tanque {tank.tank.product.name} - {tank.tank.device_pin.name}'))
+                options.append(self.map_pin_option(tank.tank.screw_pin, f'Rosca tanque {tank.tank.product.name} - {tank.tank.screw_pin.name}'))
+                if tank.tank.scale_pin: options.append(self.map_pin_option(tank.tank.scale_pin, f'Balança tanque {tank.tank.product.name} - {tank.tank.scale_pin.name}'))
             return options
 
         if svg.owner_type == "sheds":

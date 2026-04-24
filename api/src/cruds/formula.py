@@ -29,9 +29,26 @@ class FormulaRepository(Repository):
         total_percentage = 0
         for detail in details:
             product = self.product_repo.get(detail['product_id'])
+            pct = detail['product_percentage_without_moisture']
+
             if product and product.is_micronutrient:
+                # Micronutrientes: até 3 casas decimais
+                rounded = round(pct, 3)
+                if rounded != pct:
+                    raise InvalidData(
+                        f"Micronutriente '{product.name}': a porcentagem deve ter no máximo 3 casas decimais (recebido: {pct})."
+                    )
                 continue
-            total_percentage += detail['product_percentage_without_moisture']
+
+            # Produtos convencionais: deve ser inteiro
+            if pct != int(pct):
+                name = product.name if product else f"ID {detail['product_id']}"
+                raise InvalidData(
+                    f"Produto '{name}': a porcentagem deve ser um número inteiro (recebido: {pct})."
+                )
+
+            total_percentage += pct
+
         if total_percentage != 100:
             raise InvalidData("A soma das porcentagens dos produtos deve ser igual a 100%.")
 

@@ -24,7 +24,6 @@ from .batch import router_batches
 from .moviment_kinds import router_moviment_kinds
 from .trato import router_trato
 from .scripts import router_scripts
-from .dosador_seco import router_dosador_seco
 
 routers = [
     auth_router,
@@ -53,5 +52,4 @@ routers = [
     router_moviment_kinds.router,
     router_trato.router,
     router_scripts,
-    router_dosador_seco.router
 ]

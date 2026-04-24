@@ -64,31 +64,33 @@ class DevicePinRepository(Repository):
 
         room_subq = select(Sala.id).where(Sala.entrance_pin_id == DevicePin.id)
 
-        product_tank_subq = select(ProductTank.id).where(ProductTank.pin_id == DevicePin.id)
+        screw_product_tank_subq = select(ProductTank.id).where(ProductTank.screw_pin_id == DevicePin.id)
 
-        return kitchen_subq, valve_subq, room_subq, product_tank_subq
+        scale_product_tank_subq = select(ProductTank.id).where(ProductTank.scale_pin_id == DevicePin.id)
+
+        return kitchen_subq, valve_subq, room_subq, screw_product_tank_subq, scale_product_tank_subq
 
     def build_filter(self, query, filters = {}):
         # Pega o filtro in_use
         in_use_filter = filters.pop("in_use", None) if filters else None
 
-        kitchen_subq, valve_subq, room_subq, product_tank_subq = self._get_in_use_subqueries()
+        kitchen_subq, valve_subq, room_subq, screw_product_tank_subq, scale_product_tank_subq = self._get_in_use_subqueries()
         if in_use_filter is not None:
             if in_use_filter:
-                query = query.filter(exists(kitchen_subq) | exists(valve_subq) | exists(room_subq), exists(product_tank_subq))
+                query = query.filter(exists(kitchen_subq) | exists(valve_subq) | exists(room_subq), exists(screw_product_tank_subq), exists(scale_product_tank_subq))
             else:
-                query = query.filter(~(exists(kitchen_subq) | exists(valve_subq) | exists(room_subq) | exists(product_tank_subq)))
+                query = query.filter(~(exists(kitchen_subq) | exists(valve_subq) | exists(room_subq) | exists(screw_product_tank_subq) | exists(scale_product_tank_subq)))
 
         # Chama o super para aplicar outros filtros
         return super().build_filter(query, filters)
 
     def build_query(self):
         query = self.db_session.query(DevicePin)
-        kitchen_subq, valve_subq, room_subq, product_tank_subq = self._get_in_use_subqueries()
+        kitchen_subq, valve_subq, room_subq, screw_product_tank_subq, scale_product_tank_subq = self._get_in_use_subqueries()
         query = self.db_session.query(
             DevicePin,
             case(
-                (exists(kitchen_subq) | exists(valve_subq) | exists(room_subq) | exists(product_tank_subq), True),
+                (exists(kitchen_subq) | exists(valve_subq) | exists(room_subq) | exists(screw_product_tank_subq) | exists(scale_product_tank_subq), True),
                 else_=False
             ).label("in_use"),
             Installation.name.label("installation_name"),
@@ -129,9 +131,13 @@ class DevicePinRepository(Repository):
         if valve:
             return f"válvula de alimentação {valve.name}"
 
-        tank = self.db_session.query(ProductTank).filter(ProductTank.pin_id == pin_id).first()
-        if tank:
-            return f"tanque de produto {tank.name}"
+        screw_tank = self.db_session.query(ProductTank).filter(ProductTank.screw_pin_id == pin_id).first()
+        if screw_tank:
+            return f"rosca do tanque {screw_tank.name}"
+
+        scale_tank = self.db_session.query(ProductTank).filter(ProductTank.scale_pin_id == pin_id).first()
+        if scale_tank:
+            return f"balança do tanque {scale_tank.name}"
 
         return None
 

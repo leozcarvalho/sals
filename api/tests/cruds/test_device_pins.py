@@ -69,7 +69,7 @@ def test_get_pin_usage_and_is_valid_pin(session, create_installations):
     product = create_product(session, name="Produto Teste")
     product_tank = create_product_tank(session, product_id=product.id, pin_id=pin_product.id, name="PT-1")
     usage = repo.get_pin_usage(pin_product.id)
-    assert usage is not None and "tanque de produto" in usage
+    assert usage is not None and "rosca do tanque" in usage
 
     with pytest.raises(exc.InvalidData):
         repo._is_valid_pin(pin_product.id)

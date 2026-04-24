@@ -11,6 +11,7 @@ const baseList = ref(null);
 const cols = reactive([
   { name: "#", field: "id" },
   { name: "Nome", field: "name" },
+  { name: "Ordem de Inserção", field: "insertion_order" },
   { name: "Descrição", field: "description" },
   { name: "Porcentagem de Umidade", field: "moisture_percentage" },
   { name: "Tipo", field: "kind", formatter: (value) => value === 'solid' ? 'Sólido' : 'Líquido' },
@@ -30,6 +31,7 @@ const modalForm = ref(null);
 <template>
   <BaseModalForm ref="modalForm" v-model="productSelected" :fields="[
     { name: 'name', label: 'Nome', type: 'text', rules: 'required' },
+    { name: 'insertion_order', label: 'Ordem de Inserção', type: 'number', rules: 'required' },
     { name: 'description', label: 'Descrição', type: 'text', rules: 'required' },
     { name: 'moisture_percentage', label: 'Porcentagem de Umidade', type: 'number', rules: { required: true, maxValue: 100 } },
     { name: 'kind', label: 'Tipo', type: 'select', rules: 'required', options: [

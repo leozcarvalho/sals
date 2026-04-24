@@ -7,7 +7,9 @@ PRODUCT = ProductCreate(
     moisture_percentage=0,
     kind="liquid",
     density=1000,
-    is_active=True
+    is_active=True,
+    is_micronutrient=False,
+    insertion_order=1
 )
 
 def create_product(session, actor=None, **overrides):

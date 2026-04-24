@@ -11,7 +11,7 @@ def formula_repository(session) -> FormulaRepository:
 @pytest.fixture
 def get_detail_data(session):
     product_1 = create_product(session, name="Água")
-    product_2 = create_product(session, name="Óleo")
+    product_2 = create_product(session, name="Óleo", insertion_order=2)
     details = [
         {"product_id": product_1.id, "product_percentage_without_moisture": 70},
         {"product_id": product_2.id, "product_percentage_without_moisture": 30}

@@ -25,7 +25,6 @@ from .batch import Batch
 from .moviment_kinds import MovimentKind
 from .moviment import Moviment
 from .trato import Trato
-from .dosador_seco import DosadorSeco
 
 __all__ = [
     "Profile",
@@ -55,7 +54,6 @@ __all__ = [
     "MovimentKind",
     "Moviment",
     "Trato",
-    "DosadorSeco",
 ]
 
 for model_name in __all__:

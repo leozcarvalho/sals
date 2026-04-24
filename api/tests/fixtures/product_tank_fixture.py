@@ -4,8 +4,10 @@ from src.schemas.product_tank import ProductTankCreate
 PRODUCT_TANK = ProductTankCreate(
     name="Tanque Principal",
     description="Tanque para água",
-    pin_id=1,
-    product_id=1
+    screw_pin_id=1,
+    product_id=1,
+    volume=10000,
+    is_dosador_seco=False,
 )
 
 def create_product_tank(session, actor=None, **overrides):

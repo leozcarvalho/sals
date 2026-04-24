@@ -6,6 +6,7 @@ class Product(Base, table=True):
     __tablename__ = "products"
 
     name: str = Field(nullable=False, max_length=100)
+    insertion_order: int = Field(nullable=False, ge=1, unique=True)
     description: str = Field(nullable=True, max_length=255)
     moisture_percentage: int = Field(nullable=False, ge=0, le=100) # porcentagem de umidade
     kind: str = Field(nullable=False, max_length=10)  # 'solid' or 'liquid'

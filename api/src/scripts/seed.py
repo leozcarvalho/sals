@@ -150,20 +150,20 @@ def create_installations(db, user):
 
 
 def create_products(db, user):
-    create_product(db, actor=user, name="Água", description="Água natural", moisture_percentage=0, kind="liquid", density=1000, is_active=True)
-    create_product(db, actor=user, name="Milho", description="Milho em grão", moisture_percentage=12, kind="solid", density=650, is_active=True)
-    create_product(db, actor=user, name="Soja", description="Soja em grão", moisture_percentage=8, kind="solid", density=790, is_active=True)
-    create_product(db, actor=user, name="Sorgo", description="Sorgo em grão", moisture_percentage=10, kind="solid", density=800, is_active=True)
-    create_product(db, actor=user, name="Premix 01", description="Premix", moisture_percentage=0, kind="solid", density=1200, is_active=True)
+    create_product(db, actor=user, name="Água", description="Água natural", moisture_percentage=0, kind="liquid", density=1000, is_active=True, insertion_order=1)
+    create_product(db, actor=user, name="Milho", description="Milho em grão", moisture_percentage=12, kind="solid", density=650, is_active=True, insertion_order=2)
+    create_product(db, actor=user, name="Soja", description="Soja em grão", moisture_percentage=8, kind="solid", density=790, is_active=True, insertion_order=3)
+    create_product(db, actor=user, name="Sorgo", description="Sorgo em grão", moisture_percentage=10, kind="solid", density=800, is_active=True, insertion_order=4)
+    create_product(db, actor=user, name="Premix 01", description="Premix", moisture_percentage=0, kind="solid", density=1200, is_active=True, is_micronutrient=True, insertion_order=5)
     logger.info("[SEED] Produtos criados")
 
 
 def create_product_tanks(db, user):
-    create_product_tank(db, actor=user, name="TQ01", description="Silo Externo 01", pin_id=None, product_id=2)
-    create_product_tank(db, actor=user, name="TQ02", description="Silo Externo 02", pin_id=None, product_id=2)
-    create_product_tank(db, actor=user, name="TQ03", description="Soli Externo 03", pin_id=None, product_id=3)
-    create_product_tank(db, actor=user, name="CX01", description="Caixa Dágua", pin_id=None, product_id=1)
-    create_product_tank(db, actor=user, name="TQPX01", description="Silo de Premix", pin_id=None, product_id=5)
+    create_product_tank(db, actor=user, name="TQ01", description="Silo Externo 01", screw_pin_id=None, product_id=2, volume=10000)
+    create_product_tank(db, actor=user, name="TQ02", description="Silo Externo 02", screw_pin_id=None, product_id=2, volume=10000)
+    create_product_tank(db, actor=user, name="TQ03", description="Soli Externo 03", screw_pin_id=None, product_id=3, volume=10000)
+    create_product_tank(db, actor=user, name="CX01", description="Caixa Dágua", screw_pin_id=None, product_id=1, volume=10000)
+    create_product_tank(db, actor=user, name="TQPX01", description="Silo de Premix", screw_pin_id=None, product_id=5, volume=10000)
     logger.info("[SEED] Tanques de produtos criados")
 
 def create_formulas(db, user):
