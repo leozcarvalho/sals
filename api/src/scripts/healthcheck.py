@@ -12,7 +12,7 @@ async def run_healthcheck(installation):
         repo = InstallationRepository(session)
         try:
             print(f"🔍 Testando placa {installation.id} ({installation.ip_address})...")
-            repo.health_check(installation.id, actor)
+            repo.exec_action(installation.id, "healthcheck", actor)
             print(f"✅ Placa {installation.id} online")
         except Exception as e:
             print(f"❌ Placa {installation.id} offline ({e})")

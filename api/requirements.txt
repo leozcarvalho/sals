@@ -24,6 +24,7 @@ MarkupSafe==3.0.2
 packaging==25.0
 pluggy==1.6.0
 pyasn1==0.6.1
+pymodbus==3.8.6
 pycparser==2.22
 pydantic==2.11.7
 pydantic-settings==2.10.1

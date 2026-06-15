@@ -102,9 +102,10 @@ def create_users(db):
 
 
 def create_hardware_point_types(db, user):
-    create_hardware_point_type(db, actor=user)
-    create_hardware_point_type(db, actor=user, points_quantity=1, kind="bit")
-    create_hardware_point_type(db, actor=user, points_quantity=16, kind="bit")
+    create_hardware_point_type(db, actor=user)                                   # id=1  32 bits
+    create_hardware_point_type(db, actor=user, points_quantity=1, kind="bit")   # id=2   1 bit  (peso)
+    create_hardware_point_type(db, actor=user, points_quantity=16, kind="bit")  # id=3  16 bits
+    create_hardware_point_type(db, actor=user, points_quantity=30, kind="bit")  # id=4  30 bits (relé Modbus)
     logger.info("[SEED] Hardware Point Types criados")
 
 def create_hardware_kinds(db, user):
@@ -112,40 +113,33 @@ def create_hardware_kinds(db, user):
     create_hardware_kind(db, user, name='Entrada', kind="input")
 
 def create_hardware_connection_templates(db, user):
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão 1", template_url="http://{ip}/get", query_string="valvula1={value}&valvula2=0")
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão 2", template_url="http://{ip}/get", query_string="rele={value}")
-    create_hardware_connection_template(db, actor=user, name="Template de Conexão Avançado", template_url="http://{ip}/get", query_string="peso")
+    # query_string carrega os parâmetros Modbus lidos por DeviceService._get_device_service
+    create_hardware_connection_template(db, actor=user, name="Modbus Relé 30 canais", template_url="modbus://{ip}", query_string="slave_id=1&total_relays=30")  # id=1
+    create_hardware_connection_template(db, actor=user, name="Modbus Sensor de Peso",  template_url="modbus://{ip}", query_string="slave_id=0")                  # id=2
 
 def create_hardware_devices(db, user):
-    create_hardware_device(
+    create_hardware_device(              # id=1
         db,
-        name="Dispositivo 1",
+        name="Placa de Relé Modbus",
         actor=user,
-        hardware_kind_id=1,
-        point_type_id=1,
-        connection_template_id=1,
+        hardware_kind_id=1,             # output
+        point_type_id=4,                # 30 bits
+        connection_template_id=1,       # Modbus Relé 30 canais
     )
-    create_hardware_device(
+    create_hardware_device(              # id=2
         db,
-        name="Dispositivo 2",
+        name="Sensor de Peso Modbus",
         actor=user,
-        hardware_kind_id=2,
-        point_type_id=2,
-        connection_template_id=3,
-    )
-    create_hardware_device(
-        db,
-        actor=user,
-        name="Placa de relé",
-        hardware_kind_id=1,
-        point_type_id=3,
-        connection_template_id=2,
+        hardware_kind_id=2,             # input
+        point_type_id=2,                # 1 bit
+        connection_template_id=2,       # Modbus Sensor de Peso
     )
 
 def create_installations(db, user):
-    create_installation(db, actor=user, name="VA32", ip_address="192.168.60.100", device_id=1)
-    create_installation(db, actor=user, name="Pesagem", ip_address="192.168.60.250", device_id=2)
-    create_installation(db, actor=user, name="RE16", ip_address="192.168.60.252", device_id=3)
+    create_installation(db, actor=user, name="Relé 01", ip_address="192.168.60.97", device_id=1)
+    create_installation(db, actor=user, name="Relé 02", ip_address="192.168.60.96", device_id=1)
+    create_installation(db, actor=user, name="Relé 03", ip_address="192.168.60.95", device_id=1)
+    create_installation(db, actor=user, name="Pesagem", ip_address="192.168.60.99", device_id=2)
     logger.info("[SEED] Instalações criadas")
 
 

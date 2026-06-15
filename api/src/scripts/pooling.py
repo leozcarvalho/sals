@@ -15,36 +15,43 @@ def handle_installation(repo, installation):
         if installation.binary_value != installation.last_value:
             device_service = repo._get_device_service(installation)
             response = device_service.send_value(installation.decimal_value)
-
             if response.success:
                 repo.update(installation.id, {"last_value": installation.binary_value})
-                logging.info(f"Instalação {installation.id} atualizada (output)")
+                logging.info(f"[{installation.id}] relé → {installation.decimal_value} (bin={installation.binary_value})")
             else:
-                logging.warning(f"Falha ao enviar valor para instalação {installation.id}")
+                logging.warning(f"[{installation.id}] falha ao enviar relé: {response.error}")
+        else:
+            logging.debug(f"[{installation.id}] relé em sincronia ({installation.decimal_value})")
 
     elif installation.hardware_kind == "input":
         device_service = repo._get_device_service(installation)
         response = device_service.read_value()
         if response.success:
             current_value = response.data
+            logging.info(f"[{installation.id}] peso: {current_value} kg")
             if current_value != installation.last_value:
                 repo.update(installation.id, {"last_value": current_value})
-                logging.info(f"Instalação {installation.id} atualizada (input: {current_value})")
+                logging.info(f"[{installation.id}] peso salvo: {installation.last_value} → {current_value} kg")
+        else:
+            logging.warning(f"[{installation.id}] erro ao ler peso: {response.error}")
 
 def process_installations():
     with session_scope() as session:
         repo = InstallationRepository(session)
-        installations = repo.get_list()
+        installation_ids = [inst.id for inst in repo.get_list()]
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            for installation in installations:
-                executor.submit(safe_handle, repo, installation)
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        for inst_id in installation_ids:
+            executor.submit(safe_handle, inst_id)
 
-def safe_handle(repo, installation):
+def safe_handle(inst_id):
     try:
-        handle_installation(repo, installation)
+        with session_scope() as session:
+            repo = InstallationRepository(session)
+            installation = repo.check_exists(inst_id)
+            handle_installation(repo, installation)
     except Exception as e:
-        logging.exception(f"Erro ao processar instalação {installation.id}: {e}")
+        logging.exception(f"Erro ao processar instalação {inst_id}: {e}")
 
 def main():
     while True:

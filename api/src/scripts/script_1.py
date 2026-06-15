@@ -155,6 +155,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
             "MASSA_SECA_FORMULA": formula.water_percentage,
         })
 
+        cozinha_id = galpao.kitchen.id if galpao.kitchen else None
         for baia in baias:
             qtd = d(baia.animals_quantity)
             consumo_baia = consumo_animal * qtd
@@ -168,7 +169,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
                 consumo_trato = r(consumo_baia * d(trato.percent) / 100)
 
                 total_dia += consumo_trato
-                total_formula_trato[(trato.id, formula.id, sala.name)] += consumo_trato
+                total_formula_trato[(trato.id, formula.id, cozinha_id)] += consumo_trato
 
             total_baia_trato.append({
                 "ID_BA": baia.id,
@@ -188,6 +189,8 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
 
         sala = lote.sala
         galpao = sala.shed
+        cozinha = galpao.kitchen
+        cozinha_id = cozinha.id if cozinha else None
 
         dia_curva = cache_dia_curva[lote.id]
         curva_dia = cache_curva_dia[lote.id]
@@ -208,7 +211,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
 
         for trato in tratos:
 
-            massa_total = total_formula_trato.get((trato.id, formula.id, sala.name), d(0))
+            massa_total = total_formula_trato.get((trato.id, formula.id, cozinha_id), d(0))
             pct_seco_formula = (100 - d(formula.water_percentage)) / 100
 
             linhas = []
@@ -280,6 +283,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
                 row = {
                     "GALPÃO": galpao.name,
                     "SALA": sala.name,
+                    "ID_CZ": cozinha_id,
                     "ID_PR": linha_prod["produto"].id,
                     "PRODUTO": linha_prod["produto"].name,
                     "D_PR": linha_prod["dens"],
@@ -310,7 +314,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
     agrupado = defaultdict(lambda: {"sum_p": d(0), "sum_v": d(0)})
 
     for linha in matriz_producao_receita:
-        chave = (linha["SALA"], linha["TRATO"], linha["ID_FO"])
+        chave = (linha["ID_CZ"], linha["TRATO"], linha["ID_FO"])
         agrupado[chave]["sum_p"] += linha["P_TRATO"]
         agrupado[chave]["sum_v"] += linha["V_TRATO"]
 
@@ -319,31 +323,28 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
     # =========================================================
     matriz_racao_totalizada = []
 
+    # Combinações únicas (cozinha, formula) com curva válida — define a unidade de produção
+    cozinhas_formulas: dict[tuple, tuple] = {}
     for lote in lotes:
-
-        sala : Sala = lote.sala
-        galpao : Shed = sala.shed
-        cozinha : Kitchen = galpao.kitchen
-
+        if not cache_curva_dia[lote.id]:
+            continue
+        cozinha = lote.sala.shed.kitchen
         if not cozinha:
             continue
+        formula = cache_formula[lote.id]
+        chave_cz = (cozinha.id, formula.id)
+        if chave_cz not in cozinhas_formulas:
+            cozinhas_formulas[chave_cz] = (cozinha, formula)
+
+    for (cz_id, fo_id), (cozinha, formula) in cozinhas_formulas.items():
 
         v_max_cz = d(cozinha.volume_misturador)
         pct_util = d(cozinha.fracao_volume_misturador) / 100
         v_max_util = v_max_cz * pct_util
 
-        dia_curva_racao = cache_dia_curva[lote.id]
-        curva_dia_racao = cache_curva_dia[lote.id]
-
-        if not curva_dia_racao:
-            logger.warning("Lote %s: dia_curva %s fora do range na ração líquida. Ignorando.", lote.id, dia_curva_racao)
-            continue
-
-        formula = cache_formula[lote.id]
-
         for trato in tratos:
 
-            chave = (sala.name, trato.id, formula.id)
+            chave = (cz_id, trato.id, fo_id)
             sum_p = agrupado[chave]["sum_p"]
             sum_v = agrupado[chave]["sum_v"]
 
@@ -354,15 +355,12 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
             p_etapa = r(sum_p / etapas) if etapas else d(0)
 
             matriz_racao_totalizada.append({
-                "ID_SA": sala.id,
-                "GALPÃO": galpao.name,
-                "SALA": sala.name,
+                "ID_CZ": cozinha.id,
+                "COZINHA": cozinha.name,
                 "ID_FO": formula.id,
                 "TRATO": trato.id,
                 "SUM_P": float(r(sum_p)),
                 "SUM_V": float(r(sum_v)),
-                "ID_GA": galpao.id,
-                "ID_CZ": cozinha.id,
                 "V_MAX_CZ": float(v_max_cz),
                 "PCT_P_MAX_CZ": float(pct_util * 100),
                 "V_MAX_UTIL_CZ": float(r(v_max_util)),
@@ -377,33 +375,30 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
     # =========================================================
     matriz_preparacao = []
 
+    # Total de suínos por (cozinha, formula) — agrega todas as baias da cozinha
+    total_suinos_por_cz_fo: dict[tuple, Decimal] = defaultdict(Decimal)
     for lote in lotes:
-
-        sala = lote.sala
-        galpao = sala.shed
-        baias = sala.baias
-
-        dia_curva = cache_dia_curva[lote.id]
-        curva_dia = cache_curva_dia[lote.id]
-
-        if not curva_dia:
+        if not cache_curva_dia[lote.id]:
             continue
-
+        cozinha = lote.sala.shed.kitchen
+        if not cozinha:
+            continue
         formula = cache_formula[lote.id]
+        for baia in lote.sala.baias:
+            total_suinos_por_cz_fo[(cozinha.id, formula.id)] += d(baia.animals_quantity)
 
-        total_suinos = sum(d(b.animals_quantity) for b in baias)
+    racao_idx = {
+        (l["ID_CZ"], l["TRATO"], l["ID_FO"]): l
+        for l in matriz_racao_totalizada
+    }
+
+    for (cz_id, fo_id), (cozinha, formula) in cozinhas_formulas.items():
+
+        total_suinos = total_suinos_por_cz_fo[(cz_id, fo_id)]
 
         for trato in tratos:
 
-            linha_racao = next(
-                (
-                    l for l in matriz_racao_totalizada
-                    if l["SALA"] == sala.name
-                    and l["TRATO"] == trato.id
-                    and l["ID_FO"] == formula.id
-                ),
-                None
-            )
+            linha_racao = racao_idx.get((cz_id, trato.id, fo_id))
 
             if not linha_racao:
                 continue
@@ -417,9 +412,8 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
             )
 
             matriz_preparacao.append({
-                "ID_SA": sala.id,
-                "GALPÃO": galpao.name,
-                "SALA": sala.name,
+                "ID_CZ": cozinha.id,
+                "COZINHA": cozinha.name,
                 "ID_FO": formula.id,
                 "FORMULA": formula.name,
                 "TRATO": trato.id,
@@ -434,9 +428,15 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
     # =========================================================
     matriz_final = []
 
+    prep_idx = {
+        (p["ID_CZ"], p["TRATO"], p["ID_FO"]): p
+        for p in matriz_preparacao
+    }
+
     for lote in lotes:
 
         sala = lote.sala
+        cozinha = sala.shed.kitchen
         baias = sala.baias
 
         dia_curva = cache_dia_curva[lote.id]
@@ -444,6 +444,9 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
 
         if not curva_dia:
             continue
+
+        formula = cache_formula[lote.id]
+        cz_id = cozinha.id if cozinha else None
 
         for baia in baias:
 
@@ -453,6 +456,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
                 "ID": baia.id,
                 "DESC": f"BA{baia.id}",
                 "ID_SA": sala.id,
+                "ID_CZ": cz_id,
                 "SUINOS": int(qtd),
                 "T1-ETAPA-TRATO": 0,
                 "T2-ETAPA-TRATO": 0,
@@ -462,17 +466,14 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
                 "T6-ETAPA-TRATO": 0,
             }
 
-            for prep in matriz_preparacao:
-
-                if prep["ID_SA"] != sala.id:
+            for trato in tratos:
+                prep = prep_idx.get((cz_id, trato.id, formula.id))
+                if not prep:
                     continue
 
-                trato = prep["TRATO"]
                 p_suino = d(prep["P_SUINO_ETAPA_TRATO"])
-
                 valor = r(p_suino * qtd)
-
-                col = f"T{trato}-ETAPA-TRATO"
+                col = f"T{trato.id}-ETAPA-TRATO"
                 row[col] = float(valor)
 
             matriz_final.append(row)
@@ -482,7 +483,7 @@ def script_1(session, data_base: date, considerar_fracao_liquida: bool = False) 
         "LOCALIZAÇÃO DE DADOS RELEVANTES NA CURVA COM BASE NO DIA": dados_curva,
         "CÁLCULO DO TOTAL POR BAIA POR TRATO E POR DIA": total_baia_trato,
         "TOTAL FORMULA/TRATO": [
-            {"TRATO": k[0], "FORMULA": k[1], "VALOR": float(r(v))}
+            {"TRATO": k[0], "FORMULA": k[1], "COZINHA": k[2], "VALOR": float(r(v))}
             for k, v in total_formula_trato.items()
         ],
         "CÁLCULO DE PRODUÇÃO E RECEITA": matriz_producao_receita,

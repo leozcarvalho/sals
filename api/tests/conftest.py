@@ -39,6 +39,25 @@ def session(engine):
         connection.close()
 
 @pytest.fixture
+def session_with_seed(engine):
+    from src.scripts.seed import exec_seed
+    from sqlalchemy.orm import sessionmaker
+
+    connection = engine.connect()
+    transaction = connection.begin()
+
+    Session = sessionmaker(bind=connection)
+    session = Session()
+
+    try:
+        exec_seed(session)
+        yield session
+    finally:
+        session.close()
+        transaction.rollback()
+        connection.close()
+
+@pytest.fixture
 def actor(session):
     user_dict = USER.model_dump()
     user_dict['email'] = "test@admin.com"

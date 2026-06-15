@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import List
+from urllib.parse import parse_qs
 
 from sqlalchemy.orm import Session
 
@@ -27,22 +28,29 @@ class InstallationRepository(Repository):
     def _get_device_service(cls, installation: Installation) -> DeviceService:
         """
         Retorna um DeviceService para a instalação. Cria se não existir.
+
+        Parâmetros Modbus lidos do query_string do ConnectionTemplate (formato URL):
+          slave_id=1&total_relays=30&port=502
+        Valores omitidos usam os defaults de DeviceService.
         """
         if installation.ip_address not in cls._device_services:
+            template = installation.device.connection_template
+            params = parse_qs(template.query_string or "")
+            hardware_kind = installation.hardware_kind
+            default_slave_id = "0" if hardware_kind == "input" else "1"
             cls._device_services[installation.ip_address] = DeviceService(
                 ip=installation.ip_address,
-                url_template=installation.device.connection_template.template_url,
-                query_string=installation.device.connection_template.query_string
+                hardware_kind=hardware_kind,
+                port=int(params.get("port", ["502"])[0]),
+                slave_id=int(params.get("slave_id", [default_slave_id])[0]),
+                total_relays=int(params.get("total_relays", ["30"])[0]),
             )
         return cls._device_services[installation.ip_address]
 
     @classmethod
     def close_all_device_sessions(cls):
-        """
-        Fecha todas as sessões de DeviceService compartilhadas.
-        """
         for ds in cls._device_services.values():
-            ds.session.close()
+            ds.close()
         cls._device_services.clear()
 
     # ---------- CRUD e Pins ----------
