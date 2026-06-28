@@ -19,8 +19,8 @@ EOF
     echo "Executando DEPLOY..."
     ssh -t -i "$KEY_PATH" "$SERVER_USER@$SERVER_IP" << 'EOF'
       cd ~/sals || { echo "Pasta sals não encontrada"; exit 1; }
-      chmod +x deploy.sh
-      ./deploy.sh
+      chmod +x server_deploy.sh
+      ./server_deploy.sh
 EOF
   fi
 }
