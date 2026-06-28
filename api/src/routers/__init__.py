@@ -24,6 +24,7 @@ from .batch import router_batches
 from .moviment_kinds import router_moviment_kinds
 from .trato import router_trato
 from .scripts import router_scripts
+from .receita import router_receitas
 
 routers = [
     auth_router,
@@ -52,4 +53,5 @@ routers = [
     router_moviment_kinds.router,
     router_trato.router,
     router_scripts,
+    router_receitas.router,
 ]

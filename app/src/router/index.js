@@ -63,6 +63,7 @@ const BatchForm = () => import("@/pages/batches/BatchForm.vue");
 const MovimentKinds = () => import("@/pages/moviment-kinds/MovimentKinds.vue");
 const Tratos = () => import("@/pages/settings/Tratos.vue");
 const Scripts = () => import("@/pages/settings/Scripts.vue");
+const Receitas = () => import("@/pages/receitas/Receitas.vue");
 
 // Set all routes
 const routes = [
@@ -196,6 +197,12 @@ const routes = [
         name: "moviment-kinds",
         meta: { requiresAuth: true },
         component: MovimentKinds,
+      },
+      {
+        path: "receitas",
+        name: "receitas",
+        meta: { requiresAuth: true },
+        component: Receitas,
       },
     ],
   },

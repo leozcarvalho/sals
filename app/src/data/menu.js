@@ -34,6 +34,13 @@ export const baseMenu = [
     ]
   },
   {
+    name: "Produção",
+    icon: "chef-hat",
+    sub: [
+      { name: "Receitas", to: "receitas", icon: "clipboard-list", action: "manage_batch" },
+    ],
+  },
+  {
     name: "Configurações",
     icon: "cog",
     sub: [

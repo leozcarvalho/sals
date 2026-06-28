@@ -25,6 +25,9 @@ from .batch import Batch
 from .moviment_kinds import MovimentKind
 from .moviment import Moviment
 from .trato import Trato
+from .receita import Receita, ReceitaStatus
+from .receita_produzir import ReceitaProduzir, ReceitaProduzirStatus
+from .receita_distribuicao import ReceitaDistribuicao, ReceitaDistribuicaoStatus
 
 __all__ = [
     "Profile",
@@ -54,6 +57,9 @@ __all__ = [
     "MovimentKind",
     "Moviment",
     "Trato",
+    "Receita",
+    "ReceitaProduzir",
+    "ReceitaDistribuicao",
 ]
 
 for model_name in __all__:
