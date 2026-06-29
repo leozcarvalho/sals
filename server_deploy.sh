@@ -1,50 +1,64 @@
 #!/bin/bash
 set -e
 
+# ===========================
+# Configurações
+# ===========================
 APP_DIR="$HOME/sals"
 FRONT_DIR="$APP_DIR/app"
+BACK_DIR="$APP_DIR/api"
+BACK_CONTAINER_NAME="api"
+BACK_PORT=8000
 
-echo ""
-echo "========================================"
-echo " DEPLOY PRODUCAO - SALS"
-echo "========================================"
-echo ""
-
-# === 1. Atualiza codigo ===
-echo "[1/4] Atualizando codigo do Git..."
-cd "$APP_DIR"
+# ===========================
+# Passo 1: Atualiza código do Git
+# ===========================
+echo "Atualizando código do Git..."
+cd $APP_DIR
+git reset --hard
+git clean -fd
 git pull origin main
 
-# === 2. Build do frontend ===
-echo ""
-echo "[2/4] Buildando frontend Vue..."
-cd "$FRONT_DIR"
-npm ci --silent
-npm run build
+# ===========================
+# Passo 2: Atualiza front-end
+# ===========================
+echo "Atualizando front-end..."
+cd $FRONT_DIR
 
-# === 3. Rebuild e restart da API ===
-echo ""
-echo "[3/4] Rebuilding e subindo API..."
-cd "$APP_DIR"
-docker compose build api
-docker compose up -d api
+# Se dist/ já estiver comitado, apenas recarregar Nginx
+# Se quiser rebuildar no servidor, descomente:
+# npm install
+# npm run build
 
-# Aguarda o container estar saudavel
-echo "Aguardando API iniciar..."
-sleep 3
-if ! docker ps --filter "name=sals_api" --filter "status=running" | grep -q sals_api; then
-    echo "ERRO: Container sals_api nao subiu. Logs:"
-    docker logs sals_api --tail 30
-    exit 1
+# ===========================
+# Passo 3: Atualiza backend
+# ===========================
+echo "Atualizando backend..."
+cd $BACK_DIR
+
+# Para Docker:
+# Para parar container antigo, se existir
+if [ "$(docker ps -q -f name=$BACK_CONTAINER_NAME)" ]; then
+    echo "Parando container antigo..."
+    docker stop $BACK_CONTAINER_NAME
+    docker rm $BACK_CONTAINER_NAME
 fi
 
-# === 4. Nginx ===
-echo ""
-echo "[4/4] Recarregando Nginx..."
+# Build e run do container
+echo "Subindo container backend..."
+docker run -d \
+    --name $BACK_CONTAINER_NAME \
+    -p $BACK_PORT:8000 \
+    -v $BACK_DIR:/api \
+    -w /api \
+    python:3.11 \
+    bash -c "pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir python-multipart && uvicorn main:app --host 0.0.0.0 --port 8000"
+
+# ===========================
+# Passo 4: Recarrega Nginx
+# ===========================
+echo "Recarregando Nginx..."
 sudo nginx -t
 sudo systemctl reload nginx
 
-echo ""
-echo "========================================"
-echo " Deploy concluido com sucesso!"
-echo "========================================"
+echo "Deploy completo concluído!"

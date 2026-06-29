@@ -137,24 +137,24 @@ onMounted(async () => {
       <div class="row g-2 mb-3 align-items-end">
         <div class="col-auto">
           <label class="form-label mb-1">Data</label>
-          <input type="date" class="form-control" v-model="filtro.data" @change="carregar" />
+          <input type="date" class="form-control form-control-lg" v-model="filtro.data" @change="carregar" />
         </div>
         <div class="col-auto">
           <label class="form-label mb-1">Cozinha</label>
-          <select class="form-select" v-model="filtro.id_cz" @change="carregar">
+          <select class="form-select form-select-lg" v-model="filtro.id_cz" @change="carregar">
             <option :value="null">Todas</option>
             <option v-for="(nome, id) in cozinhas" :key="id" :value="id">{{ nome }}</option>
           </select>
         </div>
         <div class="col-auto">
           <label class="form-label mb-1">Status</label>
-          <select class="form-select" v-model="filtro.status" @change="carregar">
+          <select class="form-select form-select-lg" v-model="filtro.status" @change="carregar">
             <option value="">Todos</option>
             <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.label }}</option>
           </select>
         </div>
         <div class="col-auto ms-auto">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-gerar">
+          <button class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#modal-gerar">
             <i class="fa fa-play me-1"></i> Gerar Receitas
           </button>
         </div>
@@ -164,7 +164,7 @@ onMounted(async () => {
 
       <!-- Tabela principal -->
       <div class="table-responsive">
-        <table class="table table-striped table-sm align-middle">
+        <table class="table table-striped align-middle">
           <thead>
             <tr>
               <th>ID</th>
@@ -210,14 +210,14 @@ onMounted(async () => {
               <td>
                 <div class="btn-group">
                   <button
-                    class="btn btn-sm btn-outline-secondary"
+                    class="btn btn-outline-secondary"
                     title="Ingredientes"
                     data-bs-toggle="modal"
                     data-bs-target="#modal-produzir"
                     @click="abrirProduzir(r)"
                   ><i class="fa fa-flask"></i></button>
                   <button
-                    class="btn btn-sm btn-outline-secondary"
+                    class="btn btn-outline-secondary"
                     title="Distribuição por baia"
                     data-bs-toggle="modal"
                     data-bs-target="#modal-distribuicao"
@@ -247,7 +247,7 @@ onMounted(async () => {
           </div>
           <div class="modal-body">
             <div v-if="loadingProduzir" class="text-center py-4 text-muted">Carregando...</div>
-            <table v-else class="table table-sm align-middle mb-0">
+            <table v-else class="table align-middle mb-0">
               <thead>
                 <tr>
                   <th>SEQ</th>
@@ -287,7 +287,7 @@ onMounted(async () => {
             </table>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Fechar</button>
           </div>
         </div>
       </div>
@@ -308,7 +308,7 @@ onMounted(async () => {
           </div>
           <div class="modal-body">
             <div v-if="loadingDistribuicao" class="text-center py-4 text-muted">Carregando...</div>
-            <table v-else class="table table-sm align-middle mb-0">
+            <table v-else class="table align-middle mb-0">
               <thead>
                 <tr>
                   <th>Galpão</th>
@@ -343,7 +343,7 @@ onMounted(async () => {
             </table>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Fechar</button>
           </div>
         </div>
       </div>
@@ -359,8 +359,8 @@ onMounted(async () => {
             <span class="text-muted small">Se já existirem receitas para essa data, a operação será recusada.</span>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-primary" data-bs-dismiss="modal" @click="gerar">Confirmar</button>
+            <button class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-lg btn-primary" data-bs-dismiss="modal" @click="gerar">Confirmar</button>
           </div>
         </div>
       </div>
