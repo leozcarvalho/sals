@@ -32,7 +32,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ["fast-deep-equal"],
   },
-  base: './',      // ← importante para produção estática
+  base: '/',
   server: {
     host: true,
   },

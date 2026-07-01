@@ -347,7 +347,7 @@ router.beforeResolve((to, from, next) => {
     loadUserFromCookie();
   }
   if (to.meta.requiresAuth && !userStore.id) {
-    return next({ path: "/auth-signin" });
+    return next({ name: "auth-signin" });
   }
   if (from.meta.requiresAuth && to.name === "auth-signin") {
     userStore.logout();
