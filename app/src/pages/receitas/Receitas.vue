@@ -34,6 +34,7 @@ const loadingDistribuicao = ref(false)
 
 const hoje = new Date().toISOString().slice(0, 10)
 const filtro = reactive({ data: hoje, id_cz: null, status: null })
+const fracao_liquida = ref(false)
 
 const statusConfig = {
   aguardando: { label: "Aguardando", class: "bg-secondary" },
@@ -113,11 +114,10 @@ const abrirDistribuicao = async (receita) => {
 
 const gerar = async () => {
   loader.value.loaderOn()
-  const res = await api.gerar(filtro.data)
+  const res = await api.gerar(filtro.data, fracao_liquida.value)
   handleApiToast(res, "Receitas geradas com sucesso!")
   loader.value.loaderOff()
-  await carregar()
-}
+  await carregar()}
 
 const fmtHora     = (v) => v ? String(v).slice(0, 5) : "—"
 const fmtDatetime = (v) => v ? new Date(v).toLocaleString("pt-BR") : "—"
@@ -242,6 +242,9 @@ onMounted(async () => {
               <span class="text-muted fw-normal fs-sm ms-2">
                 {{ cozinhas[receitaSelecionada?.id_cz] }} · Trato {{ receitaSelecionada?.trato }} · Etapa {{ receitaSelecionada?.etapa }}
               </span>
+              <span class="badge ms-2" :class="fracao_liquida ? 'bg-info' : 'bg-secondary'">
+                {{ fracao_liquida ? 'Peso úmido' : 'Peso seco' }}
+              </span>
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
@@ -252,8 +255,7 @@ onMounted(async () => {
                 <tr>
                   <th>SEQ</th>
                   <th>Produto</th>
-                  <th>Peso seco (kg)</th>
-                  <th>Peso úmido (kg)</th>
+                  <th>Peso (kg)</th>
                   <th>Volume (L)</th>
                   <th>Água</th>
                   <th>Início</th>
@@ -263,13 +265,12 @@ onMounted(async () => {
               </thead>
               <tbody>
                 <tr v-if="produzirItens.length === 0">
-                  <td colspan="9" class="text-center text-muted py-3">Sem ingredientes</td>
+                  <td colspan="8" class="text-center text-muted py-3">Sem ingredientes</td>
                 </tr>
                 <tr v-for="item in produzirItens" :key="item.id">
                   <td>{{ item.seq_dosagem }}</td>
                   <td :title="`ID: ${item.produto_id}`">{{ produtos[item.produto_id] ?? item.produto_id }}</td>
-                  <td>{{ item.peso_etapa_sem_fracao_liquida }}</td>
-                  <td>{{ item.peso_etapa_com_fracao_liquida }}</td>
+                  <td>{{ fracao_liquida ? item.peso_etapa_com_fracao_liquida : item.peso_etapa_sem_fracao_liquida }}</td>
                   <td>{{ item.volume_etapa }}</td>
                   <td>
                     <i v-if="item.produto_e_agua" class="fa fa-tint text-primary" title="Água"></i>
@@ -355,8 +356,29 @@ onMounted(async () => {
         <div class="modal-content">
           <div class="modal-header">Gerar Receitas</div>
           <div class="modal-body">
-            Gerar receitas para <strong>{{ filtro.data }}</strong>?<br />
-            <span class="text-muted small">Se já existirem receitas para essa data, a operação será recusada.</span>
+            <p class="mb-3">Gerar receitas para <strong>{{ filtro.data }}</strong>?</p>
+            <p class="mb-2 fw-semibold">Modo de pesagem:</p>
+            <div class="d-grid gap-2">
+              <button
+                type="button"
+                class="btn btn-lg"
+                :class="!fracao_liquida ? 'btn-primary' : 'btn-outline-secondary'"
+                @click="fracao_liquida = false"
+              >
+                Peso seco
+                <small class="d-block fw-normal opacity-75">Massa sem correção de umidade</small>
+              </button>
+              <button
+                type="button"
+                class="btn btn-lg"
+                :class="fracao_liquida ? 'btn-primary' : 'btn-outline-secondary'"
+                @click="fracao_liquida = true"
+              >
+                Peso úmido
+                <small class="d-block fw-normal opacity-75">Massa corrigida pela umidade dos ingredientes</small>
+              </button>
+            </div>
+            <p class="text-muted small mt-3 mb-0">Se já existirem receitas para essa data, a operação será recusada.</p>
           </div>
           <div class="modal-footer">
             <button class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Cancelar</button>

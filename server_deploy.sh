@@ -5,7 +5,6 @@ set -e
 # Configurações
 # ===========================
 APP_DIR="$HOME/sals"
-FRONT_DIR="$APP_DIR/app"
 BACK_DIR="$APP_DIR/api"
 BACK_CONTAINER_NAME="api"
 BACK_PORT=8000
@@ -18,17 +17,6 @@ cd $APP_DIR
 git reset --hard
 git clean -fd
 git pull origin main
-
-# ===========================
-# Passo 2: Atualiza front-end
-# ===========================
-echo "Atualizando front-end..."
-cd $FRONT_DIR
-
-# Se dist/ já estiver comitado, apenas recarregar Nginx
-# Se quiser rebuildar no servidor, descomente:
-# npm install
-# npm run build
 
 # ===========================
 # Passo 3: Atualiza backend

@@ -54,8 +54,9 @@ def get_distribuicao(
 @router_receitas.router.post("/gerar")
 def gerar(
     data_base: date,
+    considerar_fracao_liquida: bool = False,
     session=Depends(get_session),
     current_user: UserBase = Depends(get_current_user),
 ):
-    receitas = gerar_receitas(session, data_base=data_base)
+    receitas = gerar_receitas(session, data_base=data_base, considerar_fracao_liquida=considerar_fracao_liquida)
     return ApiResponse(success=True, data={"total": len(receitas)}, error=None)

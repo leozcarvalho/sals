@@ -31,7 +31,7 @@ def _ingredientes_unicos(resultado: dict) -> dict[tuple, dict]:
     return mapa
 
 
-def gerar_receitas(session: Session, data_base: date) -> list[Receita]:
+def gerar_receitas(session: Session, data_base: date, considerar_fracao_liquida: bool = False) -> list[Receita]:
     """
     Gera RECEITAS, RECEITAS_PRODUZIR e RECEITAS_DISTRIBUICAO do dia.
     Lança erro se já existirem receitas para a data informada.
