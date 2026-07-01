@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CONTAINER_NAME="api"
+
 case "$1" in
   revision)
     if [ -z "$2" ]; then
@@ -35,7 +37,7 @@ case "$1" in
       exit 1
     fi
     echo "📜 Executando script: $2"
-    docker exec sals_api python3 -m src.scripts."$2"
+    docker exec "$CONTAINER_NAME" python3 -m src.scripts."$2"
     ;;
 
   test)

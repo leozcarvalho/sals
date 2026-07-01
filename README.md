@@ -107,19 +107,19 @@ docker compose up -d --build
 docker compose down
 
 # Ver logs da API
-docker logs sals_api -f
+docker logs api -f
 
 # Ver logs do frontend
-docker logs sals_vue -f
+docker logs vue -f
 
 # Popular o banco com dados iniciais
-docker exec sals_api python -m src.scripts.seed
+docker exec api python -m src.scripts.seed
 
 # Criar uma migration
-docker exec sals_api alembic revision --autogenerate -m "descricao"
+docker exec api alembic revision --autogenerate -m "descricao"
 
 # Aplicar migrations
-docker exec sals_api alembic upgrade head
+docker exec api alembic upgrade head
 ```
 
 No Windows, substitua `docker compose` por `docker compose -f docker-compose.windows.yml`.
